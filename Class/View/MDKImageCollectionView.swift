@@ -7,6 +7,7 @@
 //
 
 import UIKit
+@_exported import MDKTools
 
 @objc public class CloseOption :NSObject{
 	@objc public var lastIdentifier:String?

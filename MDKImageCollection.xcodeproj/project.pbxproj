@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		484DF8C9C01EC70A7A39C260 /* Pods_MDKImageCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B243461502BE50E86F4B2870 /* Pods_MDKImageCollection.framework */; };
 		FF2C1F6C20F4A6C40022D54F /* photoNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2C1F6B20F4A6C40022D54F /* photoNode.swift */; };
 		FF50B6D72102C5EF00911035 /* DoubleTapThanPanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */; };
 		FF6E9CF8210FF4C100CC7F3F /* lazyArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */; };
@@ -18,7 +19,6 @@
 		FF769AA120F309CB00DB6DA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA020F309CB00DB6DA1 /* Assets.xcassets */; };
 		FF769AA420F309CB00DB6DA1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA220F309CB00DB6DA1 /* LaunchScreen.storyboard */; };
 		FF769AAD20F31C3F00DB6DA1 /* MDKImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */; };
-		FF775D8320F43DF300AD33FB /* MDKTools.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF775D8220F43DF300AD33FB /* MDKTools.swift */; };
 		FF79EE8720FD9F93006D318F /* toolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF79EE8620FD9F93006D318F /* toolbarView.swift */; };
 		FF99ECA721007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF99ECA621007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift */; };
 		FFB9DFA321087304008381DC /* Transition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB9DFA221087304008381DC /* Transition.swift */; };
@@ -42,6 +42,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0C56F6F08C77DA4F417FA8B4 /* Pods-MDKImageCollection.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MDKImageCollection.release.xcconfig"; path = "Pods/Target Support Files/Pods-MDKImageCollection/Pods-MDKImageCollection.release.xcconfig"; sourceTree = "<group>"; };
+		1E2FF2C2E23BA6C0C212CED9 /* Pods-MDKImageCollection.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MDKImageCollection.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MDKImageCollection/Pods-MDKImageCollection.debug.xcconfig"; sourceTree = "<group>"; };
 		B243461502BE50E86F4B2870 /* Pods_MDKImageCollection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MDKImageCollection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF2C1F6B20F4A6C40022D54F /* photoNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = photoNode.swift; sourceTree = "<group>"; };
 		FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleTapThanPanGesture.swift; sourceTree = "<group>"; };
@@ -58,7 +60,6 @@
 		FF769AA320F309CB00DB6DA1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FF769AA520F309CB00DB6DA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageCollectionView.swift; sourceTree = "<group>"; };
-		FF775D8220F43DF300AD33FB /* MDKTools.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKTools.swift; sourceTree = "<group>"; };
 		FF79EE8620FD9F93006D318F /* toolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = toolbarView.swift; sourceTree = "<group>"; };
 		FF8C84BA211728AA00E15BE3 /* MDKImageCollectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MDKImageCollectionView.h; sourceTree = "<group>"; };
 		FF99ECA621007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiTapToPanGestureRecognizer.swift; sourceTree = "<group>"; };
@@ -74,6 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				484DF8C9C01EC70A7A39C260 /* Pods_MDKImageCollection.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +90,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		9A3039DD518BF95FDB0940A4 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				1E2FF2C2E23BA6C0C212CED9 /* Pods-MDKImageCollection.debug.xcconfig */,
+				0C56F6F08C77DA4F417FA8B4 /* Pods-MDKImageCollection.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		FF72BC0320F361BA000CAFBA /* Cell */ = {
 			isa = PBXGroup;
 			children = (
@@ -100,11 +111,11 @@
 		FF769A8D20F309CA00DB6DA1 = {
 			isa = PBXGroup;
 			children = (
-				FF775D8120F43DC400AD33FB /* Tools */,
 				FF769AAB20F309D400DB6DA1 /* Class */,
 				FF769A9820F309CA00DB6DA1 /* MDKImageCollection */,
 				FF769A9720F309CA00DB6DA1 /* Products */,
 				35F4ECCEE2927EE8DF91D7AF /* Frameworks */,
+				9A3039DD518BF95FDB0940A4 /* Pods */,
 			);
 			sourceTree = "<group>";
 		};
@@ -147,14 +158,6 @@
 			path = Class;
 			sourceTree = "<group>";
 		};
-		FF775D8120F43DC400AD33FB /* Tools */ = {
-			isa = PBXGroup;
-			children = (
-				FF775D8220F43DF300AD33FB /* MDKTools.swift */,
-			);
-			path = Tools;
-			sourceTree = "<group>";
-		};
 		FF79EE8520FD9F47006D318F /* View */ = {
 			isa = PBXGroup;
 			children = (
@@ -182,6 +185,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = FF769AA820F309CB00DB6DA1 /* Build configuration list for PBXNativeTarget "MDKImageCollection" */;
 			buildPhases = (
+				264E25296A7CBC60EA42660C /* [CP] Check Pods Manifest.lock */,
 				FF769A9220F309CA00DB6DA1 /* Sources */,
 				FF769A9320F309CA00DB6DA1 /* Frameworks */,
 				FF769A9420F309CA00DB6DA1 /* Resources */,
@@ -246,6 +250,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		264E25296A7CBC60EA42660C /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MDKImageCollection-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		55BCD9D61EC830DCECDFC795 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -253,15 +275,15 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-MDKImageCollection/Pods-MDKImageCollection-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/Hero/Hero.framework",
+				"${BUILT_PRODUCTS_DIR}/MDKTools/MDKTools.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Hero.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MDKTools.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "";
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-MDKImageCollection/Pods-MDKImageCollection-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -272,7 +294,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FFB9DFA321087304008381DC /* Transition.swift in Sources */,
-				FF775D8320F43DF300AD33FB /* MDKTools.swift in Sources */,
 				FF2C1F6C20F4A6C40022D54F /* photoNode.swift in Sources */,
 				FFB9DFA521087327008381DC /* TransitionController.swift in Sources */,
 				FF72BC0520F361BB000CAFBA /* ThumbnailCell.swift in Sources */,
@@ -427,6 +448,7 @@
 		};
 		FF769AA920F309CB00DB6DA1 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 1E2FF2C2E23BA6C0C212CED9 /* Pods-MDKImageCollection.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -450,6 +472,7 @@
 		};
 		FF769AAA20F309CB00DB6DA1 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0C56F6F08C77DA4F417FA8B4 /* Pods-MDKImageCollection.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;

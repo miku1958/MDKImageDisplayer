@@ -1,0 +1,16 @@
+PODS:
+  - MDKTools/swift (1.0.0)
+
+DEPENDENCIES:
+  - MDKTools/swift
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - MDKTools
+
+SPEC CHECKSUMS:
+  MDKTools: e084ac2844f53dfd0832c8406e1d0d00b1c65e5a
+
+PODFILE CHECKSUM: b6f2671fb9c36656838afca8fa8598a661b06cce
+
+COCOAPODS: 1.5.3
