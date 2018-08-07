@@ -6,7 +6,6 @@
 //  Copyright © 2018年 mdk. All rights reserved.
 //
 
-#import "MDKImageCollection-Swift.h"
 @import MDKImageCollection;
 
 #pragma clang diagnostic push
