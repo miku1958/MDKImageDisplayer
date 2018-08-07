@@ -93,7 +93,7 @@ Pod::Spec.new do |s|
 
   s.source_files  = "Class/**/*.{swift}"
 
-  s.default_subspec = 'objc'
+  s.default_subspec = 'main'
 
   s.subspec 'main' do |m|
     m.source_files = "Class/**/*.{swift}"
