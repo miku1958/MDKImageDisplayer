@@ -94,7 +94,7 @@ Pod::Spec.new do |s|
   s.source_files  = "Class/**/*.{swift}"
   s.exclude_files = "Classes/Exclude"
 
-  s.public_header_files = "Class/**/*.{h}"
+  s.public_header_files = "Class/View/MDKImageCollectionView.h"
 
 
   # ――― Resources ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
