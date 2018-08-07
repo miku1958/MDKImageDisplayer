@@ -80,7 +80,7 @@ Pod::Spec.new do |s|
   #  Supports git, hg, bzr, svn and HTTP.
   #
 
-  s.source       = { :git => "https://github.com/miku1958/MDKImageCollection.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://github.com/miku1958/MDKImageCollection.git", :tag => "#{s.version}" , :submodules => true}
 
 
   # ――― Source Code ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
@@ -93,16 +93,16 @@ Pod::Spec.new do |s|
 
   s.source_files  = "Class/**/*.{swift}"
 
-  s.default_subspec = 'main'
+  # s.default_subspec = 'main'
 
   s.subspec 'main' do |m|
     m.source_files = "Class/**/*.{swift}"
   end
 
-  s.subspec 'objc' do |objc|
-    objc.source_files = "Class/**/*.{h}"
-    objc.dependency 'MDKImageCollection/main'#如果子项目包含本项目的其他子项目也要写,并且要写全称 xxx/xxx,并且其他子项目需要先发布
-  end
+  # s.subspec 'objc' do |objc|
+  #   objc.source_files = "Class/**/*.{h}"
+  #   objc.dependency 'MDKImageCollection/main'#如果子项目包含本项目的其他子项目也要写,并且要写全称 xxx/xxx,并且其他子项目需要先发布
+  # end
 
   # ――― Resources ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
