@@ -7,10 +7,11 @@
 //
 
 
-
+#import "MDKImageCollection-Swift.h"
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
+@class MDKImageCollectionView;
 
 @interface MDKImageCollectionView (SWIFT_EXTENSION(MDKImageCollection))
 - (MDKImageCollectionView *)thumbnailForIndexWithCount:(NSInteger)count close:(BOOL (^ )(NSInteger index, void (^handler)(UIImage *)))close;
