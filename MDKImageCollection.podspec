@@ -93,16 +93,16 @@ Pod::Spec.new do |s|
 
   s.source_files  = "Class/**/*.{swift}"
 
-  s.default_subspec = 'objc'
+  # s.default_subspec = 'objc'
 
   s.subspec 'main' do |m|
     m.source_files = "Class/**/*.{swift}"
   end
 
-  s.subspec 'objc' do |objc|
-    objc.source_files = "Class/**/*.{h}"
-    objc.dependency 'MDKImageCollection/main'#如果子项目包含本项目的其他子项目也要写,并且要写全称 xxx/xxx,并且其他子项目需要先发布
-  end
+  # s.subspec 'objc' do |objc|
+  #   objc.source_files = "Class/**/*.{h}"
+  #   objc.dependency 'MDKImageCollection/main'#如果子项目包含本项目的其他子项目也要写,并且要写全称 xxx/xxx,并且其他子项目需要先发布
+  # end
 
   # ――― Resources ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― #
   #
