@@ -6,7 +6,7 @@
 //  Copyright © 2018年 mdk. All rights reserved.
 //
 
-@import MDKImageCollection.main;
+@import MDKImageCollection;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
