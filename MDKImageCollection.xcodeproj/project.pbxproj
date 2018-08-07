@@ -61,10 +61,10 @@
 		FF769AA520F309CB00DB6DA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageCollectionView.swift; sourceTree = "<group>"; };
 		FF79EE8620FD9F93006D318F /* toolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = toolbarView.swift; sourceTree = "<group>"; };
-		FF8C84BA211728AA00E15BE3 /* MDKImageCollectionView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MDKImageCollectionView.h; sourceTree = "<group>"; };
 		FF99ECA621007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiTapToPanGestureRecognizer.swift; sourceTree = "<group>"; };
 		FFB9DFA221087304008381DC /* Transition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transition.swift; sourceTree = "<group>"; };
 		FFB9DFA421087327008381DC /* TransitionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionController.swift; sourceTree = "<group>"; };
+		FFC162CC2119E14E00F26723 /* MDKImageCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MDKImageCollectionView.h; sourceTree = "<group>"; };
 		FFD7F08A210E9E3700154897 /* gakki.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = gakki.plist; sourceTree = "<group>"; };
 		FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageDisplayController.swift; sourceTree = "<group>"; };
 		FFDA853820F992280073AAA2 /* DisplayCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayCell.swift; sourceTree = "<group>"; };
@@ -161,7 +161,7 @@
 		FF79EE8520FD9F47006D318F /* View */ = {
 			isa = PBXGroup;
 			children = (
-				FF8C84BA211728AA00E15BE3 /* MDKImageCollectionView.h */,
+				FFC162CC2119E14E00F26723 /* MDKImageCollectionView.h */,
 				FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */,
 				FF79EE8620FD9F93006D318F /* toolbarView.swift */,
 				FF72BC0320F361BA000CAFBA /* Cell */,

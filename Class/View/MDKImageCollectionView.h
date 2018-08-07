@@ -6,12 +6,12 @@
 //  Copyright © 2018年 mdk. All rights reserved.
 //
 
-//#import "MDKImageCollection-Swift.h"
+#import "MDKImageCollection-Swift.h"
+@import MDKImageCollection;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
-@class CloseOption;
-@class MDKImageCollectionView;
+
 @interface MDKImageCollectionView (SWIFT_EXTENSION(MDKImageCollection))
 - (MDKImageCollectionView *)thumbnailForIndexWithCount:(NSInteger)count close:(BOOL (^ )(NSInteger index, void (^handler)(UIImage *)))close;
 - (MDKImageCollectionView * _Nonnull)largeForIndexWithClose:(NSString * (^)(CloseOption *option, void (^handler)(UIImage *)))close;
