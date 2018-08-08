@@ -315,14 +315,14 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 								sourceFrameMask.size.height -= insert
 								sourceFrameMask.origin.y += insert
 							}
-							print(sourceFrameToKeyWindow)
+
 						}
 					}
-
+					animatingCtr?.view.layoutIfNeeded()
 					let sourceFrameToTarget = sourceSuperView.convert(sourceFrameOri, to: view.superview)
 					let maskFrameToTarget = sourceSuperView.convert(sourceFrameMask, to: view.superview)
 
-
+					print(sourceFrameToTarget)
 					updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
 					animatingCtr?.view.isUserInteractionEnabled = false
 				}else{
@@ -359,7 +359,7 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 			return
 		}
 
-		if sourceFrame != maskFrame {
+		if sourceFrame != maskFrame && false{//等调试好再说
 
 			let mask = CALayer()
 			mask.backgroundColor = UIColor.white.cgColor

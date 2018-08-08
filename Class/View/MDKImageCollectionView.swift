@@ -30,7 +30,7 @@ open class MDKImageCollectionView: UICollectionView {
 
 	@objc public var customTransitionID:String?
 
-	public typealias IndexImageClose =  (Int,@escaping imageClose)->(Bool)
+	public typealias IndexImageClose =  (CloseOption,@escaping imageClose)->(Bool)
 	public typealias IndexImageReturnSelfClose =  (Int,@escaping IndexImageClose)->MDKImageCollectionView
 
 	private var thumbnailClose:IndexImageClose? {
@@ -38,8 +38,9 @@ open class MDKImageCollectionView: UICollectionView {
 
 			hasThumbnailClose = thumbnailClose != nil
 			guard let thumbnailClose = thumbnailClose else {return}
-
-			let hasImage = thumbnailClose(0){image in
+			let option = CloseOption()
+			option.index = 0;
+			let hasImage = thumbnailClose(option){image in
 				DispatchQueue.main.async {
 					if self.photoList.count == 0 {
 						self.photoList.count = 1
@@ -327,7 +328,9 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 
 
 		cell.imageView.image = nil
-		let _ = thumbnailClose(item){[weak self] image in
+		let option = CloseOption()
+		option.index = item;
+		let _ = thumbnailClose(option){[weak self] image in
 			DispatchQueue.main.async {
 				
 				if let cacheCell = self?.cellForItem(at: IndexPath(item: item, section: 0)) as? ThumbnailCell{
@@ -377,8 +380,9 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 				Transition.synchronized({
 					self.preloadPhotos.append(photo)
 				})
-
-				let hasImage = thumbnailClose(nextIndex){[weak self] image in
+				let option = CloseOption()
+				option.index = nextIndex;
+				let hasImage = thumbnailClose(option){[weak self] image in
 
 					if image != nil {
 						DispatchQueue.main.sync {
@@ -458,7 +462,7 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 			guard self != nil else{return nil}
 			switch option.needQuality {
 			case .thumbnail:
-				let _ = self!.thumbnailClose?(option.index){ photo  in
+				let _ = self!.thumbnailClose?(option){ photo  in
 					handler(photo)
 				}
 			case .large , .original:

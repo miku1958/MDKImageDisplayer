@@ -262,12 +262,13 @@ class MDKImageDisplayController: UIViewController {
 	}
 	var didFinishPresentTransitionAnimation:Bool = false
 	var tryToScrollIndexPath:IndexPath?
+	var needSwitchToLarge:Bool = true
 	func didFinishPresent(_ animated: Bool) -> () {
 //		collectionView.reloadData()
 //		collectionView.scrollToItem(at: IndexPath(item: photoList.negativeCount, section: 0), at: .left, animated: false)
 		didFinishPresentTransitionAnimation = true
 		collectionViewIsScrolling = false
-		if let cell = collectionView.visibleCells.first , let indexPath = collectionView.indexPath(for: cell){
+		if needSwitchToLarge , displayIndex()-photoList.negativeCount == beginIndex, let cell = collectionView.visibleCells.first , let indexPath = collectionView.indexPath(for: cell){
 			collectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
 		}
 	}
@@ -379,6 +380,10 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			var largeIsFromNet = false//修正加载大图太快会闪一下
 			let _ = largeClose?(option){[weak self] photo in
 				if let _self = self , ( !largeIsFromNet ||  _self.didFinishPresentTransitionAnimation){
+
+					if displayIndex == 0{
+						_self.needSwitchToLarge = false
+					}
 					hasLargePhoto = true
 					guard let photo = photo else {return}
 					_self.photoList[displayIndex].photoQuality = .large
@@ -386,6 +391,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 					DispatchQueue.main.async {
 						if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell{
 							_self.updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: false)
+
 						}
 					}
 				}
@@ -547,10 +553,13 @@ extension MDKImageDisplayController{
 		var cachePhotoNode:photoNode?
 
 		var hasLargePhoto:Bool = false
+		var isFromInternet:Bool = false
 		let identifier = largeClose?(option){[weak self] image  in
 			hasLargePhoto = true
+			let _isFromInternet = isFromInternet;
 			MDKDispatch_main_async_safe {
 				guard let _self = self else{return}
+
 				var pNode = photoNode()
 				if _self.photoList.checkIndex(displayIndex){
 					pNode = _self.photoList[displayIndex]
@@ -565,11 +574,15 @@ extension MDKImageDisplayController{
 				}else{
 					_self.photoList[displayIndex] = pNode
 				}
-				if let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex + _self.photoList.negativeCount, section: 0)) as? DisplayCell{
+				if !_isFromInternet , !(_self.didFinishPresentTransitionAnimation && displayIndex == _self.beginIndex) ,
+					let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex + _self.photoList.negativeCount, section: 0)) as? DisplayCell{
+					_self.needSwitchToLarge = false
 					cell.setPhoto(image,isThumbnail: false)
 				}
+
 			}
 		}
+		isFromInternet = true
 		if identifier != nil {
 			if isTryingNext {
 				if photoList[displayIndex-1].identifier == identifier{
