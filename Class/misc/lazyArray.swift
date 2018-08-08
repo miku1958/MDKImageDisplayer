@@ -6,7 +6,6 @@
 //  Copyright © 2018 mdk. All rights reserved.
 //
 
-import Foundation
 
 struct lazyArray<Element> {
 	typealias handleClose = (Int)->(Element)
@@ -56,5 +55,20 @@ struct lazyArray<Element> {
 			}
 			array[pos] = newValue
 		}
+	}
+}
+
+
+extension Array where Element == photoNode{
+	var photoCount:Int{
+		var count:Int = 0
+		for node in self{
+			if node.photo != nil {
+				count += 1
+			}else{
+				break
+			}
+		}
+		return count
 	}
 }

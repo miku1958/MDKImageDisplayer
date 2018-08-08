@@ -6,11 +6,8 @@
 //  Copyright © 2018 mdk. All rights reserved.
 //
 
-import UIKit
 
-public protocol MDKImageProtocol:NSObjectProtocol{
-	var imageView:UIImageView{get}
-}
+
 
 struct photoNode {
 	var photoQuality:LoadingPhotoQuality = .thumbnail
@@ -80,16 +77,4 @@ struct photoNode {
 }
 
 
-extension Array where Element == photoNode{
-	var photoCount:Int{
-		var count:Int = 0
-		for node in self{
-			if node.photo != nil {
-				count += 1
-			}else{
-				break
-			}
-		}
-		return count
-	}
-}
+

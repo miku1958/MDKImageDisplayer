@@ -9,28 +9,102 @@
 import UIKit
 
 
-enum SavePhotoFailType {
-	case restricted
-	case denied
-	case saveingFail(NSError)
-}
-enum SavePhotoResult {
-	case success
-	case fail(SavePhotoFailType)
-}
 
-@objc public enum LoadingPhotoQuality:Int{
-	case thumbnail = -1
-	case large = 1
-	case original = 2
-}
 
 class MDKImageDisplayController: UIViewController {
+
 	static private weak var instance:MDKImageDisplayController?
+	
 	class func current() -> MDKImageDisplayController? {
 		return instance
 	}
+	
+	private var largeClose:IndexTagImageClose?
+	convenience init(photoCount:Int ,largeClose:IndexTagImageClose?) {
+		
+		self.init()
+		
+		photoList.count = photoCount
+		self.largeClose = largeClose
+	}
+	
+	required init?(coder aDecoder: NSCoder) {
+		super.init(coder: aDecoder)
+		initself()
+	}
+	
 
+	private init() {
+		super.init(nibName: nil, bundle: nil)
+		initself()
+	}
+	
+	func initself() -> () {
+		MDKImageDisplayController.instance = self
+		modalPresentationStyle = .custom;
+		transitioningDelegate = transition
+		
+		collectionView.delegate = self
+		collectionView.dataSource = self
+		collectionView.MDKRegister(Cell: DisplayCell.self)
+		
+		
+		collectionView.addGestureRecognizer(dismissPan)
+		dismissPan.addTarget(self, action: #selector(dismissPanFunc(pan:)))
+		dismissPan.delegate = self
+		
+		collectionView.addGestureRecognizer(toolbarPan)
+		toolbarPan.addTarget(self, action: #selector(toolbarPanFunc(pan:)))
+		toolbarPan.delegate = self
+		
+		
+		dismissTap.addTarget(self, action: #selector(tapDismissFunc(tap:)))
+		collectionView.addGestureRecognizer(dismissTap)
+		
+		dismissTap.numberOfTapsRequired = 1
+		dismissTap.numberOfTouchesRequired = 1
+		dismissTap.delegate = self
+		dismissTap.require(toFail: dismissPan)
+		dismissTap.require(toFail: zoomTap)
+		
+		zoomTap.addTarget(self, action: #selector(tapZoomFunc(tap:)))
+		collectionView.addGestureRecognizer(zoomTap)
+		
+		
+		zoomTap.delegate = self
+		zoomTap.require(toFail: dismissPan)
+		
+		
+		longPress.addTarget(self, action: #selector(longPressFunc(longPress:)))
+		collectionView.addGestureRecognizer(longPress)
+		longPress.delegate = self
+		longPress.require(toFail: zoomTap)
+		
+		toolbar.addFinalAction { [weak self] in
+			self?.dismissToolbar(finish: {})
+		}
+		savePhotoResult = { result in
+			switch result {
+			case .success:
+				UIAlertController(title: "保存成功", message: nil, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
+					
+				}, title: "返回").MDKQuickPresented()
+			case .fail(.denied):
+				fallthrough
+			case .fail(.restricted):
+				UIAlertController(title: "请允许系统访问图片", message: nil, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
+					
+				}, title: "返回").MDKQuickPresented()
+			case let .fail(.saveingFail(error)):
+				UIAlertController(title: "保存失败", message: error.localizedDescription, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
+					
+				}, title: "返回").MDKQuickPresented()
+			}
+		}
+	}
+
+	let blurView = UIVisualEffectView(frame: MDKKeywindow.bounds)
+	
 	var collectionView:UICollectionView = {
 		let flow = UICollectionViewFlowLayout()
 		flow.minimumLineSpacing = 0
@@ -42,6 +116,7 @@ class MDKImageDisplayController: UIViewController {
 		collection.isPagingEnabled = true
 		return collection
 	}()
+	
 	var toolbar:toolbarView = toolbarView()
 
 	var beginIndex:Int = 0
@@ -56,41 +131,27 @@ class MDKImageDisplayController: UIViewController {
 		collectionView.layoutIfNeeded()
 		beginTransitionID = "MDK\(sourceTransitionIDPrefix)\(displayIndex)"
 	}
-	func displayIndex() -> Int {
+	var displayIndex:Int{
 		guard
 			let cell = collectionView.visibleCells.first as? DisplayCell,
 			let indexPath = collectionView.indexPath(for: cell)
-		else { return 0}
+			else { return 0}
 		return indexPath.item
 	}
 
-	@objc public var displayingOption:DisplayingOption{
-		let option = DisplayingOption()
-		let pNode = photoList[displayIndex() - photoList.negativeCount]
-		if pNode.isDequeueFromIdentifier,let identifier = pNode.identifier{
-			option.identifier = identifier
-		}else{
-			option.index = displayIndex()
-		}
-		return option
-	}
+
+
 
 	fileprivate var photoList:lazyArray<photoNode> = lazyArray(0, {(index)->(photoNode) in
 		var photo = photoNode()
 		photo.index = index
 		return photo
 	})
-
-	public var largeClose:IndexTagImageClose?
-
-	typealias IndexClose = (Int) -> ()
-	public var displayIndexWillChange:IndexClose?
-	public var willDismiss:IndexClose?
-	public var didDismiss:IndexClose?
-
-	public var sourceTransitionIDPrefix:String = ""
-
 	var preloadCloses:[Int:Bool] = [:]
+
+	
+
+
 
 	var isFailToTryPrevious:Bool?
 	var isFailToTryNext:Bool?
@@ -98,39 +159,74 @@ class MDKImageDisplayController: UIViewController {
 	var isPreloadingPrevious:Bool = false
 	var isFinishingPreloadPrevious:Bool = false
 
+	//MARK:	手势相关
 	let dismissPan:UIPanGestureRecognizer = UIPanGestureRecognizer()
-//	var lastDismissOffset
+
 	let toolbarPan:UIPanGestureRecognizer = UIPanGestureRecognizer()
-//	let tapOrPanGes:MultiTapToPanGestureRecognizer = MultiTapToPanGestureRecognizer()
 
 	let longPress = UILongPressGestureRecognizer()
 
 	let dismissTap:UITapGestureRecognizer = UITapGestureRecognizer()
 	let zoomTap:DoubleTapThanPanGesture = DoubleTapThanPanGesture()
 	var tapCount:Int = 0
-	var maxTapTimeInterval:TimeInterval = 0.3
-	var lastTapTime:TimeInterval = 0
 
 
 	var toolbarIsOpening:Bool = false
 	var toolbarIsFinishOpen:Bool = false
 	
 	var longPressIsActive:Bool = false
+	
+	
 
-	typealias SavePhotoClose = (SavePhotoResult)->()
 	var savePhotoResult:SavePhotoClose?
 
-
 	var collectionViewIsScrolling :Bool = false
+	
+	let transition = Transition.global()
 
-	typealias QRCodeHandlerClose = ([String:CGRect],CGPoint?)->()
-	var QRCodeHandler:QRCodeHandlerClose = { QRCodes,touchPoint in
+	///transition 动画是否做完
+	var didFinishPresentTransitionAnimation:Bool = false
+	///transition 动画做做完后需不需要切换到大图(防止layer动画的时候切换大图会导致视图大小出错)
+	var needSwitchToLarge:Bool = true
+
+	
+	var _animator:AnyObject?
+	@available(iOS 10.0, *)
+	func animator() -> UIViewPropertyAnimator? {
+		return _animator as? UIViewPropertyAnimator
+	}
+
+	
+	///用来第一次显示的时候滚动到当前要显示的cell
+	var firstResetPosition :Bool = false
+	///记录第一次显示的cell的transition ID
+	var beginTransitionID:String = ""
+	
+	///transition ID前缀
+	public var sourceTransitionIDPrefix:String = ""
+	
+//MARK:	供外部使用的属性
+	@objc public  var displayIndexWillChange:IndexClose?
+	@objc public  var willDismiss:IndexClose?
+	@objc public  var didDismiss:IndexClose?
+	///供外部获取当前displayCtr的显示信息
+	@objc public var displayingOption:DisplayingOption{
+		let option = DisplayingOption()
+		let pNode = photoList[displayIndex - photoList.negativeCount]
+		if pNode.isDequeueFromIdentifier,let identifier = pNode.identifier{
+			option.identifier = identifier
+		}else{
+			option.index = displayIndex
+		}
+		return option
+	}
+	public var QRCodeHandler:QRCodeHandlerClose = { QRCodes,touchPoint in
 		if QRCodes.count == 1{
 			UIApplication.shared.openURL(MDKURL(QRCodes.first!.key))
 		}else{
 			if var touchPoint = touchPoint{
 				for (message,rect) in QRCodes {
-
+					
 					if rect.contains(touchPoint){
 						UIApplication.shared.openURL(MDKURL(message))
 						break
@@ -145,142 +241,61 @@ class MDKImageDisplayController: UIViewController {
 					}, title: message)
 				}
 				alert.MDKAdd(Cancel: { (action) in
-
+					
 				}, title: "取消")
 				alert.MDKQuickPresented()
 			}
 		}
 	}
-	let transition = Transition.global()
-	private init() {
-		super.init(nibName: nil, bundle: nil)
-		MDKImageDisplayController.instance = self
-		modalPresentationStyle = .custom;
-		transitioningDelegate = transition
-
-		collectionView.delegate = self
-		collectionView.dataSource = self
-		collectionView.MDKRegister(Cell: DisplayCell.self)
-
-
-		collectionView.addGestureRecognizer(dismissPan)
-		dismissPan.addTarget(self, action: #selector(dismissPanFunc(pan:)))
-		dismissPan.delegate = self
-
-		collectionView.addGestureRecognizer(toolbarPan)
-		toolbarPan.addTarget(self, action: #selector(toolbarPanFunc(pan:)))
-		toolbarPan.delegate = self
-//		toolbarPan.require(toFail: dismissPan)
-
-		dismissTap.addTarget(self, action: #selector(tapDismissFunc(tap:)))
-		collectionView.addGestureRecognizer(dismissTap)
-
-		dismissTap.numberOfTapsRequired = 1
-		dismissTap.numberOfTouchesRequired = 1
-		dismissTap.delegate = self
-		dismissTap.require(toFail: dismissPan)
-		dismissTap.require(toFail: zoomTap)
-
-		zoomTap.addTarget(self, action: #selector(tapZoomFunc(tap:)))
-		collectionView.addGestureRecognizer(zoomTap)
-
-
-		zoomTap.delegate = self
-		zoomTap.require(toFail: dismissPan)
+}
 
 
 
-//		toolbarPan.require(toFail: zoomTap)
-//		dismissPan.require(toFail: zoomTap)
-
-
-//		let closeTap = UITapGestureRecognizer(target: self, action: #selector(dismissWithAnimation))
-//		collectionView.addGestureRecognizer(closeTap)
-//		closeTap.require(toFail: tapOrPanGes)
-
-		longPress.addTarget(self, action: #selector(longPressFunc(longPress:)))
-		collectionView.addGestureRecognizer(longPress)
-		longPress.delegate = self
-		longPress.require(toFail: zoomTap)
-
-		toolbar.addFinalAction { [weak self] in
-			self?.dismissToolbar(finish: {})
-		}
-		savePhotoResult = { result in
-			switch result {
-			case .success:
-				UIAlertController(title: "保存成功", message: nil, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
-
-				}, title: "返回").MDKQuickPresented()
-			case .fail(.denied):
-				fallthrough
-			case .fail(.restricted):
-				UIAlertController(title: "请允许系统访问图片", message: nil, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
-
-				}, title: "返回").MDKQuickPresented()
-			case let .fail(.saveingFail(error)):
-				UIAlertController(title: "保存失败", message: error.localizedDescription, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
-
-				}, title: "返回").MDKQuickPresented()
-			}
-		}
-	}
-	convenience init(photoCount:Int ,largeClose:IndexTagImageClose?) {
-
-		self.init()
-		
-		photoList.count = photoCount
-
-
-		self.largeClose = largeClose
-
-	}
-
-	required convenience init?(coder aDecoder: NSCoder) {
-		self.init()
-	}
-
-	let blurView = UIVisualEffectView(frame: MDKKeywindow.bounds)
-//	override func loadView() {
-//
-//		view = blurView
-//	}
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
+//MARK:	view function
+extension MDKImageDisplayController{
+	
+	override func viewDidLoad() {
+		super.viewDidLoad()
 		view.addSubview(blurView)
 		view.addSubview(collectionView)
-    }
-
+	}
+	
+	override func viewDidLayoutSubviews() {
+		let collFrame = collectionView.frame
+		
+		if collFrame.size != view.bounds.size {
+			collectionView.frame = view.bounds
+			blurView.frame = collectionView.frame
+			if !firstResetPosition{
+				firstResetPosition = true
+				
+				self.collectionView.scrollToItem(at: IndexPath(item: beginIndex + self.photoList.negativeCount, section: 0), at: .left, animated: false)
+				self.collectionViewIsScrolling = false
+			}
+			
+		}
+		
+	}
+	
 	override func viewWillAppear(_ animated: Bool) {
-
+		
 		UIView.animate(withDuration: Transition.duration) {
 			self.blurView.effect = UIBlurEffect(style: .dark)
 		}
 		
 		dismissToolbar { }
 	}
-	var didFinishPresentTransitionAnimation:Bool = false
-	var tryToScrollIndexPath:IndexPath?
-	var needSwitchToLarge:Bool = true
+	
 	func didFinishPresent(_ animated: Bool) -> () {
-//		collectionView.reloadData()
-//		collectionView.scrollToItem(at: IndexPath(item: photoList.negativeCount, section: 0), at: .left, animated: false)
 		didFinishPresentTransitionAnimation = true
 		collectionViewIsScrolling = false
-		if needSwitchToLarge , displayIndex()-photoList.negativeCount == beginIndex, let cell = collectionView.visibleCells.first , let indexPath = collectionView.indexPath(for: cell){
+		if needSwitchToLarge , displayIndex-photoList.negativeCount == beginIndex, let cell = collectionView.visibleCells.first , let indexPath = collectionView.indexPath(for: cell){
 			collectionView(collectionView, willDisplay: cell, forItemAt: indexPath)
 		}
 	}
 	
-	var _animator:AnyObject?
-	@available(iOS 10.0, *)
-	func animator() -> UIViewPropertyAnimator? {
-		return _animator as? UIViewPropertyAnimator
-	}
-
 	override func viewWillDisappear(_ animated: Bool) {
-		if let cell = collectionView.cellForItem(at: IndexPath(item: displayIndex(), section: 0)){
+		if let cell = collectionView.cellForItem(at: IndexPath(item: displayIndex, section: 0)){
 			Transition.antiRegistr(view: cell)
 		}
 		if #available(iOS 10.0, *) {
@@ -303,30 +318,8 @@ class MDKImageDisplayController: UIViewController {
 		}
 		
 	}
-	var firstResetPosition :Bool = false
-	override func viewDidLayoutSubviews() {
-		let collFrame = collectionView.frame
-
-		if collFrame.size != view.bounds.size {
-			collectionView.frame = view.bounds
-			blurView.frame = collectionView.frame
-			if !firstResetPosition{
-				firstResetPosition = true
-
-				self.collectionView.scrollToItem(at: IndexPath(item: beginIndex + self.photoList.negativeCount, section: 0), at: .left, animated: false)
-				self.collectionViewIsScrolling = false
-			}
-
-		}
-
-	}
-
-	var beginTransitionID:String = ""
-
 	
-	override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-		
-	}
+	
 }
 
 //MARK:	UICollectionViewDelegate,UICollectionViewDataSource
@@ -351,6 +344,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		let item = indexPath.item
 		let displayIndex = item - photoList.negativeCount
 
+		displayIndexWillChange?(displayIndex)
 		if let cell = cell as? DisplayCell {
 			cell.imageView.image = nil
 			cell.imageView.alpha = 1
@@ -430,7 +424,6 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			}
 		}
 
-		displayIndexWillChange?(displayIndex)
 
 	}
 
@@ -461,8 +454,8 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		collectionViewIsScrolling = true
 	}
 	func scrollViewDidZoom(_ scrollView: UIScrollView) {
-		if let cell = collectionView.visibleCells.first as? DisplayCell , scrollView == cell.contentScroll ,!photoList[displayIndex() - photoList.negativeCount].updatingCell{
-			photoList[displayIndex() - photoList.negativeCount].browsingScale = scrollView.zoomScale
+		if let cell = collectionView.visibleCells.first as? DisplayCell , scrollView == cell.contentScroll ,!photoList[displayIndex - photoList.negativeCount].updatingCell{
+			photoList[displayIndex - photoList.negativeCount].browsingScale = scrollView.zoomScale
 		}
 	}
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -471,8 +464,8 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		}
 
 		if let cell = collectionView.visibleCells.first as? DisplayCell , scrollView == cell.contentScroll {
-			if !photoList[displayIndex() - photoList.negativeCount].updatingCell{
-				photoList[displayIndex() - photoList.negativeCount].browsingOffset = scrollView.contentOffset
+			if !photoList[displayIndex - photoList.negativeCount].updatingCell{
+				photoList[displayIndex - photoList.negativeCount].browsingOffset = scrollView.contentOffset
 			}
 			if toolbarIsOpening ,scrollView.panGestureRecognizer.velocity(in: scrollView).y > 0{
 				dismissToolbar(finish: {})
@@ -501,6 +494,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 
 //MARK:	baseFunction
 extension MDKImageDisplayController{
+	
 	func dismissWithAnimation(all:Bool = false) -> () {
 		if !all {
 			if toolbarIsFinishOpen {
@@ -512,9 +506,9 @@ extension MDKImageDisplayController{
 			}
 		}
 
-		willDismiss?(displayIndex())
+		willDismiss?(displayIndex)
 		self.dismiss(animated: true, completion: {
-			self.didDismiss?(self.displayIndex())
+			self.didDismiss?(self.displayIndex)
 		})
 	}
 
@@ -737,11 +731,9 @@ extension MDKImageDisplayController{
 		let updateFrame = {
 			UIView.animate(withDuration: Transition.duration, animations: {
 				let photoBottom = max(-10, cell.frame.height - cell.imageView.superview!.convert(cell.imageView.frame, to: cell).maxY)
-//				let photoBottom = max(-10, cell.frame.height - cell.imageView.frame.maxY)
 				if photoBottom<self.toolbar.frame.height{
 					self.collectionView.frame.origin.y = 0-(self.toolbar.frame.height - photoBottom)
 				}
-//				self.blurView.frame.origin.y = -self.toolbar.frame.height
 				self.toolbar.frame.origin.y = self.view.frame.height - self.toolbar.frame.height
 			}) { (_) in
 				self.toolbarIsFinishOpen = true
@@ -787,7 +779,6 @@ extension MDKImageDisplayController{
 		collectionView.isScrollEnabled = true
 		UIView.animate(withDuration: Transition.duration, animations: {
 			self.collectionView.frame.origin.y = 0
-//			self.blurView.frame = self.collectionView.frame
 			self.toolbar.frame.origin.y = self.view.frame.height
 		}) { (_) in
 			if let cell = self.collectionView.visibleCells.first as? DisplayCell {
@@ -814,8 +805,6 @@ extension MDKImageDisplayController{
 		case .began:
 			cell.contentScroll.panGestureRecognizer.isEnabled = false
 			viewWillDisappear(true)
-//			willDismiss?(displayIndex())
-//			hero.dismissViewController()
 			if #available(iOS 10.0, *) {
 				animator()?.pauseAnimation()
 			}
@@ -825,21 +814,19 @@ extension MDKImageDisplayController{
 			if #available(iOS 10.0, *) {
 				animator()?.fractionComplete = min(1, progress*2)
 			}
-//			let currentPos = CGPoint(x: translation.x + cell.imageView.center.x - cell.contentScroll.contentOffset.x, y: translation.y + cell.imageView.center.y + cell.contentScroll.contentInset.top)
 			Transition.global().controlTransitionView(position: translation)
-//			Hero.shared.apply(modifiers: [.position(currentPos)], to: cell.imageView)
 		default:
 			cell.contentScroll.panGestureRecognizer.isEnabled = true
 			
 			if progress + pan.velocity(in: nil).y / collectionView.bounds.height > 0.3 , translation.y > collectionView.bounds.height/4 {
 				Transition.global().commitDismiss()
-				didDismiss?(displayIndex())
+				didDismiss?(displayIndex)
 				if #available(iOS 10.0, *) {
 					animator()?.startAnimation()
 				}
 			} else {
 				Transition.global().cancelDismiss()
-				didDismiss?(displayIndex())
+				didDismiss?(displayIndex)
 				if #available(iOS 10.0, *) {
 					animator()?.isReversed = true
 					animator()?.startAnimation()
@@ -940,24 +927,10 @@ extension MDKImageDisplayController{
 extension MDKImageDisplayController:UIGestureRecognizerDelegate {
 	func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
 
-
-//		if gestureRecognizer == doubleTapThanPan || otherGestureRecognizer == doubleTapThanPan{
-//			return true
-//		}
-
-		if gestureRecognizer.isKind(of: MultiTapToPanGestureRecognizer.self) || otherGestureRecognizer.isKind(of: MultiTapToPanGestureRecognizer.self) {
-			return false
-		}
 		if gestureRecognizer == collectionView.panGestureRecognizer || otherGestureRecognizer == collectionView.panGestureRecognizer {
 			return false
 		}
-		guard let cell = collectionView.visibleCells.first as? DisplayCell else {return true}
-//		if gestureRecognizer == dismissPan && otherGestureRecognizer == cell.contentScroll.panGestureRecognizer {
-//			return false
-//		}
-		if gestureRecognizer == toolbarPan , otherGestureRecognizer == cell.contentScroll.panGestureRecognizer {
-//			return false
-		}
+
 		return true
 	}
 	func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -968,9 +941,6 @@ extension MDKImageDisplayController:UIGestureRecognizerDelegate {
 			return (!collectionViewIsScrolling && !cell.isScrolling) || toolbarIsFinishOpen
 		}
 		if gestureRecognizer.isKind(of: UILongPressGestureRecognizer.self) {
-//			if tapCount != 0{
-//				return false
-//			}
 			if toolbarIsOpening {
 				return false
 			}
@@ -1032,7 +1002,7 @@ extension MDKImageDisplayController{
 			savePhotoResult?(.fail(.denied))
 			return
 		}
-		let displayIndex = self.displayIndex() - photoList.negativeCount
+		let displayIndex = self.displayIndex - photoList.negativeCount
 		let option = CloseOption()
 		if displayIndex>0 {
 			option.lastIdentifier = photoList[displayIndex-1].identifier
@@ -1059,7 +1029,7 @@ extension MDKImageDisplayController{
 	}
 }
 
-
+//系统功能
 extension MDKImageDisplayController{
 	override var supportedInterfaceOrientations: UIInterfaceOrientationMask{
 		return .all

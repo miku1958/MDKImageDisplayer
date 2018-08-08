@@ -27,7 +27,7 @@ class DoubleTapThanPanGesture: UIPanGestureRecognizer {
 
 		lastTapTime = now
 		tappingCount = touches.first?.tapCount ?? 0
-		print(tappingCount)
+
 		if tapCount ==  tappingCount{
 			super.touchesBegan(touches, with: event)
 		}
@@ -80,23 +80,5 @@ class DoubleTapThanPanGesture: UIPanGestureRecognizer {
 	private func finishTapPress() -> () {
 		lastTapTime = 0
 	}
-	private func notiTargetPerformAction() -> () {
-		guard let _targets = self.value(forKey: "_targets") as? Array<AnyObject> else { return }
-
-		for  _targetActionPair in _targets {//UIGestureRecognizerTarget
-			var targetActionPair = _targetActionPair
-			let selector = NSSelectorFromString("_sendActionWithGestureRecognizer:");
-
-			let target = targetActionPair.value(forKey: "_target") as AnyObject
-			if target.isKind(of: NSClassFromString("UIGestureRecognizerTarget")!){
-				//测试的时候发现,某些情况下 target才是UIGestureRecognizerTarget,以防万一这里判断一下
-				targetActionPair = target
-			}
-
-			if (targetActionPair.responds(to: selector	)) {
-				targetActionPair.perform(selector, with: self)
-			}
-		}
-
-	}
+	
 }

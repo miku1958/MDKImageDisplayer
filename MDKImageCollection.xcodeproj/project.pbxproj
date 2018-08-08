@@ -20,7 +20,10 @@
 		FF769AA420F309CB00DB6DA1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA220F309CB00DB6DA1 /* LaunchScreen.storyboard */; };
 		FF769AAD20F31C3F00DB6DA1 /* MDKImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */; };
 		FF79EE8720FD9F93006D318F /* toolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF79EE8620FD9F93006D318F /* toolbarView.swift */; };
-		FF99ECA721007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF99ECA621007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift */; };
+		FF9EE1E7211B17DE00A5F533 /* ConstData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E6211B17DE00A5F533 /* ConstData.swift */; };
+		FF9EE1E9211B1B5900A5F533 /* CloseOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */; };
+		FF9EE1EC211B1BC700A5F533 /* DisplayingOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */; };
+		FF9EE1EE211B242B00A5F533 /* UIView+containSubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1ED211B242B00A5F533 /* UIView+containSubView.swift */; };
 		FFB9DFA321087304008381DC /* Transition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB9DFA221087304008381DC /* Transition.swift */; };
 		FFB9DFA521087327008381DC /* TransitionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB9DFA421087327008381DC /* TransitionController.swift */; };
 		FFD7F08B210E9E3700154897 /* gakki.plist in Resources */ = {isa = PBXBuildFile; fileRef = FFD7F08A210E9E3700154897 /* gakki.plist */; };
@@ -61,7 +64,10 @@
 		FF769AA520F309CB00DB6DA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageCollectionView.swift; sourceTree = "<group>"; };
 		FF79EE8620FD9F93006D318F /* toolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = toolbarView.swift; sourceTree = "<group>"; };
-		FF99ECA621007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiTapToPanGestureRecognizer.swift; sourceTree = "<group>"; };
+		FF9EE1E6211B17DE00A5F533 /* ConstData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstData.swift; sourceTree = "<group>"; };
+		FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseOption.swift; sourceTree = "<group>"; };
+		FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayingOption.swift; sourceTree = "<group>"; };
+		FF9EE1ED211B242B00A5F533 /* UIView+containSubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+containSubView.swift"; sourceTree = "<group>"; };
 		FFB9DFA221087304008381DC /* Transition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transition.swift; sourceTree = "<group>"; };
 		FFB9DFA421087327008381DC /* TransitionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionController.swift; sourceTree = "<group>"; };
 		FFC162CC2119E14E00F26723 /* MDKImageCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MDKImageCollectionView.h; sourceTree = "<group>"; };
@@ -149,11 +155,8 @@
 			children = (
 				FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */,
 				FF79EE8520FD9F47006D318F /* View */,
+				FF9EE1EA211B1B6A00A5F533 /* misc */,
 				FFB9DF9F210872CE008381DC /* Transition */,
-				FF2C1F6B20F4A6C40022D54F /* photoNode.swift */,
-				FF99ECA621007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift */,
-				FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */,
-				FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */,
 			);
 			path = Class;
 			sourceTree = "<group>";
@@ -167,6 +170,20 @@
 				FF72BC0320F361BA000CAFBA /* Cell */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		FF9EE1EA211B1B6A00A5F533 /* misc */ = {
+			isa = PBXGroup;
+			children = (
+				FF9EE1E6211B17DE00A5F533 /* ConstData.swift */,
+				FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */,
+				FF2C1F6B20F4A6C40022D54F /* photoNode.swift */,
+				FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */,
+				FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */,
+				FF9EE1ED211B242B00A5F533 /* UIView+containSubView.swift */,
+				FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */,
+			);
+			path = misc;
 			sourceTree = "<group>";
 		};
 		FFB9DF9F210872CE008381DC /* Transition */ = {
@@ -298,14 +315,17 @@
 				FFB9DFA521087327008381DC /* TransitionController.swift in Sources */,
 				FF72BC0520F361BB000CAFBA /* ThumbnailCell.swift in Sources */,
 				FFDA853720F98EE40073AAA2 /* MDKImageDisplayController.swift in Sources */,
+				FF9EE1E9211B1B5900A5F533 /* CloseOption.swift in Sources */,
 				FF6E9CF8210FF4C100CC7F3F /* lazyArray.swift in Sources */,
 				FF50B6D72102C5EF00911035 /* DoubleTapThanPanGesture.swift in Sources */,
+				FF9EE1EE211B242B00A5F533 /* UIView+containSubView.swift in Sources */,
 				FF769AAD20F31C3F00DB6DA1 /* MDKImageCollectionView.swift in Sources */,
 				FFDA853920F992280073AAA2 /* DisplayCell.swift in Sources */,
 				FF79EE8720FD9F93006D318F /* toolbarView.swift in Sources */,
+				FF9EE1EC211B1BC700A5F533 /* DisplayingOption.swift in Sources */,
+				FF9EE1E7211B17DE00A5F533 /* ConstData.swift in Sources */,
 				FF72BBFD20F346E2000CAFBA /* OCTest.m in Sources */,
 				FF769A9C20F309CA00DB6DA1 /* ViewController.swift in Sources */,
-				FF99ECA721007019006AC9A3 /* MultiTapToPanGestureRecognizer.swift in Sources */,
 				FF769A9A20F309CA00DB6DA1 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

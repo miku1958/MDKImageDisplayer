@@ -6,23 +6,8 @@
 //  Copyright © 2018 mdk. All rights reserved.
 //
 
-import UIKit
-import MDKTools
 
-extension UIView{
-	func contain(subview targetView:UIView) -> Bool {
-		for view in subviews {
-			if view == targetView {
-				return true
-			}
-			if view.contain(subview: targetView) {
-				return true
-			}
-		}
 
-		return false
-	}
-}
 
 class Transition: NSObject{
 	static private weak var instance:Transition?
@@ -36,31 +21,38 @@ class Transition: NSObject{
 	}
 	
 
+	var  isPresented:Bool = true
+	static let duration:TimeInterval = 0.35
 	var ImageCornerRadius:CGFloat = 0
+	
+	weak var transitingView:UIView?
+	var transitingViewGravity:String?
+	
+	
+	weak var sourceCtr:UIViewController?
+	weak var animatingCtr:MDKImageDisplayController?
 
-	private static let lock:DispatchSemaphore = DispatchSemaphore(value: 1)
+	
+	
 	static let syncQueue = DispatchQueue(label: "MDKImageFlushQueue",attributes: [])
 
+	private static let lock:DispatchSemaphore = DispatchSemaphore(value: 1)
 	static func synchronized(_ close:(()->())) -> () {
 		Transition.lock.wait()
 		defer { Transition.lock.signal() }
 		close()
 	}
 
-	var  isPresented:Bool = true
-	static let duration:TimeInterval = 0.35
-
 
 	weak var _transitionContext:UIViewControllerContextTransitioning?
-
 	func forceTransitionContextCompleteTransition() -> () {
-		print(#function)
+
+		
 		_transitionContext?.completeTransition(true)
 		transitingView?.layer.mask = nil
 		animatingCtr?.view.isUserInteractionEnabled = true
 	}
-	weak var transitingView:UIView?
-	var transitingViewGravity:String?
+	
 
 	static var viewMap:[String:NSHashTable<UIView>] = [:]
 	static func register(view:UIView , for key:String) -> () {
@@ -80,39 +72,56 @@ class Transition: NSObject{
 		}
 	}
 
-	weak var sourceCtr:UIViewController?
-	weak var animatingCtr:MDKImageDisplayController?
-	func dismiss(viewController : MDKImageDisplayController) {
-		print(#function)
-		animatingCtr = viewController
-		transitingView?.layer.beginTime = CACurrentMediaTime()
-		didViewAnimation(to: nil, from: viewController.view)
-		transitingView?.layer.masksToBounds = false
-	}
 
+//MARK:	dismiss动画控制的属性
+	///dismiss进度
 	var process:CGFloat?{
 		didSet{
-
+			
 			if var process = process{
 				process = max(0, min(1, process))
 				if let transitingView = transitingView {
 					transitingView.layer.speed = 0.0;
 					transitingView.layer.timeOffset = CFTimeInterval(process) * Transition.duration
 				}
-//				if let blurLayer = dismissingCtr?.blurView.layer {
-//					blurLayer.speed = 0.0;
-//					blurLayer.timeOffset = 0.2//CFTimeInterval(process) * Transition.duration
-//				}
-	
 			}
 		}
 	}
+
+	///layer动画的目标位置
 	var animationTargetPosition:CGPoint?
+
+	///是否在收尾dismiss/cancel动画
+	var finishingDismiss:Bool = false
+
+	///回滚view的transform初始值
+	var rollbackTransformT:CGPoint = CGPoint()
+	///收尾动画的启动offset
+	var commitLayerBeginOffset:TimeInterval = 0
+	///收尾动画的帧间距
+	var dismissingTimeInterval:TimeInterval = 0
+	
+}
+//MARK:	dismiss动画控制的方法
+extension Transition{
+	func dismiss(viewController : MDKImageDisplayController) {
+		
+		
+		animatingCtr = viewController
+		transitingView?.layer.beginTime = CACurrentMediaTime()
+		didViewAnimation(to: nil, from: viewController.view)
+		transitingView?.layer.masksToBounds = false
+	}
+
+	
 	func controlTransitionView(position:CGPoint) -> () {
-		print(#function)
-
-		guard let transitingView = transitingView	 , let sourcePosition = transitingView.layer.value(forKey: "position") as? CGPoint , let targetPosition = animationTargetPosition else { return }
-
+		
+		
+		
+		guard let transitingView = transitingView, let targetPosition = animationTargetPosition else { return }
+		
+		let sourcePosition = transitingView.layer.position
+		
 		let ratio = CGFloat(transitingView.layer.timeOffset / Transition.duration)
 		let currentPosition = CGPoint(x: (sourcePosition.x - targetPosition.x) * ratio , y: (sourcePosition.y - targetPosition.y) * ratio)
 		transitingView.transform.tx = position.x + (currentPosition.x/max(transitingView.layer.transform.m11, 1))
@@ -120,20 +129,21 @@ class Transition: NSObject{
 	}
 	
 	func cancelDismiss() {
-		print(#function)
+		
+		
 		guard let view = transitingView else { return }
 		if finishingDismiss { return }
 		animatingCtr?.view.isUserInteractionEnabled = false
 		finishingDismiss = true
 		rollbackTransformT = CGPoint(x: view.transform.tx, y: view.transform.ty)
-		rollbackBeginOffset = view.layer.timeOffset
-		dismissingTimeInterval = (rollbackBeginOffset)/(Transition.duration*60)
+		commitLayerBeginOffset = view.layer.timeOffset
+		dismissingTimeInterval = (commitLayerBeginOffset)/(Transition.duration*60)
 		commitLayerAnimation(view ,rollback: true)
 	}
-
-	var finishingDismiss:Bool = false
+	
 	func commitDismiss() {
-		print(#function)
+		
+		
 		guard let view = transitingView else {
 			forceTransitionContextCompleteTransition()
 			animatingCtr?.dismiss(animated: true, completion: nil)
@@ -144,25 +154,19 @@ class Transition: NSObject{
 		finishingDismiss = true
 		
 		animatingCtr?.view.isUserInteractionEnabled = false
-
+		
 		view.layer.contentsGravity = kCAGravityResizeAspectFill
 		view.layer.masksToBounds = true
 		rollbackTransformT = CGPoint(x: view.transform.tx, y: view.transform.ty)
-		rollbackBeginOffset = view.layer.timeOffset
-		dismissingTimeInterval = (Transition.duration-rollbackBeginOffset)/(Transition.duration*60)
+		commitLayerBeginOffset = view.layer.timeOffset
+		dismissingTimeInterval = (Transition.duration-commitLayerBeginOffset)/(Transition.duration*60)
 		commitLayerAnimation(view ,rollback: false)
-
-
-
 	}
-	var rollbackTransformT:CGPoint = CGPoint()
-	var rollbackBeginOffset:TimeInterval = 0
-	var dismissingTimeInterval:TimeInterval = 0
 	func commitLayerAnimation(_ view:UIView , rollback:Bool){
-		print(#function)
+		
+		
 		let layer = view.layer
 		var timeOffset = layer.timeOffset
-		print("timeOffset : \(timeOffset)")
 		if dismissingTimeInterval == 0 {
 			dismissingTimeInterval = 0.000000001
 		}
@@ -170,51 +174,44 @@ class Transition: NSObject{
 		if rollback ? (timeOffset < 0) : (timeOffset > Transition.duration) {
 			if rollback{
 				layer.removeAllAnimations()
-//				layer.speed = 1.0
 				layer.timeOffset = 0
-//				layer.beginTime = CACurrentMediaTime()
 				forceTransitionContextCompleteTransition()
-				print("removeAllAnimations")
+				
 			}else if let animKey = layer.animationKeys()?.first , let anim = layer.animation(forKey: animKey){
 				animationDidStop(anim, finished: true)
-				print("animationDidStop")
+				
 			}
-
+			
 			view.transform.tx = 0
 			view.transform.ty = 0
 			finishingDismiss = false
 			animatingCtr?.view.isUserInteractionEnabled = true
 			return
 		}
-
+		
 		var reduce:CGFloat = 0
 		if rollback {
-			if rollbackBeginOffset == 0{
+			if commitLayerBeginOffset == 0{
 				reduce = 0
 			}else{
-				reduce = CGFloat(timeOffset / rollbackBeginOffset)
+				reduce = CGFloat(timeOffset / commitLayerBeginOffset)
 			}
 		}else{
-			if Transition.duration == rollbackBeginOffset{
+			if Transition.duration == commitLayerBeginOffset{
 				reduce = 0
 			}else{
-				reduce = CGFloat((Transition.duration - timeOffset) / (Transition.duration - rollbackBeginOffset))
+				reduce = CGFloat((Transition.duration - timeOffset) / (Transition.duration - commitLayerBeginOffset))
 			}
 		}
-		print("timeOffset:\(timeOffset)  rollbackBeginOffset: \(rollbackBeginOffset)   reduce :\(reduce)")
+		
 		view.transform.tx = rollbackTransformT.x * reduce
 		view.transform.ty = rollbackTransformT.y * reduce
-
+		
 		layer.timeOffset = min(max(timeOffset, 0), Transition.duration)
-
+		
 		DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(1/60.0)) {
 			self.commitLayerAnimation(view, rollback: rollback)
 		}
-	}
-
-
-	func resetLayer(_ layer:CALayer) -> () {
-
 	}
 }
 extension Transition : UIViewControllerTransitioningDelegate{
@@ -239,7 +236,8 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 	}
 
 	func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
-		print(#function)
+		
+		
 		finishingDismiss = false
 		_transitionContext = transitionContext
 		if (isPresented) {
@@ -256,7 +254,8 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 	}
 
 	func didViewAnimation(to:UIView?,from:UIView?) -> () {
-		print(#function)
+		
+		
 
 		var containVIew:UIView!
 		var isPresent:Bool = false
@@ -322,7 +321,7 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 					let sourceFrameToTarget = sourceSuperView.convert(sourceFrameOri, to: view.superview)
 					let maskFrameToTarget = sourceSuperView.convert(sourceFrameMask, to: view.superview)
 
-					print(sourceFrameToTarget)
+					
 					updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
 					animatingCtr?.view.isUserInteractionEnabled = false
 				}else{
@@ -353,7 +352,8 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 
 	func updateLayer(from view:UIView , sourceFrame:CGRect , maskFrame:CGRect , isPresent:Bool) -> () {
 
-		print(#function)
+		
+		
 		if finishingDismiss {
 			forceTransitionContextCompleteTransition()
 			return
@@ -433,9 +433,7 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		let delegate = AnimationProxy()
 		delegate.delegate = self
 		group.delegate = delegate
-		for _ in group.animations! {
-//			print(anim.debugDescription)
-		}
+
 
 //		view.layer.beginTime = CACurrentMediaTime()//打开会导致3d touch打开后dismiss的动画无效
 		view.layer.timeOffset = 0
@@ -464,14 +462,15 @@ extension Transition : CAAnimationDelegate{
 
 	func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
 
-		print(#function)
+		
+		
 		animatingCtr?.view.isUserInteractionEnabled = true
 		if isPresented {
 			animatingCtr?.didFinishPresent(flag)
 		}
-		print("animationDidStop")
+		
 		if finishingDismiss {
-			print("--->finishingDismiss")
+			
 			animatingCtr?.dismiss(animated: false, completion: nil)
 		}else{
 			if transitingViewGravity != nil {

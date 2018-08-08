@@ -6,33 +6,65 @@
 //  Copyright © 2018 mdk. All rights reserved.
 //
 
-import UIKit
-@_exported import MDKTools
-
-@objc public class CloseOption :NSObject{
-	@objc public var lastIdentifier:String?
-	@objc public var index:Int = 0
-	@objc public var needQuality:LoadingPhotoQuality = .thumbnail
-	@objc public var displayCtr:UIViewController!
-}
-@objc public class DisplayingOption : NSObject{
-	@objc public var index:Int = 0
-	@objc public var identifier:String = ""
-}
 
 
-public typealias imageClose = (UIImage?)->()
-public typealias IndexTagImageClose =  (CloseOption,@escaping imageClose)->(String?)
+
+
+//FIXME:	thumbnailClose改成两组一组传入数组数量后不需要返回BOOL/另一组去掉传入数组数量
+//FIXME:	larget同理
+//FIXME:	去掉flowlayout.改成通用型.完全交给开发者决定布局.默认初始化保留flowlayout
+
 
 open class MDKImageCollectionView: UICollectionView {
+	
+	
+	@objc public convenience init() {
+		let layout = UICollectionViewFlowLayout();
+		layout.itemSize = CGSize(width: MDKScreenWidth, height: MDKScreenHeight)
+		layout.minimumLineSpacing = 2
+		layout.minimumInteritemSpacing = 2
+		self.init(frame: CGRect(), flowLayout: layout)
+		
+	}
+	private convenience init(frame: CGRect) {
+		self.init()
+	}
+	private override init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
+		super.init(frame: frame, collectionViewLayout: layout)
+	}
+	@objc public convenience init(frame: CGRect, flowLayout layout: UICollectionViewFlowLayout) {
+		
+		self.init(frame: frame, collectionViewLayout: layout)
+		initSelf()
+	}
+	
+	public required  init?(coder aDecoder: NSCoder) {
+		super.init(coder: aDecoder)
+		initSelf()
+	}
+	func initSelf() -> () {
+		delegate = self
+		dataSource = self
+		cusMiniteritemSpace = flowLayout.minimumInteritemSpacing
+		cusSectionInset = flowLayout.sectionInset
+		
+		MDKRegister(Cell: ThumbnailCell.self)
+		if #available(iOS 11.0, *) {
+			self.contentInsetAdjustmentBehavior = .never
+		}
+	}
 
-	@objc public var ImageCornerRadius:CGFloat = 0
+	
+	
+	
+
+	@objc public var ImageTransitionCornerRadius:CGFloat = 0
 
 	@objc public var customTransitionID:String?
 
-	public typealias IndexImageClose =  (CloseOption,@escaping imageClose)->(Bool)
-	public typealias IndexImageReturnSelfClose =  (Int,@escaping IndexImageClose)->MDKImageCollectionView
 
+
+	@objc public var hasThumbnailClose:Bool = false
 	private var thumbnailClose:IndexImageClose? {
 		didSet{
 
@@ -65,21 +97,19 @@ open class MDKImageCollectionView: UICollectionView {
 		}
 	}
 
-	public typealias IndexTagImageReturnSelfClose =  (@escaping IndexTagImageClose)->MDKImageCollectionView
 	@objc public var hasLargeClose:Bool = false
-	@objc public var hasThumbnailClose:Bool = false
-	@objc public var displayingOption:DisplayingOption?{
-		return MDKImageDisplayController.current()?.displayingOption
-	}
 	private var largeClose:IndexTagImageClose? {
 		didSet{
 			hasLargeClose = largeClose != nil
 		}
 	}
+	@objc public var displayingOption:DisplayingOption?{
+		return MDKImageDisplayController.current()?.displayingOption
+	}
 
 
-	public typealias intReturnSelfClose = (Int) -> (MDKImageCollectionView)
 
+	//FIXME:	废弃
 	private var _columnCount:Int = 0
 	@objc public var autoSizeWhenOnePhot:Bool = false {
 		didSet{
@@ -90,11 +120,16 @@ open class MDKImageCollectionView: UICollectionView {
 	}
 
 	private var needAutoPreLoad:Bool = false
-	private var currentColumnCount:Int = 0
 	private var maxVisibleCount:Int = 0
+	
+	//FIXME:	废弃
+	private var currentColumnCount:Int = 0
+	//FIXME:	废弃
 	private var currentCount:Int = 0
 
+	//FIXME:	废弃
 	private var cusMiniteritemSpace:CGFloat = 0
+	//FIXME:	废弃
 	private var cusSectionInset:UIEdgeInsets = UIEdgeInsets()
 
 	private var loadingIndex:Int = 1
@@ -110,48 +145,15 @@ open class MDKImageCollectionView: UICollectionView {
 	})
 
 
-	@objc public convenience init() {
-		let layout = UICollectionViewFlowLayout();
-		layout.itemSize = CGSize(width: MDKScreenWidth, height: MDKScreenHeight)
-		layout.minimumLineSpacing = 2
-		layout.minimumInteritemSpacing = 2
-		self.init(frame: CGRect(), flowLayout: layout)
-
-	}
-	private convenience init(frame: CGRect) {
-		self.init()
-	}
-	private override init(frame: CGRect, collectionViewLayout layout: UICollectionViewLayout) {
-		super.init(frame: frame, collectionViewLayout: layout)
-	}
-	@objc public convenience init(frame: CGRect, flowLayout layout: UICollectionViewFlowLayout) {
-
-		self.init(frame: frame, collectionViewLayout: layout)
-		initSelf()
-	}
-
-	public required  init?(coder aDecoder: NSCoder) {
-		super.init(coder: aDecoder)
-		initSelf()
-	}
-	func initSelf() -> () {
-		delegate = self
-		dataSource = self
-		cusMiniteritemSpace = flowLayout.minimumInteritemSpacing
-		cusSectionInset = flowLayout.sectionInset
-
-		MDKRegister(Cell: ThumbnailCell.self)
-		if #available(iOS 11.0, *) {
-			self.contentInsetAdjustmentBehavior = .never
-		}
-	}
-
+	//FIXME:	废弃
 	@objc public var flowLayout: UICollectionViewFlowLayout{
 		return collectionViewLayout as! UICollectionViewFlowLayout
 	}
+	//FIXME:	废弃
 	@objc public func setForceSectionInset(_ inset:UIEdgeInsets){
 		_forceSectionInset = inset
 	}
+	//FIXME:	废弃
 	private var _forceSectionInset:UIEdgeInsets? {
 		didSet{
 			if _forceSectionInset != nil{
@@ -160,8 +162,13 @@ open class MDKImageCollectionView: UICollectionView {
 		}
 	}
 
-	open override func layoutSubviews() {
 
+
+}
+//MARK:	view function
+extension MDKImageCollectionView{
+	open override func layoutSubviews() {
+		
 		super.layoutSubviews()
 		if _columnCount == 0 {
 			flowLayout.minimumInteritemSpacing = cusMiniteritemSpace
@@ -180,7 +187,7 @@ open class MDKImageCollectionView: UICollectionView {
 		if flowLayout.itemSize.height > 0 {
 			tempMaxCount = tempMaxCount * (frame.size.height / flowLayout.itemSize.height)
 		}
-
+		
 		maxVisibleCount = max(1, Int(tempMaxCount))
 		var itemWidths:CGFloat = 0
 		let itemWidth = min(frame.width, flowLayout.itemSize.width )
@@ -208,11 +215,11 @@ open class MDKImageCollectionView: UICollectionView {
 				}
 			}
 		}
-
+		
 		if !self.bounds.size.equalTo(intrinsicContentSize) {
-
+			
 			invalidateIntrinsicContentSize()
-
+			
 		}
 	}
 	open override func systemLayoutSizeFitting(_ targetSize: CGSize, withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority, verticalFittingPriority: UILayoutPriority) -> CGSize {
@@ -221,7 +228,6 @@ open class MDKImageCollectionView: UICollectionView {
 	open override var intrinsicContentSize: CGSize {
 		return self.contentSize
 	}
-
 }
 
 //MARK:	链式设置
@@ -472,7 +478,7 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 			}
 			return nil
 		}
-		display.transition.ImageCornerRadius = ImageCornerRadius
+		display.transition.ImageCornerRadius = ImageTransitionCornerRadius
 		display.sourceTransitionIDPrefix = "\(Unmanaged.passUnretained(self).toOpaque())"
 		display.setDisplayIndex(displayIndex)
 		
@@ -481,13 +487,13 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 			if let cell = self?.cellForItem(at: indexPath) , let contain = self?.visibleCells.contains(cell) , contain == true {
 				return
 			}
-			//			self?.scrollToItem(at: indexPath, at: [], animated: true)
+			self?.scrollToItem(at: indexPath, at: [], animated: true)
 		}
 		
 		return display
 	}
 }
-
+//MARK:	系统功能
 extension MDKImageCollectionView: UIViewControllerPreviewingDelegate{
 
 	@available(iOS 9.0, *)

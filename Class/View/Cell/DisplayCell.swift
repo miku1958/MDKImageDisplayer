@@ -52,7 +52,6 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 	func updateSize(_ size:CGSize , resetOffset:Bool) -> () {
 		contentScroll.contentSize = size
 
-		let viewScale = size.width/(MDKScreenWidth*UIScreen.main.scale)
 		fullWidthScale = MDKScreenWidth/size.width
 		miniZoomScale = min(0.5, fullWidthScale)
 		maxZoomScale = max(2, fullWidthScale)
@@ -110,24 +109,14 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 	let contentScroll:UIScrollView = {
 		let scroll = UIScrollView()
 		
-
-
-//		scroll.bounces = false
-//		scroll.alwaysBounceVertical = true;
-		
-		
 		if #available(iOS 11.0, *) {
 			scroll.contentInsetAdjustmentBehavior = .never
-		} else {
-			// Fallback on earlier versions
 		}
 		
 		return scroll
 	}()
 	
-	func dismiss() -> () {
-		
-	}
+	
 	var fullWidthScale:CGFloat = 0
 	var miniZoomScale:CGFloat = 0
 	var maxZoomScale:CGFloat = 0
@@ -247,13 +236,3 @@ extension DisplayCell:UIScrollViewDelegate{
 	}
 }
 
-//MARK:	手势s方法
-extension DisplayCell{
-	
-
-}
-
-
-extension DisplayCell:UIGestureRecognizerDelegate{
-
-}

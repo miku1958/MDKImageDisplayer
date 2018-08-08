@@ -27,8 +27,8 @@ class ViewController: UIViewController {
 		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection)
 
-		imageCollection.thumbnailForIndex(count: 0) { (index, handler) in
-			handler(UIImage(named: "\(index%3)"))
+		imageCollection.thumbnailForIndex(count: 0) { (option, handler) in
+			handler(UIImage(named: "\(option.index%3)"))
 			return true
 		}.largeForIndex { (option, handler) in
 				handler(UIImage(named: "\(option.index%3)"))
@@ -42,9 +42,9 @@ class ViewController: UIViewController {
 		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection)
 		
-		imageCollection.thumbnailForIndex(count: 20) { (index, handler) in
-			handler(UIImage(named: "\(index%3)"))
-			if index == 19{
+		imageCollection.thumbnailForIndex(count: 20) { (option, handler) in
+			handler(UIImage(named: "\(option.index%3)"))
+			if option.index == 19{
 				self.imageCollection.updateCount(40)
 			}
 			return true
@@ -65,9 +65,9 @@ class ViewController: UIViewController {
 		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection)
 		imageCollection.registerFor3DTouchPreviewing(self)
-		imageCollection.thumbnailForIndex(count: 0) { (index, handler) in
-			if index<urlArr.count{
-				let url = urlArr[index].replacingOccurrences(of: "thumb300", with: "orj360")
+		imageCollection.thumbnailForIndex(count: 0) { (option, handler) in
+			if option.index<urlArr.count{
+				let url = urlArr[option.index].replacingOccurrences(of: "thumb300", with: "orj360")
 				self.downloadImage(url: url, finish: { (image) in
 					handler(image)
 				})
@@ -93,9 +93,9 @@ class ViewController: UIViewController {
 		layout.itemSize = CGSize(width: 200, height: 200)
 		view.addSubview(imageCollection)
 
-		imageCollection.thumbnailForIndex(count: 1) { (index, handler) in
+		imageCollection.thumbnailForIndex(count: 1) { (option, handler) in
 			handler(#imageLiteral(resourceName: "QRCode"))
-			return index == 0
+			return option.index == 0
 		}.largeForIndex { (option, handler) in
 				handler(#imageLiteral(resourceName: "QRCode"))
 			return nil

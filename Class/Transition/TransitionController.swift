@@ -6,7 +6,6 @@
 //  Copyright © 2018 mdk. All rights reserved.
 //
 
-import UIKit
 
 class TransitionController: UIPresentationController {
 	override func presentationTransitionWillBegin() {
