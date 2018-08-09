@@ -10,8 +10,7 @@
 
 @objc public class CloseOption :NSObject{
 	@objc public var lastIdentifier:String?
-	@objc public var section:Int = 0
-	@objc public var item:Int = 0
+	@objc public var index:Int = 0
 	@objc public var needQuality:LoadingPhotoQuality = .thumbnail
 	@objc public var displayCtr:UIViewController!
 }

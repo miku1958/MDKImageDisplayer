@@ -11,8 +11,7 @@
 
 struct photoNode {
 	var photoQuality:LoadingPhotoQuality = .thumbnail
-	var section:Int = 0
-	var item:Int = 0
+	var index:Int = 0
 	weak var photo:UIImage?
 	var identifier:String? {
 		didSet{

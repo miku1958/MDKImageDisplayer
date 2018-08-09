@@ -144,7 +144,7 @@ class MDKImageDisplayController: UIViewController {
 
 	fileprivate var photoList:lazyArray<photoNode> = lazyArray(0, {(index)->(photoNode) in
 		var photo = photoNode()
-		photo.item = index
+		photo.index = index
 		return photo
 	})
 	var preloadCloses:[Int:Bool] = [:]
@@ -367,7 +367,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			}else if displayIndex<0{
 				option.lastIdentifier = photoList[displayIndex+1].identifier
 			}
-			option.item = displayIndex
+			option.index = displayIndex
 			option.needQuality = .large
 			option.displayCtr = self
 			var hasLargePhoto = false
@@ -541,7 +541,7 @@ extension MDKImageDisplayController{
 			option.lastIdentifier = photoList[displayIndex+1].identifier
 		}
 
-		option.item = displayIndex
+		option.index = displayIndex
 		option.needQuality = .large
 		option.displayCtr = self
 		var cachePhotoNode:photoNode?
@@ -560,7 +560,7 @@ extension MDKImageDisplayController{
 				}
 				pNode.photoQuality = .large
 				pNode.photo = image
-				pNode.item = displayIndex
+				pNode.index = displayIndex
 				if isTryingNext , displayIndex == _self.photoList.count{
 					cachePhotoNode = pNode
 				}else if isTryingPrevious, displayIndex == (-_self.photoList.negativeCount) - 1{
@@ -1009,7 +1009,7 @@ extension MDKImageDisplayController{
 		}else if displayIndex<0{
 			option.lastIdentifier = photoList[displayIndex+1].identifier
 		}
-		option.item = displayIndex
+		option.index = displayIndex
 		option.needQuality = .large
 		option.displayCtr = self
 		let identifier = largeClose?(option){[weak self] photo in
@@ -1044,7 +1044,7 @@ extension MDKImageDisplayController{
 
 		if self.photoList[0].photo == nil {
 			let option = CloseOption()
-			option.item = 0
+			option.index = 0
 			option.needQuality = .thumbnail
 			let _ = largeClose?(option){ photo in
 				self.photoList[0].photo = photo
