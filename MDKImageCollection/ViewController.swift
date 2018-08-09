@@ -27,12 +27,12 @@ class ViewController: UIViewController {
 		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection)
 
-		imageCollection.thumbnailForIndex(count: 0) { (option, handler) in
-			handler(UIImage(named: "\(option.index%3)"))
-			return true
+		imageCollection.thumbnailForIndex(sectionCount: 1, numberInSection: { (section) -> (Int) in
+			return 10000
+		}){ (option, handler) in
+			handler(UIImage(named: "\(option.item%3)"))
 		}.largeForIndex { (option, handler) in
-				handler(UIImage(named: "\(option.index%3)"))
-			return (nil)
+			handler(UIImage(named: "\(option.item%3)"))
 		}
 		imageCollection.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height)
 	}
@@ -42,15 +42,17 @@ class ViewController: UIViewController {
 		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection)
 		
-		imageCollection.thumbnailForIndex(count: 20) { (option, handler) in
-			handler(UIImage(named: "\(option.index%3)"))
-			if option.index == 19{
-				self.imageCollection.updateCount(40)
+		imageCollection.thumbnailForIndex(sectionCount:1 , numberInSection: { section in
+			return 20
+		}){ (option, handler) in
+			handler(UIImage(named: "\(option.item%3)"))
+			if option.item == 19{
+				self.imageCollection.updateSectionCount(1, numberInSection: { (section) -> (Int) in
+					return 40
+				})
 			}
-			return true
 		}.largeForIndex { (option, handler) in
-				handler(UIImage(named: "\(option.index%3)"))
-				return (nil)
+				handler(UIImage(named: "\(option.item%3)"))
 		}
 		imageCollection.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height)
 	}
@@ -65,25 +67,19 @@ class ViewController: UIViewController {
 		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection)
 		imageCollection.registerFor3DTouchPreviewing(self)
-		imageCollection.thumbnailForIndex(count: 0) { (option, handler) in
-			if option.index<urlArr.count{
-				let url = urlArr[option.index].replacingOccurrences(of: "thumb300", with: "orj360")
-				self.downloadImage(url: url, finish: { (image) in
-					handler(image)
-				})
-				return true
-			}
-			
-			return false
-		}.largeForIndex { (option, handler) in
-			if option.index < urlArr.count{
-				let url = urlArr[option.index].replacingOccurrences(of: "thumb300", with: "large")
-				print(url)
-				self.downloadImage(url:url , finish: { (image) in
-					handler(image)
-				})
-			}
-			return nil
+		imageCollection.thumbnailForIndex(sectionCount: 1, numberInSection: { (section) -> (Int) in
+			return urlArr.count
+		}, close: { (option, handler) in
+			let url = urlArr[option.item].replacingOccurrences(of: "thumb300", with: "orj360")
+			self.downloadImage(url: url, finish: { (image) in
+				handler(image)
+			})
+		}).largeForIndex { (option, handler) in
+			let url = urlArr[option.item].replacingOccurrences(of: "thumb300", with: "large")
+			print(url)
+			self.downloadImage(url:url , finish: { (image) in
+				handler(image)
+			})
 		}
 		imageCollection.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height)
 	}
@@ -93,12 +89,12 @@ class ViewController: UIViewController {
 		layout.itemSize = CGSize(width: 200, height: 200)
 		view.addSubview(imageCollection)
 
-		imageCollection.thumbnailForIndex(count: 1) { (option, handler) in
+		imageCollection.thumbnailForIndex(sectionCount:1 , numberInSection: { section in
+			return 1
+		}) { (option, handler) in
 			handler(#imageLiteral(resourceName: "QRCode"))
-			return option.index == 0
 		}.largeForIndex { (option, handler) in
 				handler(#imageLiteral(resourceName: "QRCode"))
-			return nil
 		}
 		imageCollection.frame.size = #imageLiteral(resourceName: "QRCode").size
 		imageCollection.center = view.center

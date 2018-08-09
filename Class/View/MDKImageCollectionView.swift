@@ -65,42 +65,50 @@ open class MDKImageCollectionView: UICollectionView {
 
 
 	@objc public var hasThumbnailClose:Bool = false
-	private var thumbnailClose:IndexImageClose? {
+	private var thumbnailClose:OptionImgClose? {
 		didSet{
-
-			hasThumbnailClose = thumbnailClose != nil
-			guard let thumbnailClose = thumbnailClose else {return}
-			let option = CloseOption()
-			option.index = 0;
-			let hasImage = thumbnailClose(option){image in
-				DispatchQueue.main.async {
-					if self.photoList.count == 0 {
-						self.photoList.count = 1
-					}
-					if  self.autoSizeWhenOnePhot , !self.needAutoPreLoad , self.photoList.count == 1 {
-						if image != nil{
-							self.flowLayout.itemSize = image!.size
-						}
-						self.reloadData()
-						self.invalidateIntrinsicContentSize()
-					}
-					if let cell = self.cellForItem(at: IndexPath(item: 0, section: 0)) as? ThumbnailCell {
-						cell.imageView.image = image
-					}
-				}
-			}
-			if hasImage , photoList.count == 0  {
-				photoList.count = 1
-			}
-			reloadData()
-			invalidateIntrinsicContentSize()
+			updateThumbnailClose()
 		}
 	}
 
+	func updateThumbnailClose() -> () {
+		hasThumbnailClose = thumbnailClose != nil
+		let option = CloseOption()
+		option.item = 0;
+
+		let handler:imageClose = {image in
+			DispatchQueue.main.async {
+				if  self.autoSizeWhenOnePhot , self.photoList.count == 1 ,self.photoList[0].count == 1 {
+					if image != nil{
+						self.flowLayout.itemSize = image!.size
+					}
+					self.reloadData()
+					self.invalidateIntrinsicContentSize()
+				}
+				if let cell = self.cellForItem(at: IndexPath(item: 0, section: 0)) as? ThumbnailCell {
+					cell.imageView.image = image
+				}
+			}
+		}
+
+		if let thumbnailClose = thumbnailClose  {
+			thumbnailClose(option,handler)
+		}
+
+		reloadData()
+		invalidateIntrinsicContentSize()
+	}
+
+
 	@objc public var hasLargeClose:Bool = false
-	private var largeClose:IndexTagImageClose? {
+	private var largeClose:OptionImgClose? {
 		didSet{
-			hasLargeClose = largeClose != nil
+			hasLargeClose = largeClose != nil || hasLargeClose
+		}
+	}
+	private var largeIdentifierClose:OptionImgRtStringClose? {
+		didSet{
+			hasLargeClose = largeClose != nil || hasLargeClose
 		}
 	}
 	@objc public var displayingOption:DisplayingOption?{
@@ -119,7 +127,6 @@ open class MDKImageCollectionView: UICollectionView {
 		}
 	}
 
-	private var needAutoPreLoad:Bool = false
 	private var maxVisibleCount:Int = 0
 	
 	//FIXME:	废弃
@@ -138,10 +145,13 @@ open class MDKImageCollectionView: UICollectionView {
 
 	var preloadPhotos:[photoNode] = []
 
-	private var photoList:lazyArray<photoNode> = lazyArray(0, {(index)->(photoNode) in
-		var photo = photoNode()
-		photo.index = index
-		return photo
+	private var photoList:lazyArray<lazyArray<photoNode>> = lazyArray(0, {(index)->(lazyArray<photoNode>) in
+		var section = lazyArray(0, {(index)->(photoNode) in
+			var photo = photoNode()
+			photo.item = index
+			return photo
+		})
+		return section
 	})
 
 
@@ -234,27 +244,32 @@ extension MDKImageCollectionView{
 extension MDKImageCollectionView{
 	//MARK:	thumbnail
 	@objc @discardableResult open
-	func thumbnailForIndex(count:Int,close:@escaping IndexImageClose) ->  MDKImageCollectionView {
-		needAutoPreLoad = count == 0
-		if !needAutoPreLoad {
-			photoList.count = count
-		}else{
-			photoList.count = 0
+	func thumbnailForIndex(sectionCount:Int , numberInSection:IndexRtIntClose , close:@escaping OptionImgClose) ->  MDKImageCollectionView {
+
+		photoList.count = sectionCount;
+		for section in 0..<sectionCount{
+			photoList[section].count = numberInSection(sectionCount)
 		}
 		thumbnailClose = close
 		return self;
 	}
 
+
 	//MARK:	large
 	@objc @discardableResult open
-	func largeForIndex(close:@escaping IndexTagImageClose) ->  MDKImageCollectionView {
+	func largeForIndex(close:@escaping OptionImgClose) ->  MDKImageCollectionView {
 		largeClose = close
+		return self;
+	}
+	@objc @discardableResult open
+	func largeForIndexUseIndetifier(close:@escaping OptionImgRtStringClose) ->  MDKImageCollectionView {
+		largeIdentifierClose = close
 		return self;
 	}
 
 
 	//MARK:	columnCount
-	@objc open var columnCount_:intReturnSelfClose{
+	@objc open var columnCount_:intRtSelfClose{
 		return {
 			
 			self._columnCount = $0
@@ -269,54 +284,70 @@ extension MDKImageCollectionView{
 	}
 
 
-	//MARK:	updateCount
-	@objc open var updateCount_:intReturnSelfClose{
-		return {
-			self.updateCollectionCount($0)
-			return self;
-		}
-	}
-
+	//MARK:	updateSectionCount
 	@discardableResult
-	func updateCount(_ count:Int) ->  MDKImageCollectionView {
-		self.updateCollectionCount(count)
+	func updateSectionCount(_ sectionCount:Int , numberInSection:IndexRtIntClose) ->  MDKImageCollectionView {
+		self.updateCollectionSectionCount(sectionCount,numberInSection: numberInSection)
 		return self;
 	}
 
-	private func updateCollectionCount(_ count:Int) -> () {
-		guard photoList.count != count else { return }
-		if count == 0 {
+	private func updateCollectionSectionCount(_ sectionCount:Int , numberInSection:IndexRtIntClose) -> () {
+		var needUpdate = photoList.count != sectionCount
+		photoList.count = sectionCount
+
+		if sectionCount == 0 {
 			for cell in visibleCells as! [ThumbnailCell]{
 				Transition.antiRegistr(view: cell.imageView)
 			}
-			photoList.count = 0;
-			photoList.removeAll()
 			reloadData()
 		}else{
-			var indexPs:[IndexPath] = []
-			if count>photoList.count {
-				for idx in photoList.count..<count {
-					indexPs.append(IndexPath(item: idx, section: 0))
-				}
-				photoList.count = count
-				insertItems(at: indexPs)
-			}else{
-				for idx in count..<photoList.count {
-					indexPs.append(IndexPath(item: idx, section: 0))
-				}
-				photoList.count = count
+			var insertIndexPs:[IndexPath] = []
+			var deleteIndexPs:[IndexPath] = []
 
-				deleteItems(at: indexPs)
+			for section in 0..<sectionCount{
+				let item = numberInSection(section)
+				if item>photoList[section].count {
+					for idx in photoList[section].count..<item {
+						insertIndexPs.append(IndexPath(item: idx, section: 0))
+					}
+					photoList[section].count = item
+				}else{
+					for idx in item..<photoList[section].count {
+						deleteIndexPs.append(IndexPath(item: idx, section: 0))
+					}
+					photoList[section].count = item
+
+				}
+			}
+
+			if insertIndexPs.count>0{
+				UIView.performWithoutAnimation {
+					CATransaction.begin()
+					CATransaction.setDisableActions(true)
+					insertItems(at: insertIndexPs)
+					layoutIfNeeded()
+					CATransaction.commit()
+				}
+				needUpdate = true
+			}
+			if insertIndexPs.count>0{
+				needUpdate = true
+				deleteItems(at: deleteIndexPs)
 			}
 		}
-		invalidateIntrinsicContentSize()
+		if needUpdate {
+			invalidateIntrinsicContentSize()
+		}
 	}
 }
 
 //MARK:	UICollectionViewDelegate,UICollectionViewDataSource
 extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewDataSource {
+	open override var numberOfSections: Int{
+		return photoList.count;
+	}
 	public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-		return photoList.count
+		return photoList[section].count
 	}
 
 	public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
@@ -325,7 +356,7 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 	}
 	public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath){
 		let item = indexPath.item
-		guard let cell = cell as? ThumbnailCell , let thumbnailClose = self.thumbnailClose else {return}
+		guard let cell = cell as? ThumbnailCell else  {return}
 		if let customTransitionID = customTransitionID {
 			Transition.register(view:cell.imageView, for: customTransitionID)
 		}else{
@@ -335,117 +366,19 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 
 		cell.imageView.image = nil
 		let option = CloseOption()
-		option.index = item;
-		let _ = thumbnailClose(option){[weak self] image in
+		option.item = item;
+		let handler:imageClose = {[weak self] image in
 			DispatchQueue.main.async {
-				
+
 				if let cacheCell = self?.cellForItem(at: IndexPath(item: item, section: 0)) as? ThumbnailCell{
 					cacheCell.imageView.image = image
 				}
 			}
 		}
-
-		guard needAutoPreLoad else {return}
-
-		if maxVisibleCount == 0 {
-			layoutSubviews()
-			maxVisibleCount = Int(CGFloat(currentColumnCount) * (frame.size.height / flowLayout.itemSize.height))
+		if let thumbnailClose = self.thumbnailClose{
+			thumbnailClose(option,handler)
 		}
-		if maxVisibleCount>2 ,maxVisibleCount%2 != 0 {
-			maxVisibleCount -= 1
-		}
-		Transition.syncQueue.async {
-			var beginIndex = 0
-			var endIndex = 0
-			let pageCount = self.maxVisibleCount//如果比这个值高的话,有可能在滚太快的时候导致这个index的cell没有显示就跳过了
-			let preloadCount = pageCount
-			if indexPath.item == 0{
-				//加载第一页self.maxVisibleCount个
-				beginIndex = 1
-				endIndex = beginIndex + self.maxVisibleCount/*第一页*/ + preloadCount
-			}else if indexPath.item % pageCount == 0{
-				//间隔self.maxVisibleCount/2个,加载
-				beginIndex = (indexPath.item/pageCount) * (pageCount) + 1 + self.maxVisibleCount
-				endIndex = beginIndex + preloadCount
-			}else{
-				return
-			}
-			if self.photoList.count >= endIndex{
-				return
-			}
 
-			if self.photoList.count > 0 ,beginIndex < self.photoList[0].index{
-				return
-			}
-
-			for nextIndex in beginIndex..<endIndex{
-
-				var photo = photoNode()
-				photo.index = nextIndex
-				
-				Transition.synchronized({
-					self.preloadPhotos.append(photo)
-				})
-				let option = CloseOption()
-				option.index = nextIndex;
-				let hasImage = thumbnailClose(option){[weak self] image in
-
-					if image != nil {
-						DispatchQueue.main.sync {
-
-							Transition.synchronized({
-								guard self != nil else { return }
-								if let firstPhoto = self!.preloadPhotos.first ,
-									nextIndex >= firstPhoto.index ,
-									nextIndex - firstPhoto.index < self!.preloadPhotos.count{
-
-								}else if nextIndex<self!.photoList.count{
-									if let cell = collectionView.cellForItem(at: IndexPath(item: nextIndex, section: 0)) as? ThumbnailCell {
-										cell.imageView.image = image
-									}
-								}
-							})
-
-						}
-					}
-				}
-				if(!hasImage){
-					Transition.synchronized({
-						self.preloadPhotos.removeLast()
-					})
-
-					self.currentCount = nextIndex-1
-					break
-				}
-
-
-			}
-			DispatchQueue.main.sync {
-				Transition.synchronized({
-
-					if self.preloadPhotos.count > 0{
-						var insertedIndexPaths:[IndexPath] = []
-						self.photoList.count += self.preloadPhotos.count
-						for photo in self.preloadPhotos{
-							self.photoList[photo.index] = photo
-							insertedIndexPaths.append(IndexPath(item: photo.index, section: 0))
-						}
-						UIView.performWithoutAnimation {
-							CATransaction.begin()
-							CATransaction.setDisableActions(true)
-
-							self.insertItems(at: insertedIndexPaths)
-
-							CATransaction.commit()
-						}
-		
-						self.preloadPhotos.removeAll()
-					MDKImageDisplayController.current()?.updatePhotoCount(self.photoList.count)
-					}
-
-				})
-			}
-		}
 	}
 
 	public func collectwillDisplayCellionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
@@ -464,17 +397,39 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 	}
 	
 	func getDisplayCtr(displayIndex:Int) -> (MDKImageDisplayController) {
-		let display = MDKImageDisplayController( photoCount: photoList.count){ [weak self] option,handler in
-			guard self != nil else{return nil}
+		var photoCount = 0
+		for section in 0..<photoList.count {
+			photoCount += photoList[section].count
+		}
+		let display = MDKImageDisplayController( photoCount: photoCount){ [weak self] option,handler in
+			guard let _self = self else{return nil}
+
+			var photoCount = 0
+			for section in 0..<_self.photoList.count {
+				photoCount += _self.photoList[section].count
+				if photoCount>option.item{
+					option.section = section
+					option.item = option.item - (photoCount - _self.photoList[section].count)
+					break;
+				}
+			}
+
 			switch option.needQuality {
 			case .thumbnail:
-				let _ = self!.thumbnailClose?(option){ photo  in
+				_self.thumbnailClose?(option){ photo  in
 					handler(photo)
 				}
 			case .large , .original:
-				return self!.largeClose?(option){ photo  in
-					handler(photo)
+				if _self.largeClose != nil{
+					_self.largeClose?(option){ photo  in
+						handler(photo)
+					}
+				}else{
+					return _self.largeIdentifierClose?(option){ photo  in
+						handler(photo)
+					}
 				}
+
 			}
 			return nil
 		}

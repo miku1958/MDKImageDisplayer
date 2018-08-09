@@ -9,7 +9,17 @@
 
 struct lazyArray<Element> {
 	typealias handleClose = (Int)->(Element)
-	var count:Int = 0
+
+	var array:[Int:Element] = [:]
+
+	var count:Int = 0 {
+		didSet{
+			if count == 0 {
+				array.removeAll()
+			}
+		}
+	}
+
 	var negativeCount:Int = 0
 	func checkIndex(_ index:Int) -> Bool {
 		if index >= count {
@@ -22,7 +32,6 @@ struct lazyArray<Element> {
 	}
 
 	let handle:handleClose!
-	var array:[Int:Element] = [:]
 	init(_ count:Int , _ handle:@escaping handleClose) {
 		self.count = count
 		self.handle = handle
@@ -33,9 +42,7 @@ struct lazyArray<Element> {
 	var last:Element?{
 		return array[count-1]
 	}
-	mutating func removeAll() -> () {
-		array.removeAll()
-	}
+
 	subscript(pos:Int) -> Element {
 		mutating get {
 			if let element = self.array[pos] {
@@ -50,9 +57,6 @@ struct lazyArray<Element> {
 			}
 		}
 		set {
-			if (newValue as! photoNode).identifier == nil {
-
-			}
 			array[pos] = newValue
 		}
 	}

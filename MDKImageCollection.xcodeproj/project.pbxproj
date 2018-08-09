@@ -20,6 +20,7 @@
 		FF769AA420F309CB00DB6DA1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA220F309CB00DB6DA1 /* LaunchScreen.storyboard */; };
 		FF769AAD20F31C3F00DB6DA1 /* MDKImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */; };
 		FF79EE8720FD9F93006D318F /* toolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF79EE8620FD9F93006D318F /* toolbarView.swift */; };
+		FF93AE26211C284E0022CB34 /* MDKImageCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = FF93AE25211C284E0022CB34 /* MDKImageCollectionView.m */; };
 		FF9EE1E7211B17DE00A5F533 /* ConstData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E6211B17DE00A5F533 /* ConstData.swift */; };
 		FF9EE1E9211B1B5900A5F533 /* CloseOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */; };
 		FF9EE1EC211B1BC700A5F533 /* DisplayingOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */; };
@@ -64,6 +65,7 @@
 		FF769AA520F309CB00DB6DA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageCollectionView.swift; sourceTree = "<group>"; };
 		FF79EE8620FD9F93006D318F /* toolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = toolbarView.swift; sourceTree = "<group>"; };
+		FF93AE25211C284E0022CB34 /* MDKImageCollectionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MDKImageCollectionView.m; sourceTree = "<group>"; };
 		FF9EE1E6211B17DE00A5F533 /* ConstData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstData.swift; sourceTree = "<group>"; };
 		FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseOption.swift; sourceTree = "<group>"; };
 		FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayingOption.swift; sourceTree = "<group>"; };
@@ -153,6 +155,7 @@
 		FF769AAB20F309D400DB6DA1 /* Class */ = {
 			isa = PBXGroup;
 			children = (
+				FF93AE24211C282B0022CB34 /* objc */,
 				FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */,
 				FF79EE8520FD9F47006D318F /* View */,
 				FF9EE1EA211B1B6A00A5F533 /* misc */,
@@ -164,12 +167,20 @@
 		FF79EE8520FD9F47006D318F /* View */ = {
 			isa = PBXGroup;
 			children = (
-				FFC162CC2119E14E00F26723 /* MDKImageCollectionView.h */,
 				FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */,
 				FF79EE8620FD9F93006D318F /* toolbarView.swift */,
 				FF72BC0320F361BA000CAFBA /* Cell */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		FF93AE24211C282B0022CB34 /* objc */ = {
+			isa = PBXGroup;
+			children = (
+				FFC162CC2119E14E00F26723 /* MDKImageCollectionView.h */,
+				FF93AE25211C284E0022CB34 /* MDKImageCollectionView.m */,
+			);
+			path = objc;
 			sourceTree = "<group>";
 		};
 		FF9EE1EA211B1B6A00A5F533 /* misc */ = {
@@ -317,6 +328,7 @@
 				FFDA853720F98EE40073AAA2 /* MDKImageDisplayController.swift in Sources */,
 				FF9EE1E9211B1B5900A5F533 /* CloseOption.swift in Sources */,
 				FF6E9CF8210FF4C100CC7F3F /* lazyArray.swift in Sources */,
+				FF93AE26211C284E0022CB34 /* MDKImageCollectionView.m in Sources */,
 				FF50B6D72102C5EF00911035 /* DoubleTapThanPanGesture.swift in Sources */,
 				FF9EE1EE211B242B00A5F533 /* UIView+containSubView.swift in Sources */,
 				FF769AAD20F31C3F00DB6DA1 /* MDKImageCollectionView.swift in Sources */,
@@ -485,6 +497,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = mdk.MDKImageCollection;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "MDKImageCollection/MDKImageCollection-Bridging-Header.h";
+				SWIFT_OBJC_INTERFACE_HEADER_NAME = "$(SWIFT_MODULE_NAME)-Swift.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 4.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

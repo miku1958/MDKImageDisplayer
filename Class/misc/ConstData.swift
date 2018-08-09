@@ -35,12 +35,14 @@ public typealias SavePhotoClose = (SavePhotoResult)->()
 public typealias QRCodeHandlerClose = ([String:CGRect],CGPoint?)->()
 
 typealias IndexClose = (Int) -> ()
-public typealias intReturnSelfClose = (Int) -> (MDKImageCollectionView)
+public typealias intRtSelfClose = (Int) -> (MDKImageCollectionView)
+
+public typealias IndexRtIntClose = (Int) -> (Int)
 
 public typealias imageClose = (UIImage?)->()
 
-public typealias IndexTagImageClose =  (CloseOption,@escaping imageClose)->(String?)
-public typealias IndexTagImageReturnSelfClose =  (@escaping IndexTagImageClose)->MDKImageCollectionView
+public typealias OptionImgClose =  (CloseOption,@escaping imageClose)->()
+public typealias OptionImgRtStringClose =  (CloseOption,@escaping imageClose)->(String?)
 
-public typealias IndexImageClose =  (CloseOption,@escaping imageClose)->(Bool)
-public typealias IndexImageReturnSelfClose =  (Int,@escaping IndexImageClose)->MDKImageCollectionView
+public typealias OptionImgRtBoolClose =  (CloseOption,@escaping imageClose)->(Bool)
+

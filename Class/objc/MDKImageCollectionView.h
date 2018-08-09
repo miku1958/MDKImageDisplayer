@@ -5,8 +5,8 @@
 //  Created by mikun on 2018/8/5.
 //  Copyright © 2018年 mdk. All rights reserved.
 //
+#import "MDKImageCollection-Swift.h"
 
-@import MDKImageCollection.main;
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wnullability-completeness"
