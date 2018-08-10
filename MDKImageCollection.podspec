@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   #
 
   s.name         = "MDKImageCollection"
-  s.version      = "1.0.3"
+  s.version      = "1.0.4"
   s.summary      = "a image collection"
 
   # This description is used to generate tags and improve search results.
@@ -84,18 +84,17 @@ Pod::Spec.new do |s|
 
 
 
-  s.source_files  = "Class/**/*.{swift}"
+  s.source_files  = "Class/**/*.{swift}"#,"Class/objc/*.h"
 
 
 
 
 
   s.requires_arc = true
-  s.static_framework = true
+  s.static_framework = false
   s.prefix_header_file = false
 
   s.dependency "MDKTools/swift"
-
 
   s.swift_version = '4.0'
 
