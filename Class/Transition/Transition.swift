@@ -280,8 +280,8 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		keyWinFrame.origin.y += sourceScreenInset.top
 		keyWinFrame.size.width -= sourceScreenInset.left+sourceScreenInset.right
 		keyWinFrame.size.height -= sourceScreenInset.top+sourceScreenInset.bottom
-		assert(keyWinFrame.size.width < 0, "sourceScreenInset.left or sourceScreenInset.right is wrong")
-		assert(keyWinFrame.size.height < 0, "sourceScreenInset.top or sourceScreenInset.bottom is wrong")
+		assert(keyWinFrame.size.width > 0, "sourceScreenInset.left or sourceScreenInset.right is wrong")
+		assert(keyWinFrame.size.height > 0, "sourceScreenInset.top or sourceScreenInset.bottom is wrong")
 		for (transitionID,views) in Transition.viewMap {
 
 			let enumerator = views.objectEnumerator()
