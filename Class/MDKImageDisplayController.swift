@@ -129,7 +129,10 @@ class MDKImageDisplayController: UIViewController {
 
 		loadPhoto(displayIndex)
 		collectionView.layoutIfNeeded()
-		beginTransitionID = "MDK\(sourceTransitionIDPrefix)\(displayIndex)"
+		if sourceTransitionIDPrefix != nil {
+			beginTransitionID = "MDK\(sourceTransitionIDPrefix!)\(displayIndex)"
+		}
+
 	}
 	var displayIndex:Int{
 		guard
@@ -158,6 +161,9 @@ class MDKImageDisplayController: UIViewController {
 
 	var isPreloadingPrevious:Bool = false
 	var isFinishingPreloadPrevious:Bool = false
+
+
+	public var isFrom3DTouch:Bool = false
 
 	//MARK:	手势相关
 	let dismissPan:UIPanGestureRecognizer = UIPanGestureRecognizer()
@@ -203,7 +209,7 @@ class MDKImageDisplayController: UIViewController {
 	var beginTransitionID:String = ""
 	
 	///transition ID前缀
-	public var sourceTransitionIDPrefix:String = ""
+	public var sourceTransitionIDPrefix:String?
 	
 //MARK:	供外部使用的属性
 	@objc public  var displayIndexWillChange:IndexClose?
@@ -351,15 +357,23 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			cell.imageView.layer.mask = nil
 			cell.isScrolling = false
 
-			var sourceID = "MDK\(sourceTransitionIDPrefix)\(displayIndex)"
-			if beginTransitionID.count > 0, photoList[item - photoList.negativeCount].isDequeueFromIdentifier {
-				sourceID = beginTransitionID
-			}
-			Transition.register(view: cell.imageView, for: sourceID)
-			
+
 			if let identifier = photoList[item - photoList.negativeCount].identifier{
 				Transition.register(view: cell.imageView, for: identifier)
+			}else{
+				var sourceID = ""
+
+				if beginTransitionID.count > 0, photoList[item - photoList.negativeCount].isDequeueFromIdentifier {
+					sourceID = beginTransitionID
+				}else if sourceTransitionIDPrefix != nil{
+					sourceID = "MDK\(sourceTransitionIDPrefix)\(displayIndex)"
+				}
+				if sourceID.count > 0{
+					Transition.register(view: cell.imageView, for: sourceID)
+				}
 			}
+
+
 
 			let option = CloseOption()
 			if displayIndex>0 {

@@ -32,7 +32,7 @@ class Transition: NSObject{
 	weak var sourceCtr:UIViewController?
 	weak var animatingCtr:MDKImageDisplayController?
 
-	
+	var sourceScreenInset:UIEdgeInsets = UIEdgeInsets()
 	
 	static let syncQueue = DispatchQueue(label: "MDKImageFlushQueue",attributes: [])
 
@@ -108,8 +108,11 @@ extension Transition{
 		
 		
 		animatingCtr = viewController
-		transitingView?.layer.beginTime = CACurrentMediaTime()
+
 		didViewAnimation(to: nil, from: viewController.view)
+//		if (animatingCtr?.isFrom3DTouch ?? false) , let layer = transitingView?.layer {//3d touch打开后dismiss的动画无效
+//			layer.beginTime = CACurrentMediaTime()
+//		}
 		transitingView?.layer.masksToBounds = false
 	}
 
@@ -270,16 +273,30 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		}
 
 		var allTargetViews:[UIView] = []
+		var beginTransitionViews:[UIView] = []
 		var hasViewPair:Bool = false
-		for (_,views) in Transition.viewMap {
+		var keyWinFrame = MDKKeywindow.frame
+		keyWinFrame.origin.x += sourceScreenInset.left
+		keyWinFrame.origin.y += sourceScreenInset.top
+		keyWinFrame.size.width -= sourceScreenInset.left+sourceScreenInset.right
+		keyWinFrame.size.height -= sourceScreenInset.top+sourceScreenInset.bottom
+		assert(keyWinFrame.size.width < 0, "sourceScreenInset.left or sourceScreenInset.right is wrong")
+		assert(keyWinFrame.size.height < 0, "sourceScreenInset.top or sourceScreenInset.bottom is wrong")
+		for (transitionID,views) in Transition.viewMap {
+
 			let enumerator = views.objectEnumerator()
 			var targetViews:[UIView] = []
 			var sourceViews:Set<UIView> = Set()
 			while let view = enumerator.nextObject() as? UIView {
-				
-				if let frame = view.superview?.convert(view.frame, to: MDKKeywindow),MDKKeywindow.frame.intersects(frame){
+				if let beginTransID = animatingCtr?.beginTransitionID ,beginTransID == transitionID{
+					beginTransitionViews.append(view)
+				}
+				if let frame = view.superview?.convert(view.frame, to: MDKKeywindow) , keyWinFrame.intersects(frame){
 					if containVIew.contain(subview: view) {
 						targetViews.append(view)
+						if let index = beginTransitionViews.index(of: view){
+							beginTransitionViews.remove(at: index)
+						}
 					}else{
 						sourceViews.update(with: view)
 					}
@@ -295,58 +312,63 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 					let sourceSuperView = sourceView.superview{
 
 					hasViewPair = true
-					let sourceFrameOri = sourceView.frame
-					var sourceFrameMask = sourceFrameOri
-					if var sourceCtr = sourceCtr{
-						if sourceCtr.isKind(of: UITabBarController.self) , let selected = (sourceCtr as! UITabBarController).selectedViewController{
-							sourceCtr = selected
-						}
-						var navCtr:UINavigationController?
-						if sourceCtr.isKind(of: UINavigationController.self){
-							navCtr = sourceCtr as? UINavigationController
-						}else{
-							navCtr = sourceCtr.navigationController
-						}
-						if let hidden = navCtr?.isNavigationBarHidden,!hidden,let navBar = navCtr?.navigationBar{
-							let sourceFrameToKeyWindow = sourceSuperView.convert(sourceFrameOri, to: MDKKeywindow)
-							if sourceFrameToKeyWindow.origin.y < navBar.frame.maxY{
-								let insert = navBar.frame.maxY-sourceFrameToKeyWindow.origin.y
-								sourceFrameMask.size.height -= insert
-								sourceFrameMask.origin.y += insert
-							}
-
-						}
-					}
-					animatingCtr?.view.layoutIfNeeded()
-					let sourceFrameToTarget = sourceSuperView.convert(sourceFrameOri, to: view.superview)
-					let maskFrameToTarget = sourceSuperView.convert(sourceFrameMask, to: view.superview)
-
-					
-					updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
-					animatingCtr?.view.isUserInteractionEnabled = false
+					pairAnimationViews(targetView: view, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
+					targetViews.removeFirst()
 				}else{
 					allTargetViews.append(contentsOf: targetViews)
+					break
 				}
 			}
 		}
 		if !hasViewPair {
-			if isPresent {
-				for view in allTargetViews{
-					view.alpha = 0
+			for view in allTargetViews{
+				if let sourceView = beginTransitionViews.first ,
+					let sourceSuperView = sourceView.superview{
+
+					hasViewPair = true
+					pairAnimationViews(targetView: view, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
+					allTargetViews.removeFirst()
+				}else{
+					self.forceTransitionContextCompleteTransition()
+					self.animatingCtr?.view.isUserInteractionEnabled = true
+					if !isPresent{
+						self.animatingCtr?.dismiss(animated: false, completion: nil)
+					}
 				}
-			}
-			
-			animatingCtr?.view.isUserInteractionEnabled = false
-			UIView.animate(withDuration: Transition.duration, animations: {
-				for view in allTargetViews{
-					view.alpha = isPresent ? 1 : 0
-				}
-			}) { (finish) in
-				self.forceTransitionContextCompleteTransition()
-				
-				self.animatingCtr?.view.isUserInteractionEnabled = true
 			}
 		}
+	}
+
+	func pairAnimationViews(targetView view:UIView , sourceView:UIView , sourceSuperView:UIView , isPresent:Bool) -> () {
+		let sourceFrameOri = sourceView.frame
+		var sourceFrameMask = sourceFrameOri
+		if var sourceCtr = sourceCtr{
+			if sourceCtr.isKind(of: UITabBarController.self) , let selected = (sourceCtr as! UITabBarController).selectedViewController{
+				sourceCtr = selected
+			}
+			var navCtr:UINavigationController?
+			if sourceCtr.isKind(of: UINavigationController.self){
+				navCtr = sourceCtr as? UINavigationController
+			}else{
+				navCtr = sourceCtr.navigationController
+			}
+			if let hidden = navCtr?.isNavigationBarHidden,!hidden,let navBar = navCtr?.navigationBar{
+				let sourceFrameToKeyWindow = sourceSuperView.convert(sourceFrameOri, to: MDKKeywindow)
+				if sourceFrameToKeyWindow.origin.y < navBar.frame.maxY{
+					let insert = navBar.frame.maxY-sourceFrameToKeyWindow.origin.y
+					sourceFrameMask.size.height -= insert
+					sourceFrameMask.origin.y += insert
+				}
+
+			}
+		}
+		animatingCtr?.view.layoutIfNeeded()
+		let sourceFrameToTarget = sourceSuperView.convert(sourceFrameOri, to: view.superview)
+		let maskFrameToTarget = sourceSuperView.convert(sourceFrameMask, to: view.superview)
+
+
+		updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
+		animatingCtr?.view.isUserInteractionEnabled = false
 	}
 
 
@@ -424,6 +446,9 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		let group = CAAnimationGroup()
 		group.animations = [boundsAnim,positionAnim,cornerRadiusAnim]
 
+		for anim in group.animations!{
+			print(anim.debugDescription)
+		}
 		group.duration = Transition.duration
 		group.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
 
@@ -435,9 +460,14 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		group.delegate = delegate
 
 
-//		view.layer.beginTime = CACurrentMediaTime()//打开会导致3d touch打开后dismiss的动画无效
+
+		if !isPresent ,let superlayer = view.layer.superlayer{//3d touch打开后dismiss的动画无效
+			view.layer.beginTime = superlayer.convertTime(CACurrentMediaTime(), from: nil)
+			group.beginTime = view.layer.convertTime(CACurrentMediaTime(), from: nil)
+		}
 		view.layer.timeOffset = 0
 		view.layer.speed = 1
+
 		view.layer.add(group, forKey: "animateTransition")
 		transitingView = view
 

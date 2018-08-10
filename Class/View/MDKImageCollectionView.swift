@@ -56,9 +56,8 @@ open class MDKImageCollectionView: UICollectionView {
 
 	
 	
-	
 
-	@objc public var ImageTransitionCornerRadius:CGFloat = 0
+	@objc public var imageTransitionCornerRadius:CGFloat = 0
 
 	@objc public var customTransitionID:String?
 
@@ -128,6 +127,7 @@ open class MDKImageCollectionView: UICollectionView {
 		return MDKImageDisplayController.current()?.displayingOption
 	}
 
+	@objc public var sourceScreenInset:UIEdgeInsets = UIEdgeInsets()
 
 
 	//FIXME:	废弃
@@ -528,18 +528,25 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 			}
 			return nil
 		}
-		display.transition.ImageCornerRadius = ImageTransitionCornerRadius
-		display.sourceTransitionIDPrefix = "\(Unmanaged.passUnretained(self).toOpaque())"
+		display.transition.ImageCornerRadius = imageTransitionCornerRadius
+		display.transition.sourceScreenInset = sourceScreenInset
+		if let customTransitionID = customTransitionID {
+			display.beginTransitionID = customTransitionID
+		}else{
+			display.sourceTransitionIDPrefix = "\(Unmanaged.passUnretained(self).toOpaque())"
+		}
+
 		display.setDisplayIndex(displayIndex)
 		
 		display.displayIndexWillChange = { [weak self]   index in
+			guard index>=0 , index<self?.photoList.count ?? 0  else { return }
 			let indexPath = IndexPath(item: index, section: 0)
 			if let cell = self?.cellForItem(at: indexPath) , let contain = self?.visibleCells.contains(cell) , contain == true {
 				return
 			}
 			self?.scrollToItem(at: indexPath, at: [], animated: true)
 		}
-		
+
 		return display
 	}
 }
@@ -561,7 +568,7 @@ extension MDKImageCollectionView: UIViewControllerPreviewingDelegate{
 		
 		
 		let display = getDisplayCtr(displayIndex: indexPath.item)
-
+		display.isFrom3DTouch = true
 
 		//设置显示高度
 		display.preferredContentSize = CGSize(width: MDKScreenWidth, height: min(MDKScreenHeight, MDKScreenWidth/image.size.width * image.size.height))
