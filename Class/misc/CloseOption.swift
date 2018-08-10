@@ -12,5 +12,5 @@
 	@objc public var lastIdentifier:String?
 	@objc public var index:Int = 0
 	@objc public var needQuality:LoadingPhotoQuality = .thumbnail
-	@objc public var displayCtr:UIViewController!
+	@objc public var displayCtr:UIViewController?
 }

@@ -13,9 +13,9 @@ class ViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 //		InfiniteTest()
-		gakkiTest()
+//		gakkiTest()
 //		UpdateTest()
-//		QRCodeTest()
+		QRCodeTest()
 	}
 	override func viewDidLayoutSubviews() {
 		imageCollection.frame = view.bounds

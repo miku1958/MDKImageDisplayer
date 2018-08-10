@@ -745,9 +745,9 @@ extension MDKImageDisplayController{
 		DispatchQueue.global().async {
 			self.photoList[indexPath.item - self.photoList.negativeCount].checkHasQRCode {
 				DispatchQueue.main.async { [weak self] in
-					guard  let _self = self else {return}
-					if (_self.photoList[indexPath.item - _self.photoList.negativeCount].QRCode?.count ?? 0) > 0 {
+					if let _self = self , (_self.photoList[indexPath.item - _self.photoList.negativeCount].QRCode?.count ?? 0) > 0 {
 						_self.toolbar.insertAction(title: "识别图中的二维码", action: {
+							guard  let _self = self else {return}
 							var convertPoint = touchPoint
 							if convertPoint != nil{
 								convertPoint = cell.imageView.convert(touchPoint!, from: cell)
