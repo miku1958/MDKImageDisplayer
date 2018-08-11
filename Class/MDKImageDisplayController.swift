@@ -366,7 +366,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 				if beginTransitionID.count > 0, photoList[item - photoList.negativeCount].isDequeueFromIdentifier {
 					sourceID = beginTransitionID
 				}else if sourceTransitionIDPrefix != nil{
-					sourceID = "MDK\(sourceTransitionIDPrefix)\(displayIndex)"
+					sourceID = "MDK\(sourceTransitionIDPrefix!)\(displayIndex)"
 				}
 				if sourceID.count > 0{
 					Transition.register(view: cell.imageView, for: sourceID)
