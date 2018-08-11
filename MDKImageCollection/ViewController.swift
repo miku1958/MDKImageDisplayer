@@ -13,13 +13,11 @@ class ViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 //		InfiniteTest()
-//		gakkiTest()
+		gakkiTest()
 //		UpdateTest()
-		QRCodeTest()
+//		QRCodeTest()
 	}
-	override func viewDidLayoutSubviews() {
-		imageCollection.frame = view.bounds
-	}
+
 	var imageCollection:MDKImageCollectionView!
 	func InfiniteTest() -> () {
 		let flow = UICollectionViewFlowLayout()
@@ -79,7 +77,7 @@ class ViewController: UIViewController {
 	func QRCodeTest() -> () {
 		imageCollection = MDKImageCollectionView()
 		let layout = imageCollection.collectionViewLayout as! UICollectionViewFlowLayout
-		layout.itemSize = CGSize(width: 200, height: 200)
+		layout.itemSize = #imageLiteral(resourceName: "QRCode").size
 		view.addSubview(imageCollection)
 
 		imageCollection.thumbnailForIndex(count: 1, close: { (_, handler) in
@@ -88,7 +86,7 @@ class ViewController: UIViewController {
 				handler(#imageLiteral(resourceName: "QRCode"))
 		}
 		imageCollection.frame.size = #imageLiteral(resourceName: "QRCode").size
-		imageCollection.center = view.center
+		imageCollection.center.x = view.center.x
 	}
 
 	var cache:NSCache<NSString,UIImage> = NSCache()

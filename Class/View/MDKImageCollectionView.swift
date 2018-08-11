@@ -10,9 +10,8 @@
 
 
 
-//FIXME:	thumbnailClose改成两组一组传入数组数量后不需要返回BOOL/另一组去掉传入数组数量
-//FIXME:	larget同理
 //FIXME:	去掉flowlayout.改成通用型.完全交给开发者决定布局.默认初始化保留flowlayout
+//FIXME:	handler改成传出去一个UIImageVIew,可以通过注册类型来改显示的UIIMageView以支持gif/视频
 
 
 open class MDKImageCollectionView: UICollectionView {
@@ -166,7 +165,7 @@ open class MDKImageCollectionView: UICollectionView {
 	})
 
 
-	//FIXME:	废弃
+	//FIXME:	废弃?
 	@objc public var flowLayout: UICollectionViewFlowLayout{
 		return collectionViewLayout as! UICollectionViewFlowLayout
 	}

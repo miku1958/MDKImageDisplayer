@@ -8,7 +8,7 @@
 
 import UIKit
 
-
+//TODO:	做读取时占位提示圈
 
 
 class MDKImageDisplayController: UIViewController {
@@ -826,7 +826,7 @@ extension MDKImageDisplayController{
 		case .changed:
 			Transition.global().process = progress
 			if #available(iOS 10.0, *) {
-				animator()?.fractionComplete = min(1, progress*2)
+				animator()?.fractionComplete = min(1, progress*1.5)
 			}
 			Transition.global().controlTransitionView(position: translation)
 		default:
@@ -836,14 +836,18 @@ extension MDKImageDisplayController{
 				Transition.global().commitDismiss()
 				didDismiss?(displayIndex)
 				if #available(iOS 10.0, *) {
-					animator()?.startAnimation()
+					if let animator = animator(){
+						animator.continueAnimation(withTimingParameters: UICubicTimingParameters(animationCurve: .easeIn), durationFactor: 1/(1-animator.fractionComplete))
+					}
 				}
 			} else {
 				Transition.global().cancelDismiss()
 				didDismiss?(displayIndex)
 				if #available(iOS 10.0, *) {
 					animator()?.isReversed = true
-					animator()?.startAnimation()
+					if let animator = animator(){
+						animator.continueAnimation(withTimingParameters: UICubicTimingParameters(animationCurve: .easeIn), durationFactor: 1/animator.fractionComplete)
+					}
 				}
 			}
 		}

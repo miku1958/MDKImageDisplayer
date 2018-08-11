@@ -21,8 +21,8 @@ class Transition: NSObject{
 	}
 	
 
-	var  isPresented:Bool = true
-	static let duration:TimeInterval = 0.35
+	var  isPresenting:Bool? = true
+	static let duration:TimeInterval = 0.25
 	var ImageCornerRadius:CGFloat = 0
 	
 	weak var transitingView:UIView?
@@ -46,16 +46,18 @@ class Transition: NSObject{
 
 	weak var _transitionContext:UIViewControllerContextTransitioning?
 	func forceTransitionContextCompleteTransition() -> () {
-
-		
 		_transitionContext?.completeTransition(true)
 		transitingView?.layer.mask = nil
 		animatingCtr?.view.isUserInteractionEnabled = true
+		isPresenting = nil
 	}
 	
 
 	static var viewMap:[String:NSHashTable<UIView>] = [:]
 	static func register(view:UIView , for key:String) -> () {
+		if key.contains("Optional"){
+			
+		}
 		antiRegistr(view: view)
 		if Transition.viewMap[key] == nil {
 			Transition.viewMap[key] = NSHashTable.weakObjects()
@@ -222,12 +224,12 @@ extension Transition : UIViewControllerTransitioningDelegate{
 		return TransitionController(presentedViewController: presented, presenting: presenting)
 	}
 	func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-		self.isPresented = true
+		self.isPresenting = true
 		return self
 	}
 
 	func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-		self.isPresented = false
+		self.isPresenting = false
 		return self
 	}
 }
@@ -243,16 +245,20 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		
 		finishingDismiss = false
 		_transitionContext = transitionContext
-		if (isPresented) {
-			guard let toView = transitionContext.view(forKey: .to) else {return}
-			animatingCtr = transitionContext.viewController(forKey: .to) as? MDKImageDisplayController
-			sourceCtr = transitionContext.viewController(forKey: .from)
-			didViewAnimation(to: toView, from: nil)
-		} else {
-			guard let fromView = transitionContext.view(forKey: .from) else {return}
-			animatingCtr = transitionContext.viewController(forKey: .from) as? MDKImageDisplayController
-			sourceCtr = transitionContext.viewController(forKey: .to)
-			didViewAnimation(to: nil, from: fromView)
+		if let isPresented = isPresenting {
+			if (isPresented) {
+				guard let toView = transitionContext.view(forKey: .to) else {return}
+				animatingCtr = transitionContext.viewController(forKey: .to) as? MDKImageDisplayController
+				sourceCtr = transitionContext.viewController(forKey: .from)
+				didViewAnimation(to: toView, from: nil)
+			} else {
+				guard let fromView = transitionContext.view(forKey: .from) else {return}
+				animatingCtr = transitionContext.viewController(forKey: .from) as? MDKImageDisplayController
+				sourceCtr = transitionContext.viewController(forKey: .to)
+				didViewAnimation(to: nil, from: fromView)
+			}
+		}else{
+			forceTransitionContextCompleteTransition()
 		}
 	}
 
@@ -495,7 +501,7 @@ extension Transition : CAAnimationDelegate{
 		
 		
 		animatingCtr?.view.isUserInteractionEnabled = true
-		if isPresented {
+		if let isPresented = isPresenting, isPresented {
 			animatingCtr?.didFinishPresent(flag)
 		}
 		
