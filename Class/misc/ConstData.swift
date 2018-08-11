@@ -24,6 +24,7 @@ public enum SavePhotoResult {
 }
 
 @objc public enum LoadingPhotoQuality:Int{
+
 	case thumbnail = -1
 	case large = 1
 	case original = 2

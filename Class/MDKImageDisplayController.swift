@@ -192,6 +192,7 @@ class MDKImageDisplayController: UIViewController {
 
 	///transition 动画是否做完
 	var didFinishPresentTransitionAnimation:Bool = false
+	var shouldResetCellImage:Bool = false
 	///transition 动画做做完后需不需要切换到大图(防止layer动画的时候切换大图会导致视图大小出错)
 	var needSwitchToLarge:Bool = true
 
@@ -355,7 +356,9 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 
 		displayIndexWillChange?(displayIndex)
 		if let cell = cell as? DisplayCell {
-			cell.imageView.image = nil
+			if shouldResetCellImage{
+				cell.imageView.image = nil
+			}
 			cell.imageView.alpha = 1
 			cell.imageView.layer.mask = nil
 			cell.isScrolling = false
@@ -400,8 +403,10 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 					_self.photoList[displayIndex].photoQuality = .large
 					_self.photoList[displayIndex].photo = photo
 					DispatchQueue.main.async {
-						if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell{
+						if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell {
+							
 							_self.updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: false)
+							_self.shouldResetCellImage = true
 
 						}
 					}
@@ -417,7 +422,6 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 					DispatchQueue.main.async {
 						guard let _self = self else {return}
 						if _self.photoList[displayIndex].photoQuality == .thumbnail{
-
 							_self.photoList[displayIndex].photo = photo
 							if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell{
 								_self.updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: true)
@@ -457,6 +461,9 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		photoList[displayIndex].updatingCell = false
 	}
 	func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+		if didFinishPresentTransitionAnimation {
+			 shouldResetCellImage = true
+		}
 		if let cell = cell as? DisplayCell {
 			cell.isScrolling = false
 			Transition.antiRegistr(view: cell.imageView)
@@ -695,9 +702,9 @@ extension MDKImageDisplayController{
 				if _self.photoList[displayIndex].photoQuality == .thumbnail{
 
 					_self.photoList[displayIndex].photo = image
-					if let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex+_self.photoList.negativeCount, section: 0)) as? DisplayCell{
-						cell.setPhoto(image, isThumbnail: true)
-					}
+//					if let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex+_self.photoList.negativeCount, section: 0)) as? DisplayCell{
+//						cell.setPhoto(image, isThumbnail: true)
+//					}
 				}
 			}
 		}
