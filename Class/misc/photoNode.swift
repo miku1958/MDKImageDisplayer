@@ -48,8 +48,8 @@ struct photoNode {
 
 		let ciContext = CIContext(options: nil)
 
-		if photo.size.width<640 {
-			let sacle = 1080/photo.size.width
+		if photo.size.width*photo.scale<640 {
+			let sacle = 1080/(photo.size.width*photo.scale)
 			let transform = CGAffineTransform(scaleX: sacle, y: sacle);
 			ciImage = ciImage.transformed(by: transform)
 		}
@@ -66,7 +66,12 @@ struct photoNode {
 		if features.count > 0 {
 			for case let feature as CIQRCodeFeature in features {
 				if let message = feature.messageString , message.count > 0{
-					QRCode?[message] = CGRect(origin: CGPoint(x: feature.bounds.origin.x , y: photo.size.height*photo.scale - feature.bounds.origin.y - feature.bounds.height), size: feature.bounds.size)
+					QRCode?[message] = CGRect(
+						origin:
+							CGPoint(x: feature.bounds.origin.x , y: photo.size.height*photo.scale - feature.bounds.origin.y - feature.bounds.height),
+						size:
+							feature.bounds.size
+					)
 				}
 			}
 		}
