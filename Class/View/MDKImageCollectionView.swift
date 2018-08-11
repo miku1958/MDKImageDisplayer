@@ -329,15 +329,19 @@ extension MDKImageCollectionView{
 				for idx in photoList.count..<count {
 					indexPs.append(IndexPath(item: idx, section: 0))
 				}
-				photoList.count = count
-				insertItems(at: indexPs)
+				
+				DispatchQueue.main.async {
+					self.photoList.count = count
+					self.insertItems(at: indexPs)
+				}
 			}else{
 				for idx in count..<photoList.count {
 					indexPs.append(IndexPath(item: idx, section: 0))
 				}
-				photoList.count = count
-
-				deleteItems(at: indexPs)
+				DispatchQueue.main.async {
+					self.photoList.count = count
+					self.deleteItems(at: indexPs)
+				}
 			}
 		}
 		invalidateIntrinsicContentSize()

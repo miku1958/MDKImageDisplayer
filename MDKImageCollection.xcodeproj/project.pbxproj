@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		484DF8C9C01EC70A7A39C260 /* Pods_MDKImageCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B243461502BE50E86F4B2870 /* Pods_MDKImageCollection.framework */; };
 		FF2C1F6C20F4A6C40022D54F /* photoNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2C1F6B20F4A6C40022D54F /* photoNode.swift */; };
+		FF3AE439211F1136008CAEBD /* DemoCtr.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF3AE438211F1136008CAEBD /* DemoCtr.swift */; };
 		FF50B6D72102C5EF00911035 /* DoubleTapThanPanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */; };
 		FF6E9CF8210FF4C100CC7F3F /* lazyArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */; };
 		FF72BBFD20F346E2000CAFBA /* OCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FF72BBFC20F346E2000CAFBA /* OCTest.m */; };
@@ -50,6 +51,7 @@
 		1E2FF2C2E23BA6C0C212CED9 /* Pods-MDKImageCollection.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MDKImageCollection.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MDKImageCollection/Pods-MDKImageCollection.debug.xcconfig"; sourceTree = "<group>"; };
 		B243461502BE50E86F4B2870 /* Pods_MDKImageCollection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MDKImageCollection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF2C1F6B20F4A6C40022D54F /* photoNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = photoNode.swift; sourceTree = "<group>"; };
+		FF3AE438211F1136008CAEBD /* DemoCtr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCtr.swift; sourceTree = "<group>"; };
 		FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleTapThanPanGesture.swift; sourceTree = "<group>"; };
 		FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lazyArray.swift; sourceTree = "<group>"; };
 		FF72BBFA20F346E2000CAFBA /* MDKImageCollection-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MDKImageCollection-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -141,6 +143,7 @@
 				FFD7F08A210E9E3700154897 /* gakki.plist */,
 				FF769A9920F309CA00DB6DA1 /* AppDelegate.swift */,
 				FF769A9B20F309CA00DB6DA1 /* ViewController.swift */,
+				FF3AE438211F1136008CAEBD /* DemoCtr.swift */,
 				FF769A9D20F309CA00DB6DA1 /* Main.storyboard */,
 				FF769AA020F309CB00DB6DA1 /* Assets.xcassets */,
 				FF769AA220F309CB00DB6DA1 /* LaunchScreen.storyboard */,
@@ -338,6 +341,7 @@
 				FF9EE1E7211B17DE00A5F533 /* ConstData.swift in Sources */,
 				FF72BBFD20F346E2000CAFBA /* OCTest.m in Sources */,
 				FF769A9C20F309CA00DB6DA1 /* ViewController.swift in Sources */,
+				FF3AE439211F1136008CAEBD /* DemoCtr.swift in Sources */,
 				FF769A9A20F309CA00DB6DA1 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

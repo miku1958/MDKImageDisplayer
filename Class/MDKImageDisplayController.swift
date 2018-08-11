@@ -230,15 +230,18 @@ class MDKImageDisplayController: UIViewController {
 		if QRCodes.count == 1{
 			UIApplication.shared.openURL(MDKURL(QRCodes.first!.key))
 		}else{
+			var inPoint = false
 			if var touchPoint = touchPoint{
 				for (message,rect) in QRCodes {
 					
 					if rect.contains(touchPoint){
+						inPoint = true
 						UIApplication.shared.openURL(MDKURL(message))
 						break
 					}
 				}
-			}else{
+			}
+			if !inPoint{
 				//弹个选择框给用户
 				let alert = UIAlertController(title: "检查到多个二维码", message: "请选择", preferredStyle: .actionSheet)
 				for (message,_) in QRCodes {

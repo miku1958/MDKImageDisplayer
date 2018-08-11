@@ -48,10 +48,16 @@ struct photoNode {
 
 		let ciContext = CIContext(options: nil)
 
-		if photo.size.width*photo.scale<640 {
-			let sacle = 1080/(photo.size.width*photo.scale)
+		var photoSize = photo.size
+		photoSize.width *= photo.scale
+		photoSize.height *= photo.scale
+		if photoSize.width<640 {
+			let sacle = 1080/photoSize.width
 			let transform = CGAffineTransform(scaleX: sacle, y: sacle);
 			ciImage = ciImage.transformed(by: transform)
+			let ratio = photoSize.width/photoSize.height
+			photoSize.width = 1080
+			photoSize.height = 1080/ratio
 		}
 
 		let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: ciContext, options: [CIDetectorAccuracy:CIDetectorAccuracyLow])
@@ -68,11 +74,22 @@ struct photoNode {
 				if let message = feature.messageString , message.count > 0{
 					QRCode?[message] = CGRect(
 						origin:
-							CGPoint(x: feature.bounds.origin.x , y: photo.size.height*photo.scale - feature.bounds.origin.y - feature.bounds.height),
+							CGPoint(x: feature.bounds.origin.x , y: photoSize.height - feature.bounds.origin.y - feature.bounds.height),
 						size:
 							feature.bounds.size
 					)
 				}
+			}
+		}
+		if photoSize != photo.size , QRCode != nil {
+			let ratio = photoSize.width / photo.size.width
+			for qc in QRCode!{
+				var bounds = qc.value
+				bounds.origin.x /= ratio
+				bounds.origin.y /= ratio
+				bounds.size.width /= ratio
+				bounds.size.height /= ratio
+				QRCode![qc.key] = bounds
 			}
 		}
 		isCheckingQRCode = false

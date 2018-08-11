@@ -1,24 +1,99 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13122.16" systemVersion="17A277" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14295.6" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="mTa-3L-4zn">
+    <device id="retina4_7" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13104.12"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14270.1"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="xis-88-E83">
+            <objects>
+                <navigationController id="mTa-3L-4zn" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="SmS-xz-ep6">
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="BYZ-38-t0r" kind="relationship" relationship="rootViewController" id="Fbg-ZA-yse"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="Xja-b9-8X4" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-473" y="-275"/>
+        </scene>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="MDKImageCollection" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lfR-by-9zO">
+                                <rect key="frame" x="18" y="114" width="339" height="30"/>
+                                <state key="normal" title="本地图片延迟加载(无限加载),图片来源@王菊 的猫"/>
+                                <connections>
+                                    <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="tls-Lk-igA"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="u9P-Oc-BIW">
+                                <rect key="frame" x="126" y="164" width="123" height="30"/>
+                                <state key="normal" title="本地图片手动更新"/>
+                                <connections>
+                                    <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ty4-lO-mWU"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="5mC-hw-cKT">
+                                <rect key="frame" x="48.5" y="214" width="278" height="30"/>
+                                <state key="normal" title="加载网络图片,图片来源@新垣结衣新闻社"/>
+                                <connections>
+                                    <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="eeK-qS-XSt"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="toZ-GA-hGa">
+                                <rect key="frame" x="70.5" y="264" width="234" height="30"/>
+                                <state key="normal">
+                                    <string key="title" base64-UTF8="YES">
+5Yqg6L29572R57uc5Zu+54mHACzlpKflsI/lm77niYfmr5TkvovkuI3kuIDmoLc
+</string>
+                                </state>
+                                <connections>
+                                    <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="BHA-l6-wOS"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="N08-La-McT">
+                                <rect key="frame" x="101" y="314" width="173" height="30"/>
+                                <state key="normal" title="二维码识别,支持多二维码"/>
+                                <connections>
+                                    <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qgr-RP-jGx"/>
+                                </connections>
+                            </button>
+                        </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="N08-La-McT" firstAttribute="top" secondItem="toZ-GA-hGa" secondAttribute="bottom" constant="20" id="1HE-7l-pMh"/>
+                            <constraint firstItem="toZ-GA-hGa" firstAttribute="top" secondItem="5mC-hw-cKT" secondAttribute="bottom" constant="20" id="4nD-Mi-rop"/>
+                            <constraint firstItem="N08-La-McT" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="GBZ-b2-Jvn"/>
+                            <constraint firstItem="toZ-GA-hGa" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Gdv-cL-Qfu"/>
+                            <constraint firstItem="5mC-hw-cKT" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Jvl-Mi-fdG"/>
+                            <constraint firstItem="u9P-Oc-BIW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Jxx-11-qQP"/>
+                            <constraint firstItem="lfR-by-9zO" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="50" id="RtX-QB-RCk"/>
+                            <constraint firstItem="5mC-hw-cKT" firstAttribute="top" secondItem="u9P-Oc-BIW" secondAttribute="bottom" constant="20" id="XM1-5B-pg6"/>
+                            <constraint firstItem="u9P-Oc-BIW" firstAttribute="top" secondItem="lfR-by-9zO" secondAttribute="bottom" constant="20" id="pLQ-Ng-hu6"/>
+                            <constraint firstItem="lfR-by-9zO" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="tVC-U7-J0z"/>
+                        </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
+                    <navigationItem key="navigationItem" id="b35-SE-shc"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
+            <point key="canvasLocation" x="423" y="-276"/>
         </scene>
     </scenes>
 </document>
