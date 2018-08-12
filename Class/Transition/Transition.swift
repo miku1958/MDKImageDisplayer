@@ -20,7 +20,7 @@ class Transition: NSObject{
 		return strongInstance!
 	}
 	
-
+	var isInTransition:Bool = false
 	var  isPresenting:Bool? = true
 	static let duration:TimeInterval = 0.25
 	var ImageCornerRadius:CGFloat = 0
@@ -50,6 +50,7 @@ class Transition: NSObject{
 		transitingView?.layer.mask = nil
 		animatingCtr?.view.isUserInteractionEnabled = true
 		isPresenting = nil
+		isInTransition = false
 	}
 	
 
@@ -379,7 +380,7 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 
 
 	func updateLayer(from view:UIView , sourceFrame:CGRect , maskFrame:CGRect , isPresent:Bool) -> () {
-
+		isInTransition = true
 		
 		
 		if finishingDismiss {

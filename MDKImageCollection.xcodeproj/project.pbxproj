@@ -203,8 +203,8 @@
 		FFB9DF9F210872CE008381DC /* Transition */ = {
 			isa = PBXGroup;
 			children = (
-				FFB9DFA421087327008381DC /* TransitionController.swift */,
 				FFB9DFA221087304008381DC /* Transition.swift */,
+				FFB9DFA421087327008381DC /* TransitionController.swift */,
 			);
 			path = Transition;
 			sourceTree = "<group>";
