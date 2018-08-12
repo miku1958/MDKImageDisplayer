@@ -295,19 +295,21 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 			var targetViews:[UIView] = []
 			var sourceViews:Set<UIView> = Set()
 			while let view = enumerator.nextObject() as? UIView {
+				if view.frame.width == 0{
+					
+				}
 				if let beginTransID = animatingCtr?.beginTransitionID ,beginTransID == transitionID{
 					beginTransitionViews.append(view)
 				}
-				if let frame = view.superview?.convert(view.frame, to: MDKKeywindow) , keyWinFrame.intersects(frame){
-					if containVIew.contain(subview: view) {
-						targetViews.append(view)
-						if let index = beginTransitionViews.index(of: view){
-							beginTransitionViews.remove(at: index)
-						}
-					}else{
-						sourceViews.update(with: view)
+				if containVIew.contain(subview: view) {
+					targetViews.append(view)
+					if let index = beginTransitionViews.index(of: view){
+						beginTransitionViews.remove(at: index)
 					}
+				}else if let frame = view.superview?.convert(view.frame, to: MDKKeywindow) , keyWinFrame.intersects(frame){
+					sourceViews.update(with: view)
 				}
+
 				
 				if targetViews.count>0,sourceViews.count>0{
 					break

@@ -295,7 +295,12 @@ extension MDKImageDisplayController{
 		
 		dismissToolbar { }
 	}
-	
+	override func viewDidAppear(_ animated: Bool) {
+		if didFinishPresentTransitionAnimation && isFrom3DTouch {
+			didFinishPresent(true)
+		}
+		didFinishPresentTransitionAnimation = true
+	}
 	func didFinishPresent(_ animated: Bool) -> () {
 		didFinishPresentTransitionAnimation = true
 		collectionViewIsScrolling = false

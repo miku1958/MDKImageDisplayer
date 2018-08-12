@@ -114,18 +114,19 @@ class DemoCtr: UIViewController {
 	}
 	
 	var cache:NSCache<NSString,UIImage> = NSCache()
-	var downloaingList:[String:(UIImage)->()] = [:]
+	var downloaingList:[String:[(UIImage)->()]] = [:]
 	func downloadImage(url urlstr:String , finish:@escaping (UIImage)->()) {
-
 		if let image =  cache.object(forKey: urlstr as NSString) {
 			finish(image)
 			return
 		}
-		if (downloaingList[urlstr] != nil) {
-			downloaingList[urlstr] = finish
+		if (downloaingList[urlstr] == nil) {
+			downloaingList[urlstr] = [finish]
+		}else{
+			downloaingList[urlstr]?.append(finish)
 			return
 		}
-		downloaingList[urlstr] = finish
+		
 		guard let url = URL(string: urlstr) else {return}
 		
 		URLSession.shared.dataTask(with: url) {[weak self] (data, _, _) in
@@ -134,7 +135,11 @@ class DemoCtr: UIViewController {
 				let image = UIImage(data: data)
 				else {return}
 			self?.cache.setObject(image, forKey: urlstr as NSString)
-			self?.downloaingList[urlstr]?(image)
+			if let arr = self?.downloaingList[urlstr]{
+				for finish in arr{
+					finish(image)
+				}
+			}
 			self?.downloaingList[urlstr] = nil
 			}.resume()
 	}

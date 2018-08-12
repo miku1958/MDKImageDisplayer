@@ -581,7 +581,7 @@ extension MDKImageCollectionView: UIViewControllerPreviewingDelegate{
 	}
 	
 	public func previewingContext(_ previewingContext: UIViewControllerPreviewing, commit viewControllerToCommit: UIViewController) {
-		MDKRootViewController.show(viewControllerToCommit, sender: nil)
+		MDKRootViewController.present(viewControllerToCommit, animated: true, completion: nil)
 	}
 	
 	@available(iOS 9.0, *) @objc @discardableResult open
