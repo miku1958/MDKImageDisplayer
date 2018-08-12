@@ -31,7 +31,7 @@ imageCollection.quickRegister3DTouchPreviewing()
 
 1. 手势下滑关闭
 
-<!--dismiss手势的时候毛玻璃模糊度变化只支持iOS10以后-->
+dismiss手势的时候毛玻璃模糊度变化只支持iOS10以后
 
 ![](https://github.com/miku1958/MDKImageCollection/raw/master/photo/2.gif)
 
