@@ -6,27 +6,16 @@
 
 #### 特性：
 
-1. 支持动态加载
+1. ~~支持3DTouch打开~~
 
 ```swift
-imageCollection.thumbnailForIndexUseCheck(close: { (option, handler) in
-	handler(UIImage(named: "\(option.index%3)"))
-	return true//这里返回true就能不停的添加新的cell
-})
+
 ```
 
-![](https://github.com/miku1958/MDKImageCollection/raw/master/photo/1.gif)
 
-1. 支持3DTouch打开
 
 ```swift
-imageCollection.registerFor3DTouchPreviewing(self)//self为ViewController
-```
 
-如果不是在ViewController中创建imageCollection，可以：
-
-```swift
-imageCollection.quickRegister3DTouchPreviewing()
 ```
 
 1. 手势下滑关闭
@@ -45,7 +34,14 @@ dismiss手势的时候毛玻璃模糊度变化只支持iOS10以后
 
 1. 支持在IM等聊天页面中跨信息切换原图
 
-截图，示例代码
+```
+MDKImageDisplayController *display = [[MDKImageDisplayController alloc]initWithLargeClose:^NSString * _Nullable(MDKImageCloseOption * option, void (^ handler)(UIImage *)) {
+	利用option.index和option.lastIdentifier来返回一个identifer
+        
+    异步加载image
+    handler(image);
+}];
+```
 
 
 
