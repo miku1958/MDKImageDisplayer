@@ -6,33 +6,21 @@
 
 #### 特性：
 
-1. ~~支持3DTouch打开~~
-
-```swift
-
-```
-
-
-
-```swift
-
-```
-
-1. 手势下滑关闭
+手势下滑关闭
 
 dismiss手势的时候毛玻璃模糊度变化只支持iOS10以后
 
 ![](https://github.com/miku1958/MDKImageCollection/raw/master/photo/2.gif)
 
-1. 上滑呼出菜单
+上滑呼出菜单
 
-1. 二维码识别,多个二维码的时候会弹出选择
+二维码识别,多个二维码的时候会弹出选择
 
 ![](https://github.com/miku1958/MDKImageCollection/raw/master/photo/3.gif)
 
 
 
-1. 支持在IM等聊天页面中跨信息切换原图
+支持在IM等聊天页面中跨信息切换原图
 
 ```
 MDKImageDisplayController *display = [[MDKImageDisplayController alloc]initWithLargeClose:^NSString * _Nullable(MDKImageCloseOption * option, void (^ handler)(UIImage *)) {
@@ -43,7 +31,7 @@ MDKImageDisplayController *display = [[MDKImageDisplayController alloc]initWithL
 }];
 ```
 
-
+![](https://github.com/miku1958/MDKImageCollection/raw/master/photo/4.gif)
 
 #### 计划中特性：
 
@@ -64,99 +52,89 @@ pod ‘MDKImageCollection’
 
 
 
-#### 创建imageCollection
+#### 创建MDKImageDisplayController
+
+方法1，通过index来管理内容
+
+```
+MDKImageDisplayController *display = [[MDKImageDisplayController alloc]initWithPhotoCount:imageArr.count largeClose:^(MDKImageCloseOption * option, void (^ handler)(UIImage *)) {
+	handler(imageArr[option.index]);	
+}];
+```
+
+
+
+方法2，通过identifer来管理内容，如假设imageView.image就是打开的大图：
 
 ```swift
-let flow = UICollectionViewFlowLayout()//目前只支持UICollectionViewFlowLayout，后续会修改
-flow.itemSize = CGSize(width: 100, height: 100)
-let imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
-```
-
-
-
-#### 注册缩略图
-
-直到图片数量的时候：
-
-```
-imageCollection.thumbnailForIndex(count: 40, close: { (option, handler) in
-
-	{//异步下载UIImage
-		handler(<#下载UIImage#>)
+__weak typeof(self) _self = self;
+MDKImageDisplayController *display = [[MDKImageDisplayController alloc]initWithLargeClose:^NSString * (MDKImageCloseOption * option, void (^ handler)(UIImage * image)) {
+    if (!option.lastIdentifier) {//首张打开的图片是没有lastIdentifier的
+        handler(view.image);
+        return identifer;
+    }else{
+        NSInteger lastIndex = [_self indexWithIdentifer:option.lastIdentifier];
+        if (option.index>0) {
+            if (lastIndex == 3) {
+                return nil;
+            }
+            lastIndex += 1;
+            handler([_self imageViewWithIndex:lastIndex].image);
+            return [_self identiferWithWithIndex:lastIndex];
+        }else{
+            if (lastIndex == 0) {
+                return nil;
+            }
+            lastIndex -= 1;
+            handler([_self imageViewWithIndex:lastIndex].image);
+            return [_self identiferWithWithIndex:lastIndex];
+        }
     }
-
-    if option.index == 39{
-        self.imageCollection.updateCount(80)//updateCount用来更新图片数量
-    }
-})
-
-```
-
-如果不确定图片数量可以：
-
-```
-imageCollection.thumbnailForIndexUseCheck(close: { (option, handler) in
-    {//异步下载UIImage
-        handler(<#下载UIImage#>)
-    }
-    return true
-})
+}];
 ```
 
 
 
-#### 注册原图
+注册缩放动画的来源view：
 
 ```
-imageCollection.largeForIndex { (option, handler) in
-    {//异步下载UIImage
-        handler(<#下载UIImage#>)
-    }
-}
-```
-
-
-
-#### 链式支持
-
-```
-imageCollection.thumbnailForIndexUseCheck(close: { (option, handler) in
-    handler(UIImage(named: "\(option.index%3)"))
-    return true
-}).largeForIndex { (option, handler) in
-    handler(UIImage(named: "\(option.index%3)"))
-}
+__weak typeof(self) _self = self;
+display.registerAppearSourecView = ^UIView *{
+//获取出现时的来源view
+	return view;
+};
+display.registerDismissTargetView = ^UIView * (MDKImageCloseOption * option) {
+//获取消失时的目标view
+	return [_self imageViewWithIndex:[_self indexWithIdentifer:option.lastIdentifier]];
+};
 ```
 
 
 
-
-
-跨信息切换原图
+关闭高斯模糊背景：
 
 ```
-imageCollection.largeIdentifierClose { (option, handler) in
-	let lastIdentifier = option.lastIdentifier
-	if option.index>0{
-        lastIdentifier对应cell的下一个
-	}else{
-		lastIdentifier对应cell的上一个
-	}
-	
-	根据option.lastIdentifier和option.index获取下一个/前一个cell的identifier
-	let identifier = ...
-	
-    {//异步下载UIImage
-        handler(<#下载UIImage#>)
-    }
-    return identifier//这个identifier是用来定位的,
-}
+display.disableBlurBackgroundWithBlack = true;
 ```
 
-同时，这个identifier也是原图浏览器的Transition动画标识符，如果想要实现跨cell 的dismiss动画：
 
 
+由于从3Dtouchpresent出来不会走transition动画，如果要实现3Dtouch，以下是临时解决办法：
 
-需要把这个identifier设置为imageCollection.customTransitionID替换默认的Transition动画标识符
+在
+
+```
+- (nullable UIViewController *)previewingContext:(id <UIViewControllerPreviewing>)previewingContext viewControllerForLocation:(CGPoint)location NS_AVAILABLE_IOS(9_0);
+```
+
+中创建MDKImageDisplayController *display;后，设置
+
+```
+display.isFrom3DTouch = true;
+```
+
+以解决动画错误
+
+
 
 完整代码查看DemoCtr

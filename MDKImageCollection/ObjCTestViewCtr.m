@@ -32,26 +32,27 @@
 	UIImageView *view = (id)[self.view hitTest:point withEvent:event];
 	NSString *identifer = [self identifierWithView:view];
 	if (identifer) {
+		
 		MDKImageDisplayController *display = [[MDKImageDisplayController alloc]initWithLargeClose:^NSString * (MDKImageCloseOption * option, void (^ handler)(UIImage * image)) {
 			if (!option.lastIdentifier) {
 				handler(view.image);
 				return identifer;
 			}else{
-				NSInteger lastIndex = [self indexWithIdentifer:option.lastIdentifier];
+				NSInteger lastIndex = [_self indexWithIdentifer:option.lastIdentifier];
 				if (option.index>0) {
 					if (lastIndex == 3) {
 						return nil;
 					}
 					lastIndex += 1;
-					handler([self imageViewWithIndex:lastIndex].image);
-					return [self identiferWithWithIndex:lastIndex];
+					handler([_self imageViewWithIndex:lastIndex].image);
+					return [_self identiferWithWithIndex:lastIndex];
 				}else{
 					if (lastIndex == 0) {
 						return nil;
 					}
 					lastIndex -= 1;
-					handler([self imageViewWithIndex:lastIndex].image);
-					return [self identiferWithWithIndex:lastIndex];
+					handler([_self imageViewWithIndex:lastIndex].image);
+					return [_self identiferWithWithIndex:lastIndex];
 				}
 			}
 		}];

@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
 
 
   s.name         = "MDKImageCollection"
-  s.version      = "1.1.1"
+  s.version      = "1.1.2"
   s.summary      = "a image collection"
 
   s.description  = <<-DESC
