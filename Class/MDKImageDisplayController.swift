@@ -481,8 +481,10 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 
 	func updateCell(_ cell:DisplayCell , image:UIImage? , displayIndex:Int , isThumbnail:Bool) -> () {
 		if transition.isInTransition , cell.imageView.image != nil{
+			needSwitchToLarge = true
 			return
 		}
+		needSwitchToLarge = false
 		photoList[displayIndex].updatingCell = true
 		cell.setPhoto(image, isThumbnail: isThumbnail)
 		if let zoom = photoList[displayIndex].browsingScale{
@@ -807,9 +809,8 @@ extension MDKImageDisplayController{
 			}else{
 				_self.photoList[displayIndex] = pNode
 			}
-			if !_isFromInternet , !(_self.didFinishPresentTransitionAnimation && displayIndex == _self.beginIndex) ,
-				let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex + _self.photoList.negativeCount, section: 0)) as? DisplayCell{
-				_self.needSwitchToLarge = false
+			if let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex + _self.photoList.negativeCount, section: 0)) as? DisplayCell{
+
 				_self.updateCell(cell, image: image, displayIndex: displayIndex, isThumbnail: false)
 			}
 

@@ -208,6 +208,7 @@ extension DisplayCell:UIScrollViewDelegate{
 				0,
 				0
 		)
+		scrollViewDidEndDecelerating(contentScroll)
 	}
 
 
