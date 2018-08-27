@@ -37,9 +37,12 @@ public typealias QRCodeHandlerClose = ([String:CGRect],CGPoint?)->()
 
 public typealias IndexClose = (Int) -> ()
 
-public typealias imageClose = (UIImage?)->()
+public typealias ImageClose = (UIImage?)->()
 
-public typealias OptionImgClose =  (MDKImageCloseOption,@escaping imageClose)->()
-public typealias OptionImgRtStringClose =  (MDKImageCloseOption,@escaping imageClose)->(String?)
+public typealias OptionImgClose =  (MDKImageCloseOption,@escaping ImageClose)->()
+public typealias OptionImgRtStringClose =  (MDKImageCloseOption,@escaping ImageClose)->(String?)
 
 
+
+public typealias RegisterAppearClose = (()->(UIView?))
+public typealias RegisterDismissClose = ((MDKImageCloseOption)->(UIView?))

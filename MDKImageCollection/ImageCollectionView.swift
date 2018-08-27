@@ -76,7 +76,7 @@ open class ImageCollectionView: UICollectionView {
 		let option = MDKImageCloseOption()
 		option.index = 0;
 
-		let handler:imageClose = {image in
+		let handler:ImageClose = {image in
 			DispatchQueue.main.async {
 				if self.needAutoPreLoad , self.photoList.count == 0 {
 					self.photoList.count = 1
@@ -287,7 +287,7 @@ extension ImageCollectionView{
 		return self;
 	}
 
-	public typealias OptionImgRtBoolClose =  (MDKImageCloseOption,@escaping imageClose)->(Bool)
+	public typealias OptionImgRtBoolClose =  (MDKImageCloseOption,@escaping ImageClose)->(Bool)
 	public typealias intRtSelfClose = (Int) -> (ImageCollectionView)
 
 	//MARK:	updateCount
@@ -354,7 +354,7 @@ extension ImageCollectionView : UICollectionViewDelegateFlowLayout,UICollectionV
 		cell.imageView.image = nil
 		let option = MDKImageCloseOption()
 		option.index = item;
-		let handler:imageClose = {[weak self] image in
+		let handler:ImageClose = {[weak self] image in
 			DispatchQueue.main.async {
 				if let cacheCell = self?.cellForItem(at: IndexPath(item: item, section: 0)) as? ThumbnailCell{
 					cacheCell.imageView.image = image
@@ -542,12 +542,12 @@ extension ImageCollectionView : UICollectionViewDelegateFlowLayout,UICollectionV
 		display.transition.ImageCornerRadius = imageTransitionCornerRadius
 		display.transition.sourceScreenInset = sourceScreenInset
 
-		display.registerAppearSourecView = { [weak self] in
+		display.registerAppearSourecView({ [weak self] in
 			return self?.cellForItem(at: IndexPath(item: displayIndex, section: 0))
-		}
-		display.registerDismissTargetView = { [weak self] (option) ->(UIView?) in
+		})
+		display.registerDismissTargetView({ [weak self] (option) ->(UIView?) in
 			return self?.cellForItem(at: IndexPath(item: option.index, section: 0))
-		}
+		})
 
 		display.setDisplayIndex(displayIndex)
 		

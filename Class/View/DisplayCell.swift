@@ -221,7 +221,8 @@ extension DisplayCell:UIScrollViewDelegate{
 			if let stopOffset = stopScrollOffset{
 				contentScroll.setContentOffset(stopOffset, animated: false)
 			}
-			isScrolling = true
+			let trans = scrollView.panGestureRecognizer.translation(in: nil)
+			isScrolling = fabs(trans.x) > 1 || fabs(trans.y) > 1 || scrollView.isZooming || scrollView.isDragging || scrollView.isDecelerating
 		}
 	}
 

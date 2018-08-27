@@ -116,7 +116,14 @@ open class MDKImageDisplayController: UIViewController {
 		}
 	}
 
-	let blurView = UIVisualEffectView(frame: MDKKeywindow.bounds)
+	lazy var blurView = UIVisualEffectView(frame: MDKKeywindow.bounds)
+
+	lazy var blackView:UIView = {
+		let view = UIView(frame: MDKKeywindow.bounds)
+		view.backgroundColor = .black
+		view.alpha = 0
+		return view
+	}()
 	
 	lazy var collectionView:UICollectionView = {
 		let flow = UICollectionViewFlowLayout()
@@ -275,9 +282,19 @@ open class MDKImageDisplayController: UIViewController {
 		}
 	}
 
-	@objc public var registerAppearSourecView:(()->(UIView?))?
-	@objc public var registerDismissTargetView:((MDKImageCloseOption)->(UIView?))?
+	@objc public var registerAppearSourecView:RegisterAppearClose?
+	func registerAppearSourecView(_ register:@escaping RegisterAppearClose) -> () {
+		registerAppearSourecView = register
+	}
+	
+	@objc public var registerDismissTargetView:RegisterDismissClose?
+	func registerDismissTargetView(_ register:@escaping RegisterDismissClose) -> () {
+		registerDismissTargetView = register
+	}
 
+	
+	
+	@objc public var disableBlurBackgroundWithBlack:Bool = false
 
 }
 
@@ -288,7 +305,11 @@ extension MDKImageDisplayController{
 	
 	override open func viewDidLoad() {
 		super.viewDidLoad()
-		view.addSubview(blurView)
+		if disableBlurBackgroundWithBlack {
+			view.addSubview(blackView)
+		}else{
+			view.addSubview(blurView)
+		}
 		view.addSubview(collectionView)
 	}
 	
@@ -297,7 +318,11 @@ extension MDKImageDisplayController{
 		
 		if collFrame.size != view.bounds.size {
 			collectionView.frame = view.bounds
-			blurView.frame = collectionView.frame
+			if disableBlurBackgroundWithBlack{
+				blackView.frame = collectionView.frame
+			}else{
+				blurView.frame = collectionView.frame
+			}
 			if !firstResetPosition{
 				firstResetPosition = true
 				
@@ -319,7 +344,11 @@ extension MDKImageDisplayController{
 		}
 
 		UIView.animate(withDuration: MDKImageTransition.duration) {
-			self.blurView.effect = UIBlurEffect(style: .dark)
+			if self.disableBlurBackgroundWithBlack{
+				self.blackView.alpha = 1
+			}else{
+				self.blurView.effect = UIBlurEffect(style: .dark)
+			}
 		}
 		
 		dismissToolbar { }
@@ -354,7 +383,11 @@ extension MDKImageDisplayController{
 		}
 		if #available(iOS 10.0, *) {
 			let anim = UIViewPropertyAnimator(duration: MDKImageTransition.duration, curve: .easeInOut) {
-				self.blurView.effect = nil
+				if self.disableBlurBackgroundWithBlack{
+					self.blackView.alpha = 0
+				}else{
+					self.blurView.effect = nil
+				}
 			}
 			anim.startAnimation()
 			anim.addCompletion { (position) in
@@ -367,7 +400,11 @@ extension MDKImageDisplayController{
 			_animator = anim
 		} else {
 			UIView.animate(withDuration: 0.15) {
-				self.blurView.effect = nil
+				if self.disableBlurBackgroundWithBlack{
+					self.blackView.alpha = 0
+				}else{
+					self.blurView.effect = nil
+				}
 			}
 		}
 		
@@ -515,14 +552,15 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		}
 	}
 	@objc func handlePan(_ pan:UIPanGestureRecognizer) -> () {
-		if let leftmostIndex = leftmostIndex {
+		if pan.state == .began {
+			collectionPanBeginOffset = collectionView.contentOffset
+		}
+		if let leftmostIndex = leftmostIndex,Int(collectionView.contentOffset.x / collectionView.frame.width) == leftmostIndex {
 			var translation = pan.translation(in: nil)
 
 			let canPanWidth = collectionView.frame.width * 0.5
 			let leftmostOffset = (CGFloat(leftmostIndex) + 1) * collectionView.frame.width - canPanWidth
 			switch pan.state {
-			case .began:
-				collectionPanBeginOffset = collectionView.contentOffset
 			case .ended:
 				if collectionView.contentOffset.x - leftmostOffset < canPanWidth{
 					pan.setTranslation(CGPoint(), in: nil)
@@ -560,10 +598,9 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 				dismissToolbar(finish: {})
 			}
 		}
-
-
 		if scrollView == collectionView {
-			collectionViewIsScrolling = true
+			let trans = scrollView.panGestureRecognizer.translation(in: nil)
+			collectionViewIsScrolling = fabs(trans.x) > 1 || fabs(trans.y) > 1 || scrollView.isZooming || scrollView.isDragging || scrollView.isDecelerating
 		}
 	}
 
@@ -1068,7 +1105,7 @@ extension MDKImageDisplayController:UIGestureRecognizerDelegate {
 	}
 	public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 
-		if gestureRecognizer == dismissTap {
+		if gestureRecognizer == dismissTap || gestureRecognizer == zoomTap{
 			guard let cell = self.collectionView.visibleCells.first as? DisplayCell else {return true}
 
 			return (!collectionViewIsScrolling && !cell.isScrolling) || toolbarIsFinishOpen

@@ -55,6 +55,7 @@
 				}
 			}
 		}];
+		display.disableBlurBackgroundWithBlack = true;
 		display.registerAppearSourecView = ^UIView *{
 			return view;
 		};

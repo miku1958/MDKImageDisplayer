@@ -151,7 +151,6 @@
 		FF769AAB20F309D400DB6DA1 /* Class */ = {
 			isa = PBXGroup;
 			children = (
-				FF93AE24211C282B0022CB34 /* objc */,
 				FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */,
 				FF79EE8520FD9F47006D318F /* View */,
 				FF9EE1EA211B1B6A00A5F533 /* misc */,
@@ -167,13 +166,6 @@
 				FFDA853820F992280073AAA2 /* DisplayCell.swift */,
 			);
 			path = View;
-			sourceTree = "<group>";
-		};
-		FF93AE24211C282B0022CB34 /* objc */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = objc;
 			sourceTree = "<group>";
 		};
 		FF9EE1EA211B1B6A00A5F533 /* misc */ = {
