@@ -27,7 +27,7 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 			let ratio = size.width / size.height
 			let lastRatio = self.imageView.frame.size.width / self.imageView.frame.size.height
 			if fabs(ratio-lastRatio) > 0.01 {//防止两张图是因为缩小分辨率后比例稍微有些变化
-				UIView.animate(withDuration: Transition.duration, animations: {
+				UIView.animate(withDuration: MDKImageTransition.duration, animations: {
 					self.imageView.frame.size.height = self.imageView.frame.size.width / ratio
 					self.scrollViewDidZoom(self.contentScroll)
 				}) { (finish) in
@@ -75,7 +75,14 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 		scrollViewDidZoom(self.contentScroll)
 	}
 
-	var isScrolling:Bool = false
+	var isScrolling:Bool = false {
+		didSet{
+			if isScrolling {
+				
+			}
+		}
+	}
+
 
 
 	weak var scrollDelegate:UIScrollViewDelegate?
@@ -213,8 +220,7 @@ extension DisplayCell:UIScrollViewDelegate{
 			if let stopOffset = stopScrollOffset{
 				contentScroll.setContentOffset(stopOffset, animated: false)
 			}
-			let trans = contentScroll.panGestureRecognizer.translation(in: nil)
-			isScrolling = fabs(trans.x) > 1 || fabs(trans.y) > 1
+			isScrolling = true
 		}
 	}
 
@@ -224,7 +230,9 @@ extension DisplayCell:UIScrollViewDelegate{
 		}
 	}
 	func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-		isScrolling = false
+		DispatchQueue.main.asyncAfter(deadline: .now()+0.2) {
+			self.isScrolling = false
+		}
 	}
 
 	func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {

@@ -9,28 +9,28 @@
 /* Begin PBXBuildFile section */
 		484DF8C9C01EC70A7A39C260 /* Pods_MDKImageCollection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B243461502BE50E86F4B2870 /* Pods_MDKImageCollection.framework */; };
 		FF2C1F6C20F4A6C40022D54F /* photoNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF2C1F6B20F4A6C40022D54F /* photoNode.swift */; };
+		FF363F7121338EDE00D02BF2 /* ImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF363F7021338EDE00D02BF2 /* ImageCollectionView.swift */; };
 		FF3AE439211F1136008CAEBD /* DemoCtr.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF3AE438211F1136008CAEBD /* DemoCtr.swift */; };
 		FF50B6D72102C5EF00911035 /* DoubleTapThanPanGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */; };
 		FF6E9CF8210FF4C100CC7F3F /* lazyArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */; };
-		FF72BBFD20F346E2000CAFBA /* OCTest.m in Sources */ = {isa = PBXBuildFile; fileRef = FF72BBFC20F346E2000CAFBA /* OCTest.m */; };
 		FF72BC0520F361BB000CAFBA /* ThumbnailCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF72BC0420F361BA000CAFBA /* ThumbnailCell.swift */; };
 		FF769A9A20F309CA00DB6DA1 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF769A9920F309CA00DB6DA1 /* AppDelegate.swift */; };
 		FF769A9C20F309CA00DB6DA1 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF769A9B20F309CA00DB6DA1 /* ViewController.swift */; };
 		FF769A9F20F309CA00DB6DA1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF769A9D20F309CA00DB6DA1 /* Main.storyboard */; };
 		FF769AA120F309CB00DB6DA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA020F309CB00DB6DA1 /* Assets.xcassets */; };
 		FF769AA420F309CB00DB6DA1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA220F309CB00DB6DA1 /* LaunchScreen.storyboard */; };
-		FF769AAD20F31C3F00DB6DA1 /* MDKImageCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */; };
 		FF79EE8720FD9F93006D318F /* toolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF79EE8620FD9F93006D318F /* toolbarView.swift */; };
-		FF93AE26211C284E0022CB34 /* MDKImageCollectionView.m in Sources */ = {isa = PBXBuildFile; fileRef = FF93AE25211C284E0022CB34 /* MDKImageCollectionView.m */; };
 		FF9EE1E7211B17DE00A5F533 /* ConstData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E6211B17DE00A5F533 /* ConstData.swift */; };
-		FF9EE1E9211B1B5900A5F533 /* CloseOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */; };
-		FF9EE1EC211B1BC700A5F533 /* DisplayingOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */; };
+		FF9EE1E9211B1B5900A5F533 /* MDKImageCloseOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E8211B1B5900A5F533 /* MDKImageCloseOption.swift */; };
+		FF9EE1EC211B1BC700A5F533 /* MDKImageDisplayingInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1EB211B1BC700A5F533 /* MDKImageDisplayingInfo.swift */; };
 		FF9EE1EE211B242B00A5F533 /* UIView+containSubView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1ED211B242B00A5F533 /* UIView+containSubView.swift */; };
-		FFB9DFA321087304008381DC /* Transition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB9DFA221087304008381DC /* Transition.swift */; };
+		FFB9DFA321087304008381DC /* MDKImageTransition.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB9DFA221087304008381DC /* MDKImageTransition.swift */; };
 		FFB9DFA521087327008381DC /* TransitionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFB9DFA421087327008381DC /* TransitionController.swift */; };
 		FFD7F08B210E9E3700154897 /* gakki.plist in Resources */ = {isa = PBXBuildFile; fileRef = FFD7F08A210E9E3700154897 /* gakki.plist */; };
 		FFDA853720F98EE40073AAA2 /* MDKImageDisplayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */; };
 		FFDA853920F992280073AAA2 /* DisplayCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = FFDA853820F992280073AAA2 /* DisplayCell.swift */; };
+		FFE2AACB2130E25C00146CEA /* ObjCTestViewCtr.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FFE2AACA2130E25C00146CEA /* ObjCTestViewCtr.storyboard */; };
+		FFE2AACE2130E27800146CEA /* ObjCTestViewCtr.m in Sources */ = {isa = PBXBuildFile; fileRef = FFE2AACD2130E27800146CEA /* ObjCTestViewCtr.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -51,12 +51,11 @@
 		1E2FF2C2E23BA6C0C212CED9 /* Pods-MDKImageCollection.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MDKImageCollection.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MDKImageCollection/Pods-MDKImageCollection.debug.xcconfig"; sourceTree = "<group>"; };
 		B243461502BE50E86F4B2870 /* Pods_MDKImageCollection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MDKImageCollection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF2C1F6B20F4A6C40022D54F /* photoNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = photoNode.swift; sourceTree = "<group>"; };
+		FF363F7021338EDE00D02BF2 /* ImageCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageCollectionView.swift; sourceTree = "<group>"; };
 		FF3AE438211F1136008CAEBD /* DemoCtr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCtr.swift; sourceTree = "<group>"; };
 		FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoubleTapThanPanGesture.swift; sourceTree = "<group>"; };
 		FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = lazyArray.swift; sourceTree = "<group>"; };
 		FF72BBFA20F346E2000CAFBA /* MDKImageCollection-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MDKImageCollection-Bridging-Header.h"; sourceTree = "<group>"; };
-		FF72BBFB20F346E2000CAFBA /* OCTest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = OCTest.h; sourceTree = "<group>"; };
-		FF72BBFC20F346E2000CAFBA /* OCTest.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = OCTest.m; sourceTree = "<group>"; };
 		FF72BC0420F361BA000CAFBA /* ThumbnailCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThumbnailCell.swift; sourceTree = "<group>"; };
 		FF769A9620F309CA00DB6DA1 /* MDKImageCollection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MDKImageCollection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FF769A9920F309CA00DB6DA1 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -65,19 +64,19 @@
 		FF769AA020F309CB00DB6DA1 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FF769AA320F309CB00DB6DA1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FF769AA520F309CB00DB6DA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageCollectionView.swift; sourceTree = "<group>"; };
 		FF79EE8620FD9F93006D318F /* toolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = toolbarView.swift; sourceTree = "<group>"; };
-		FF93AE25211C284E0022CB34 /* MDKImageCollectionView.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MDKImageCollectionView.m; sourceTree = "<group>"; };
 		FF9EE1E6211B17DE00A5F533 /* ConstData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstData.swift; sourceTree = "<group>"; };
-		FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloseOption.swift; sourceTree = "<group>"; };
-		FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayingOption.swift; sourceTree = "<group>"; };
+		FF9EE1E8211B1B5900A5F533 /* MDKImageCloseOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageCloseOption.swift; sourceTree = "<group>"; };
+		FF9EE1EB211B1BC700A5F533 /* MDKImageDisplayingInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageDisplayingInfo.swift; sourceTree = "<group>"; };
 		FF9EE1ED211B242B00A5F533 /* UIView+containSubView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+containSubView.swift"; sourceTree = "<group>"; };
-		FFB9DFA221087304008381DC /* Transition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transition.swift; sourceTree = "<group>"; };
+		FFB9DFA221087304008381DC /* MDKImageTransition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageTransition.swift; sourceTree = "<group>"; };
 		FFB9DFA421087327008381DC /* TransitionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionController.swift; sourceTree = "<group>"; };
-		FFC162CC2119E14E00F26723 /* MDKImageCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MDKImageCollectionView.h; sourceTree = "<group>"; };
 		FFD7F08A210E9E3700154897 /* gakki.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = gakki.plist; sourceTree = "<group>"; };
 		FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageDisplayController.swift; sourceTree = "<group>"; };
 		FFDA853820F992280073AAA2 /* DisplayCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayCell.swift; sourceTree = "<group>"; };
+		FFE2AACA2130E25C00146CEA /* ObjCTestViewCtr.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = ObjCTestViewCtr.storyboard; sourceTree = "<group>"; };
+		FFE2AACC2130E27800146CEA /* ObjCTestViewCtr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ObjCTestViewCtr.h; sourceTree = "<group>"; };
+		FFE2AACD2130E27800146CEA /* ObjCTestViewCtr.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ObjCTestViewCtr.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -109,15 +108,6 @@
 			name = Pods;
 			sourceTree = "<group>";
 		};
-		FF72BC0320F361BA000CAFBA /* Cell */ = {
-			isa = PBXGroup;
-			children = (
-				FF72BC0420F361BA000CAFBA /* ThumbnailCell.swift */,
-				FFDA853820F992280073AAA2 /* DisplayCell.swift */,
-			);
-			path = Cell;
-			sourceTree = "<group>";
-		};
 		FF769A8D20F309CA00DB6DA1 = {
 			isa = PBXGroup;
 			children = (
@@ -144,12 +134,15 @@
 				FF769A9920F309CA00DB6DA1 /* AppDelegate.swift */,
 				FF769A9B20F309CA00DB6DA1 /* ViewController.swift */,
 				FF3AE438211F1136008CAEBD /* DemoCtr.swift */,
+				FF363F7021338EDE00D02BF2 /* ImageCollectionView.swift */,
+				FF72BC0420F361BA000CAFBA /* ThumbnailCell.swift */,
 				FF769A9D20F309CA00DB6DA1 /* Main.storyboard */,
+				FFE2AACA2130E25C00146CEA /* ObjCTestViewCtr.storyboard */,
+				FFE2AACC2130E27800146CEA /* ObjCTestViewCtr.h */,
+				FFE2AACD2130E27800146CEA /* ObjCTestViewCtr.m */,
 				FF769AA020F309CB00DB6DA1 /* Assets.xcassets */,
 				FF769AA220F309CB00DB6DA1 /* LaunchScreen.storyboard */,
 				FF769AA520F309CB00DB6DA1 /* Info.plist */,
-				FF72BBFB20F346E2000CAFBA /* OCTest.h */,
-				FF72BBFC20F346E2000CAFBA /* OCTest.m */,
 				FF72BBFA20F346E2000CAFBA /* MDKImageCollection-Bridging-Header.h */,
 			);
 			path = MDKImageCollection;
@@ -170,9 +163,8 @@
 		FF79EE8520FD9F47006D318F /* View */ = {
 			isa = PBXGroup;
 			children = (
-				FF769AAC20F31C3F00DB6DA1 /* MDKImageCollectionView.swift */,
 				FF79EE8620FD9F93006D318F /* toolbarView.swift */,
-				FF72BC0320F361BA000CAFBA /* Cell */,
+				FFDA853820F992280073AAA2 /* DisplayCell.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -180,8 +172,6 @@
 		FF93AE24211C282B0022CB34 /* objc */ = {
 			isa = PBXGroup;
 			children = (
-				FFC162CC2119E14E00F26723 /* MDKImageCollectionView.h */,
-				FF93AE25211C284E0022CB34 /* MDKImageCollectionView.m */,
 			);
 			path = objc;
 			sourceTree = "<group>";
@@ -192,8 +182,8 @@
 				FF9EE1E6211B17DE00A5F533 /* ConstData.swift */,
 				FF6E9CF7210FF4C100CC7F3F /* lazyArray.swift */,
 				FF2C1F6B20F4A6C40022D54F /* photoNode.swift */,
-				FF9EE1E8211B1B5900A5F533 /* CloseOption.swift */,
-				FF9EE1EB211B1BC700A5F533 /* DisplayingOption.swift */,
+				FF9EE1E8211B1B5900A5F533 /* MDKImageCloseOption.swift */,
+				FF9EE1EB211B1BC700A5F533 /* MDKImageDisplayingInfo.swift */,
 				FF9EE1ED211B242B00A5F533 /* UIView+containSubView.swift */,
 				FF50B6D62102C5EF00911035 /* DoubleTapThanPanGesture.swift */,
 			);
@@ -203,7 +193,7 @@
 		FFB9DF9F210872CE008381DC /* Transition */ = {
 			isa = PBXGroup;
 			children = (
-				FFB9DFA221087304008381DC /* Transition.swift */,
+				FFB9DFA221087304008381DC /* MDKImageTransition.swift */,
 				FFB9DFA421087327008381DC /* TransitionController.swift */,
 			);
 			path = Transition;
@@ -271,6 +261,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FFE2AACB2130E25C00146CEA /* ObjCTestViewCtr.storyboard in Resources */,
 				FFD7F08B210E9E3700154897 /* gakki.plist in Resources */,
 				FF769AA420F309CB00DB6DA1 /* LaunchScreen.storyboard in Resources */,
 				FF769AA120F309CB00DB6DA1 /* Assets.xcassets in Resources */,
@@ -324,22 +315,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FFB9DFA321087304008381DC /* Transition.swift in Sources */,
+				FFB9DFA321087304008381DC /* MDKImageTransition.swift in Sources */,
 				FF2C1F6C20F4A6C40022D54F /* photoNode.swift in Sources */,
 				FFB9DFA521087327008381DC /* TransitionController.swift in Sources */,
 				FF72BC0520F361BB000CAFBA /* ThumbnailCell.swift in Sources */,
 				FFDA853720F98EE40073AAA2 /* MDKImageDisplayController.swift in Sources */,
-				FF9EE1E9211B1B5900A5F533 /* CloseOption.swift in Sources */,
+				FF9EE1E9211B1B5900A5F533 /* MDKImageCloseOption.swift in Sources */,
 				FF6E9CF8210FF4C100CC7F3F /* lazyArray.swift in Sources */,
-				FF93AE26211C284E0022CB34 /* MDKImageCollectionView.m in Sources */,
 				FF50B6D72102C5EF00911035 /* DoubleTapThanPanGesture.swift in Sources */,
 				FF9EE1EE211B242B00A5F533 /* UIView+containSubView.swift in Sources */,
-				FF769AAD20F31C3F00DB6DA1 /* MDKImageCollectionView.swift in Sources */,
 				FFDA853920F992280073AAA2 /* DisplayCell.swift in Sources */,
 				FF79EE8720FD9F93006D318F /* toolbarView.swift in Sources */,
-				FF9EE1EC211B1BC700A5F533 /* DisplayingOption.swift in Sources */,
+				FF9EE1EC211B1BC700A5F533 /* MDKImageDisplayingInfo.swift in Sources */,
 				FF9EE1E7211B17DE00A5F533 /* ConstData.swift in Sources */,
-				FF72BBFD20F346E2000CAFBA /* OCTest.m in Sources */,
+				FF363F7121338EDE00D02BF2 /* ImageCollectionView.swift in Sources */,
+				FFE2AACE2130E27800146CEA /* ObjCTestViewCtr.m in Sources */,
 				FF769A9C20F309CA00DB6DA1 /* ViewController.swift in Sources */,
 				FF3AE439211F1136008CAEBD /* DemoCtr.swift in Sources */,
 				FF769A9A20F309CA00DB6DA1 /* AppDelegate.swift in Sources */,

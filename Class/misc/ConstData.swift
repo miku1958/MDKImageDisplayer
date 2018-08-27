@@ -35,15 +35,11 @@ public enum SavePhotoResult {
 public typealias SavePhotoClose = (SavePhotoResult)->()
 public typealias QRCodeHandlerClose = ([String:CGRect],CGPoint?)->()
 
-typealias IndexClose = (Int) -> ()
-public typealias intRtSelfClose = (Int) -> (MDKImageCollectionView)
-
-public typealias IndexRtIntClose = (Int) -> (Int)
+public typealias IndexClose = (Int) -> ()
 
 public typealias imageClose = (UIImage?)->()
 
-public typealias OptionImgClose =  (CloseOption,@escaping imageClose)->()
-public typealias OptionImgRtStringClose =  (CloseOption,@escaping imageClose)->(String?)
+public typealias OptionImgClose =  (MDKImageCloseOption,@escaping imageClose)->()
+public typealias OptionImgRtStringClose =  (MDKImageCloseOption,@escaping imageClose)->(String?)
 
-public typealias OptionImgRtBoolClose =  (CloseOption,@escaping imageClose)->(Bool)
 

@@ -1,5 +1,5 @@
 //
-//  DisplayingOption.swift
+//  MDKImageDisplayingInfo.swift
 //  MDKImageCollection
 //
 //  Created by mikun on 2018/8/8.
@@ -8,7 +8,7 @@
 
 
 
-@objc public class DisplayingOption : NSObject{
+@objc public class MDKImageDisplayingInfo : NSObject{
 	@objc public var index:Int = 0
 	@objc public var identifier:String = ""
 }

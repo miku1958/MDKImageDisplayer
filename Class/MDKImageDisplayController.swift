@@ -11,24 +11,39 @@ import UIKit
 //TODO:	做读取时占位提示圈
 
 
-class MDKImageDisplayController: UIViewController {
+open class MDKImageDisplayController: UIViewController {
 
 	static private weak var instance:MDKImageDisplayController?
 	
-	class func current() -> MDKImageDisplayController? {
+	@objc public class func current() -> MDKImageDisplayController? {
 		return instance
 	}
-	
-	private var largeClose:OptionImgRtStringClose?
-	convenience init(photoCount:Int ,largeClose:OptionImgRtStringClose?) {
+
+	private var largeClose:OptionImgClose?
+
+	@objc public convenience init(photoCount:Int ,largeClose:OptionImgClose?) {
 		
 		self.init()
 		
 		photoList.count = photoCount
 		self.largeClose = largeClose
+
+		setDisplayIndex(0)
+	}
+
+	private var largeIdentiferClose:OptionImgRtStringClose?
+	private var leftmostIndex:Int?
+	@objc public convenience init(largeClose:OptionImgRtStringClose?) {
+
+		self.init()
+
+		photoList.count = 1
+		largeIdentiferClose = largeClose
+
+		setDisplayIndex(0)
 	}
 	
-	required init?(coder aDecoder: NSCoder) {
+	required public init?(coder aDecoder: NSCoder) {
 		super.init(coder: aDecoder)
 		initself()
 	}
@@ -44,9 +59,7 @@ class MDKImageDisplayController: UIViewController {
 		modalPresentationStyle = .custom;
 		transitioningDelegate = transition
 		
-		collectionView.delegate = self
-		collectionView.dataSource = self
-		collectionView.MDKRegister(Cell: DisplayCell.self)
+
 		
 		
 		collectionView.addGestureRecognizer(dismissPan)
@@ -105,22 +118,35 @@ class MDKImageDisplayController: UIViewController {
 
 	let blurView = UIVisualEffectView(frame: MDKKeywindow.bounds)
 	
-	var collectionView:UICollectionView = {
+	lazy var collectionView:UICollectionView = {
 		let flow = UICollectionViewFlowLayout()
 		flow.minimumLineSpacing = 0
 		flow.minimumInteritemSpacing = 0
-		flow.itemSize = MDKKeywindow.frame.size
+		flow.itemSize = CGSize(width: MDKScreenWidth, height: MDKScreenHeight)//-1貌似是为了防止3D TOUCH出来的照片尺寸一样导致没有滚动到目标位置,但是-1的话visableCells就会有两个导致各种问题
 		flow.scrollDirection = .horizontal
-		let collection = UICollectionView(frame: CGRect(x: 0, y: 0, width: MDKScreenWidth-1, height: MDKScreenHeight-1), collectionViewLayout: flow)//防止3D TOUCH出来的照片尺寸一样导致没有滚动到目标位置
+		let collection = UICollectionView(frame: CGRect(origin: CGPoint(), size: flow.itemSize), collectionViewLayout: flow)
 		collection.backgroundColor = nil
 		collection.isPagingEnabled = true
+		collection.delegate = self
+		collection.dataSource = self
+		collection.MDKRegister(Cell: DisplayCell.self)
+
+		collection.showsVerticalScrollIndicator = false
+		collection.showsHorizontalScrollIndicator = false
+
+		collection.panGestureRecognizer.removeTarget(collection, action: nil)
+		collection.panGestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
+		collectionPanSelector = NSSelectorFromString("handlePan:")
 		return collection
 	}()
-	
+	var collectionPanSelector : Selector!
+	var collectionPanBeginOffset:CGPoint = CGPoint()
+	var collectionPanLastTranslation:CGPoint = CGPoint()
+
 	var toolbar:toolbarView = toolbarView()
 
 	var beginIndex:Int = 0
-	func setDisplayIndex(_ displayIndex:Int) -> () {
+	@objc public func setDisplayIndex(_ displayIndex:Int) -> () {
 		beginIndex = displayIndex
 		collectionView.reloadData()
 		let displayIndexPath = IndexPath(item: displayIndex, section: 0)
@@ -129,17 +155,17 @@ class MDKImageDisplayController: UIViewController {
 
 		loadPhoto(displayIndex)
 		collectionView.layoutIfNeeded()
-		if sourceTransitionIDPrefix != nil {
-			beginTransitionID = "MDK\(sourceTransitionIDPrefix!)\(displayIndex)"
-		}
+
 
 	}
 	var displayIndex:Int{
-		guard
-			let cell = collectionView.visibleCells.first as? DisplayCell,
-			let indexPath = collectionView.indexPath(for: cell)
-			else { return 0}
-		return indexPath.item
+		guard let visableCells = collectionView.visibleCells as? [DisplayCell] else { return 0}
+		for cell in visableCells{
+			if cell.imageView.image != nil , let indexPath = collectionView.indexPath(for: cell){
+				return indexPath.item
+			}
+		}
+		return 0
 	}
 
 
@@ -152,15 +178,10 @@ class MDKImageDisplayController: UIViewController {
 	})
 	var preloadCloses:[Int:Bool] = [:]
 
-	
-
 
 
 	var isFailToTryPrevious:Bool?
 	var isFailToTryNext:Bool?
-
-	var isPreloadingPrevious:Bool = false
-	var isFinishingPreloadPrevious:Bool = false
 
 
 	public var isFrom3DTouch:Bool = false
@@ -188,7 +209,7 @@ class MDKImageDisplayController: UIViewController {
 
 	var collectionViewIsScrolling :Bool = false
 	
-	let transition = Transition.global()
+	@objc public let transition = MDKImageTransition.global()
 
 	///transition 动画是否做完
 	var didFinishPresentTransitionAnimation:Bool = false
@@ -206,19 +227,15 @@ class MDKImageDisplayController: UIViewController {
 	
 	///用来第一次显示的时候滚动到当前要显示的cell
 	var firstResetPosition :Bool = false
-	///记录第一次显示的cell的transition ID
-	var beginTransitionID:String = ""
-	
-	///transition ID前缀
-	public var sourceTransitionIDPrefix:String?
+
 	
 //MARK:	供外部使用的属性
 	@objc public  var displayIndexWillChange:IndexClose?
 	@objc public  var willDismiss:IndexClose?
 	@objc public  var didDismiss:IndexClose?
 	///供外部获取当前displayCtr的显示信息
-	@objc public var displayingOption:DisplayingOption{
-		let option = DisplayingOption()
+	@objc public var displayingInfo:MDKImageDisplayingInfo{
+		let option = MDKImageDisplayingInfo()
 		let pNode = photoList[displayIndex - photoList.negativeCount]
 		if pNode.isDequeueFromIdentifier,let identifier = pNode.identifier{
 			option.identifier = identifier
@@ -257,6 +274,11 @@ class MDKImageDisplayController: UIViewController {
 			}
 		}
 	}
+
+	@objc public var registerAppearSourecView:(()->(UIView?))?
+	@objc public var registerDismissTargetView:((MDKImageCloseOption)->(UIView?))?
+
+
 }
 
 
@@ -264,13 +286,13 @@ class MDKImageDisplayController: UIViewController {
 //MARK:	view function
 extension MDKImageDisplayController{
 	
-	override func viewDidLoad() {
+	override open func viewDidLoad() {
 		super.viewDidLoad()
 		view.addSubview(blurView)
 		view.addSubview(collectionView)
 	}
 	
-	override func viewDidLayoutSubviews() {
+	override open func viewDidLayoutSubviews() {
 		let collFrame = collectionView.frame
 		
 		if collFrame.size != view.bounds.size {
@@ -287,19 +309,30 @@ extension MDKImageDisplayController{
 		
 	}
 	
-	override func viewWillAppear(_ animated: Bool) {
-		
-		UIView.animate(withDuration: Transition.duration) {
+	override open func viewWillAppear(_ animated: Bool) {
+		if let sourceView = registerAppearSourecView?(){
+			MDKImageTransition.global().beginViewMap.add(sourceView)
+		}
+
+		if let cell = collectionView.visibleCells.first as? DisplayCell{
+			MDKImageTransition.global().beginViewMap.add(cell.imageView)
+		}
+
+		UIView.animate(withDuration: MDKImageTransition.duration) {
 			self.blurView.effect = UIBlurEffect(style: .dark)
 		}
 		
 		dismissToolbar { }
 	}
-	override func viewDidAppear(_ animated: Bool) {
+	override open func viewDidAppear(_ animated: Bool) {
 		if didFinishPresentTransitionAnimation && isFrom3DTouch {
 			didFinishPresent(true)
 		}
 		didFinishPresentTransitionAnimation = true
+		if let cell = collectionView.visibleCells.first as? DisplayCell{
+			cell.isScrolling = false
+			MDKImageTransition.global().beginViewMap.remove(cell.imageView)
+		}
 	}
 	func didFinishPresent(_ animated: Bool) -> () {
 		didFinishPresentTransitionAnimation = true
@@ -309,16 +342,21 @@ extension MDKImageDisplayController{
 		}
 	}
 	
-	override func viewWillDisappear(_ animated: Bool) {
-		if let cell = collectionView.cellForItem(at: IndexPath(item: displayIndex, section: 0)){
-			Transition.antiRegistr(view: cell)
+	override open func viewWillDisappear(_ animated: Bool) {
+		let option = MDKImageCloseOption()
+		option.index = displayIndex
+		option.lastIdentifier = photoList[displayIndex - photoList.negativeCount].identifier
+		if let sourceView = registerDismissTargetView?(option) {
+			MDKImageTransition.global().dismissViewMap.add(sourceView)
+		}
+		if let cell = collectionView.visibleCells.first as? DisplayCell{
+			MDKImageTransition.global().dismissViewMap.add(cell.imageView)
 		}
 		if #available(iOS 10.0, *) {
-			let anim = UIViewPropertyAnimator(duration: Transition.duration, curve: .easeInOut) {
+			let anim = UIViewPropertyAnimator(duration: MDKImageTransition.duration, curve: .easeInOut) {
 				self.blurView.effect = nil
 			}
 			anim.startAnimation()
-			_animator = anim
 			anim.addCompletion { (position) in
 				switch position {
 				case .start , .end:
@@ -326,6 +364,7 @@ extension MDKImageDisplayController{
 				default:break
 				}
 			}
+			_animator = anim
 		} else {
 			UIView.animate(withDuration: 0.15) {
 				self.blurView.effect = nil
@@ -339,11 +378,11 @@ extension MDKImageDisplayController{
 
 //MARK:	UICollectionViewDelegate,UICollectionViewDataSource
 extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollectionViewDataSource{
-	func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+	public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
 		return photoList.count + photoList.negativeCount
 	}
 
-	func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+	public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 		let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NSStringFromClass(DisplayCell.self), for: indexPath) as! DisplayCell
 		if cell.scrollDelegate == nil {
 			cell.scrollDelegate = self
@@ -354,107 +393,94 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		}
 		return cell
 	}
-	func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+	public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 
 		let item = indexPath.item
 		let displayIndex = item - photoList.negativeCount
 
 		displayIndexWillChange?(displayIndex)
-		if let cell = cell as? DisplayCell {
-			if shouldResetCellImage{
-				cell.imageView.image = nil
-			}
-			cell.imageView.alpha = 1
-			cell.imageView.layer.mask = nil
-			cell.isScrolling = false
-
-
-			if let identifier = photoList[item - photoList.negativeCount].identifier{
-				Transition.register(view: cell.imageView, for: identifier)
-			}else{
-				var sourceID = ""
-
-				if beginTransitionID.count > 0, photoList[item - photoList.negativeCount].isDequeueFromIdentifier {
-					sourceID = beginTransitionID
-				}else if sourceTransitionIDPrefix != nil{
-					sourceID = "MDK\(sourceTransitionIDPrefix!)\(displayIndex)"
-				}
-				if sourceID.count > 0{
-					Transition.register(view: cell.imageView, for: sourceID)
-				}
-			}
-
-
-
-			let option = CloseOption()
-			if displayIndex>0 {
-				option.lastIdentifier = photoList[displayIndex-1].identifier
-			}else if displayIndex<0{
-				option.lastIdentifier = photoList[displayIndex+1].identifier
-			}
-			option.index = displayIndex
-			option.needQuality = .large
-			option.displayCtr = self
-			var hasLargePhoto = false
-			var largeIsFromNet = false//修正加载大图太快会闪一下
-			let _ = largeClose?(option){[weak self] photo in
-				if let _self = self , ( !largeIsFromNet ||  _self.didFinishPresentTransitionAnimation){
-
-					if displayIndex == 0{
-						_self.needSwitchToLarge = false
-					}
-					hasLargePhoto = true
-					guard let photo = photo else {return}
-					_self.photoList[displayIndex].photoQuality = .large
-					_self.photoList[displayIndex].photo = photo
-					DispatchQueue.main.async {
-						if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell {
-							
-							_self.updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: false)
-							_self.shouldResetCellImage = true
-
-						}
-					}
-				}
-			}
-			largeIsFromNet = true
-
-
-			if !hasLargePhoto {
-				option.needQuality = .thumbnail
-
-				let _ = self.largeClose?(option){[weak self] photo  in
-					DispatchQueue.main.async {
-						guard let _self = self else {return}
-						if _self.photoList[displayIndex].photoQuality == .thumbnail{
-							_self.photoList[displayIndex].photo = photo
-							if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell{
-								_self.updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: true)
-							}
-						}
-					}
-				}
-			}
-
-
-
+		guard let cell = cell as? DisplayCell else { return }
+		if shouldResetCellImage{
+			cell.imageView.image = nil
 		}
-		Transition.syncQueue.async {
-			DispatchQueue.main.sync {
-				Transition.synchronized({
-					if !self.isFinishingPreloadPrevious{
-						self.loadPhoto(displayIndex - 1)
+		cell.imageView.alpha = 1
+		cell.imageView.layer.mask = nil
+		cell.isScrolling = false
+
+
+
+		if let leftmostIndex = leftmostIndex, indexPath.item == leftmostIndex{
+			return
+		}
+
+
+		let option = MDKImageCloseOption()
+		if displayIndex>0 {
+			option.lastIdentifier = photoList[displayIndex-1].identifier
+		}else if displayIndex<0{
+			option.lastIdentifier = photoList[displayIndex+1].identifier
+		}
+		option.index = displayIndex
+		option.needQuality = .large
+		option.displayCtr = self
+		var hasLargePhoto = false
+		var largeIsFromNet = false//修正加载大图太快会闪一下
+		let handler:(UIImage?)->() = {[weak self] photo in
+			if let _self = self , ( !largeIsFromNet ||  _self.didFinishPresentTransitionAnimation){
+
+				if displayIndex == 0{
+					_self.needSwitchToLarge = false
+				}
+				hasLargePhoto = true
+				guard let photo = photo else {return}
+				_self.photoList[displayIndex].photoQuality = .large
+				_self.photoList[displayIndex].photo = photo
+
+				DispatchQueue.main.async(execute: {
+					if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell {
+
+						_self.updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: false)
+						_self.shouldResetCellImage = true
+
 					}
+				})
+
+			}
+		}
+		largeClose?(option,handler)
+		let _ = largeIdentiferClose?(option,handler)
+
+		largeIsFromNet = true
+
+
+		if !hasLargePhoto {
+			option.needQuality = .thumbnail
+			let handler:(UIImage?) -> () = {[weak self] photo  in
+				DispatchQueue.main.async {
+					guard let _self = self else {return}
+					if _self.photoList[displayIndex].photoQuality == .thumbnail{
+						_self.photoList[displayIndex].photo = photo
+						if let cell = _self.collectionView.cellForItem(at: IndexPath(item: item, section: 0)) as? DisplayCell{
+							_self.updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: true)
+						}
+					}
+				}
+			}
+			largeClose?(option,handler)
+			let _ = largeIdentiferClose?(option,handler)
+		}
+		MDKImageTransition.syncQueue.async {
+			DispatchQueue.main.sync {
+				MDKImageTransition.synchronized({
+					self.loadPhoto(displayIndex - 1)
 					self.loadPhoto(displayIndex + 1)
 				})
 			}
 		}
-
-
 	}
 
 	func updateCell(_ cell:DisplayCell , image:UIImage? , displayIndex:Int , isThumbnail:Bool) -> () {
-		if transition.isInTransition {
+		if transition.isInTransition , cell.imageView.image != nil{
 			return
 		}
 		photoList[displayIndex].updatingCell = true
@@ -468,29 +494,58 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 
 		photoList[displayIndex].updatingCell = false
 	}
-	func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+	public func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 		if didFinishPresentTransitionAnimation {
 			 shouldResetCellImage = true
 		}
 		if let cell = cell as? DisplayCell {
 			cell.isScrolling = false
-			Transition.antiRegistr(view: cell.imageView)
 		}
-
 	}
 
-	func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-		return MDKKeywindow.bounds.size
-	}
-	func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+
+	public func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
 		collectionViewIsScrolling = true
 	}
-	func scrollViewDidZoom(_ scrollView: UIScrollView) {
+	public func scrollViewDidZoom(_ scrollView: UIScrollView) {
 		if let cell = collectionView.visibleCells.first as? DisplayCell , scrollView == cell.contentScroll ,!photoList[displayIndex - photoList.negativeCount].updatingCell{
 			photoList[displayIndex - photoList.negativeCount].browsingScale = scrollView.zoomScale
 		}
 	}
-	func scrollViewDidScroll(_ scrollView: UIScrollView) {
+	@objc func handlePan(_ pan:UIPanGestureRecognizer) -> () {
+		if let leftmostIndex = leftmostIndex {
+			var translation = pan.translation(in: nil)
+
+			let canPanWidth = collectionView.frame.width * 0.5
+			let leftmostOffset = (CGFloat(leftmostIndex) + 1) * collectionView.frame.width - canPanWidth
+			switch pan.state {
+			case .began:
+				collectionPanBeginOffset = collectionView.contentOffset
+			case .ended:
+				if collectionView.contentOffset.x - leftmostOffset < canPanWidth{
+					pan.setTranslation(CGPoint(), in: nil)
+					collectionView.setContentOffset(CGPoint(x: (CGFloat(leftmostIndex) + 1) * collectionView.frame.width, y: 0), animated: true)
+					return
+				}
+			default:
+				if collectionView.contentOffset.x - leftmostOffset < canPanWidth{
+					let canPanTranslation = collectionPanBeginOffset.x - leftmostOffset
+					if translation.x > canPanTranslation{
+						pan.setTranslation(CGPoint(x: canPanTranslation, y: collectionPanBeginOffset.y), in: nil)
+					}else{
+						translation.x = collectionPanLastTranslation.x + (translation.x - collectionPanLastTranslation.x)*(1-min(translation.x/canPanTranslation, 1))*0.6
+
+						pan.setTranslation(translation, in: nil)
+					}
+				}
+
+			}
+			collectionPanLastTranslation = translation
+		}
+
+		collectionView.perform(collectionPanSelector, with: pan)
+	}
+	public func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		if scrollView.panGestureRecognizer.translation(in: nil).x > 1 || scrollView.panGestureRecognizer.translation(in: nil).y > 1 {
 			resetTapCount()
 		}
@@ -509,18 +564,23 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			collectionViewIsScrolling = true
 		}
 	}
-	func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+
+	public func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
 		if !decelerate {
 			scrollViewDidEndDecelerating(scrollView)
 		}
 	}
-	func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+	public func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+		DispatchQueue.main.asyncAfter(deadline: .now()+0.15) {
+			self.collectionViewIsScrolling = false
+		}
+	}
+
+	public func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
 		collectionViewIsScrolling = false
 	}
 
-	func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
-		collectionViewIsScrolling = false
-	}
+
 
 }
 
@@ -545,74 +605,91 @@ extension MDKImageDisplayController{
 	}
 
 	func loadPhoto(_ displayIndex:Int)->()  {
+
+
+		let option = MDKImageCloseOption()
+
+		option.index = displayIndex
+		option.needQuality = .large
+		option.displayCtr = self
+
+
+		var hasLargePhoto:Bool = false
+		if let largeIdentiferClose = largeIdentiferClose{
+			guard let _hasLarge = load(largeIdentiferClose: largeIdentiferClose, option: option, displayIndex: displayIndex) else{
+//				print(identifer)
+				return
+			}
+			hasLargePhoto = _hasLarge
+		}
+
+		if let largeClose = largeClose{
+			guard let _hasLarge = load(largeClose: largeClose, option: option, displayIndex: displayIndex) else{ return }
+			hasLargePhoto = _hasLarge
+		}
+
+
+		if hasLargePhoto {
+			return
+		}
+		option.needQuality = .thumbnail
+		let handler:(UIImage?)->() = {[weak self] image  in
+			DispatchQueue.main.async {
+				guard let _self = self else {return}
+				if _self.photoList[displayIndex].photoQuality == .thumbnail{
+
+					_self.photoList[displayIndex].photo = image
+				}
+			}
+		}
+		largeClose?(option,handler)
+		let _ = largeIdentiferClose?(option,handler)
+	}
+	func load(largeIdentiferClose:OptionImgRtStringClose , option:MDKImageCloseOption  ,displayIndex:Int) -> (Bool?) {
+
+
 		let maxNegativeIndex = (-photoList.negativeCount) - 1;
-		guard displayIndex >= maxNegativeIndex , displayIndex < photoList.count+1 else { return }
+		guard displayIndex >= maxNegativeIndex , displayIndex <= photoList.count else { return nil}
 		let isTryingNext = displayIndex == photoList.count
 		let isTryingPrevious = displayIndex == maxNegativeIndex
 		if isTryingNext ,(isFailToTryNext ?? false ||
 			photoList[displayIndex-1].identifier == nil){
 
-			return
+			return nil
 		}
 		if isTryingPrevious , (isFailToTryPrevious ?? false ||
 			photoList[displayIndex+1].identifier == nil){
 
-			return
+			return nil
 		}
 		var inPreload = false
 		if let _inPreload  = self.preloadCloses[displayIndex] {
 			inPreload = _inPreload
 		}
-		guard !inPreload else { return }
+		guard !inPreload else { return nil}
 		self.preloadCloses[displayIndex] = true
 
-		let option = CloseOption()
 		if displayIndex>0 {
 			option.lastIdentifier = photoList[displayIndex-1].identifier
 		}else if displayIndex<0{
 			option.lastIdentifier = photoList[displayIndex+1].identifier
 		}
 
-		option.index = displayIndex
-		option.needQuality = .large
-		option.displayCtr = self
+
+		var hasLargePhoto = false
+
 		var cachePhotoNode:photoNode?
 
-		var hasLargePhoto:Bool = false
 		var isFromInternet:Bool = false
-		let identifier = largeClose?(option){[weak self] image  in
+		let identifier = largeIdentiferClose(option){[weak self] image  in
 			hasLargePhoto = true
-			let _isFromInternet = isFromInternet;
-			MDKDispatch_main_async_safe {
-				guard let _self = self else{return}
-
-				var pNode = photoNode()
-				if _self.photoList.checkIndex(displayIndex){
-					pNode = _self.photoList[displayIndex]
-				}
-				pNode.photoQuality = .large
-				pNode.photo = image
-				pNode.index = displayIndex
-				if isTryingNext , displayIndex == _self.photoList.count{
-					cachePhotoNode = pNode
-				}else if isTryingPrevious, displayIndex == (-_self.photoList.negativeCount) - 1{
-					cachePhotoNode = pNode
-				}else{
-					_self.photoList[displayIndex] = pNode
-				}
-				if !_isFromInternet , !(_self.didFinishPresentTransitionAnimation && displayIndex == _self.beginIndex) ,
-					let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex + _self.photoList.negativeCount, section: 0)) as? DisplayCell{
-					_self.needSwitchToLarge = false
-					_self.updateCell(cell, image: image, displayIndex: displayIndex, isThumbnail: false)
-				}
-
-			}
+			cachePhotoNode = self?.update(image: image, cachePhotoNode: cachePhotoNode, isFromInternet: isFromInternet, displayIndex: displayIndex, isTryingNext: isTryingNext, isTryingPrevious: isTryingPrevious)
 		}
 		isFromInternet = true
 		if identifier != nil {
 			if isTryingNext {
 				if photoList[displayIndex-1].identifier == identifier{
-					return
+					return nil
 				}
 				self.photoList.count = max(self.photoList.count, displayIndex + 1)
 				isFailToTryNext = false
@@ -632,7 +709,7 @@ extension MDKImageDisplayController{
 			}
 			if isTryingPrevious {
 				if photoList[displayIndex+1].identifier == identifier{
-					return
+					return nil
 				}
 				photoList.negativeCount = (-displayIndex)
 				if cachePhotoNode != nil{
@@ -644,39 +721,29 @@ extension MDKImageDisplayController{
 				photoList[displayIndex].identifier = identifier
 			}
 			photoList[displayIndex].isDequeueFromIdentifier = true
-			if (isTryingPrevious && !isPreloadingPrevious){
-				isPreloadingPrevious = true
+			if (isTryingPrevious){
 
-				var indexPs:[IndexPath] = [IndexPath(item: 0, section: 0)]
-				for idx in 1..<10{
-					self.loadPhoto(displayIndex-idx)
-					if !self.isPreloadingPrevious {
-						break
-					}
-					indexPs.append(IndexPath(item: 0, section: 0))
-				}
-				let addOffset = self.collectionView.frame.width * CGFloat(indexPs.count);
+				let preloadCount = 1000
+
+
+				let addOffset = self.collectionView.frame.width * CGFloat(preloadCount);
 				let offsetX = self.collectionView.contentOffset.x + addOffset
 
+				self.photoList.negativeCount += preloadCount-1
 				UIView.performWithoutAnimation {
 					CATransaction.begin()
 					CATransaction.setDisableActions(true)
 
-					self.collectionView.insertItems(at: indexPs)
-					self.collectionView.layoutIfNeeded()
+					self.collectionView.reloadData()
 
-					var translation = self.collectionView.panGestureRecognizer.translation(in: nil)
-					if translation.x == 0{
-						self.collectionView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: false)
-					}else{
-						translation.x -= addOffset
-						self.collectionView.panGestureRecognizer.setTranslation(translation, in: nil)
-					}
 
-					self.collectionView.layoutIfNeeded()
+					self.collectionView.setContentOffset(CGPoint(x: offsetX, y: 0), animated: false)
+
+
 
 					CATransaction.commit()
 				}
+				self.collectionView.layoutIfNeeded()
 
 
 				self.collectionViewIsScrolling = false
@@ -684,39 +751,71 @@ extension MDKImageDisplayController{
 					cell.isScrolling = false
 				}
 
-				self.isFinishingPreloadPrevious = true
-				DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(0.1)) {
-					self.isPreloadingPrevious = false
-					self.isFinishingPreloadPrevious = false
-				}
 			}
 		}else if isTryingNext{
 			isFailToTryNext = true
-			return
+			return nil
 		}else if isTryingPrevious{
 			isFailToTryPrevious = true
-			isPreloadingPrevious = false
-			return
+			return nil
+		}else if displayIndex<0 && leftmostIndex==nil{
+			leftmostIndex = displayIndex + photoList.negativeCount
 		}
 
-		if hasLargePhoto {
-			return
-		}
-		option.needQuality = .thumbnail
-
-		let _ = self.largeClose?(option){[weak self] image  in
-			DispatchQueue.main.async {
-				guard let _self = self else {return}
-				if _self.photoList[displayIndex].photoQuality == .thumbnail{
-
-					_self.photoList[displayIndex].photo = image
-				}
-			}
-		}
-
-
+		return hasLargePhoto
 	}
-	
+
+	func load(largeClose:OptionImgClose , option:MDKImageCloseOption  ,displayIndex:Int) -> (Bool?) {
+		if displayIndex<0 || displayIndex>=photoList.count {
+			return nil
+		}
+		var inPreload = false
+		if let _inPreload  = self.preloadCloses[displayIndex] {
+			inPreload = _inPreload
+		}
+		guard !inPreload else { return nil}
+		self.preloadCloses[displayIndex] = true
+
+		var hasLargePhoto = false
+
+		var isFromInternet:Bool = false
+		largeClose(option){[weak self] image in
+			hasLargePhoto = true
+			self?.update(image: image, cachePhotoNode: nil, isFromInternet: isFromInternet, displayIndex: displayIndex, isTryingNext: false, isTryingPrevious: false)
+		}
+		isFromInternet = true
+		return hasLargePhoto
+	}
+	@discardableResult
+	func update(image:UIImage? , cachePhotoNode:photoNode? ,isFromInternet:Bool,displayIndex:Int,isTryingNext:Bool,isTryingPrevious:Bool) -> (photoNode?) {
+		let _isFromInternet = isFromInternet;
+		var cachePhotoNode = cachePhotoNode
+		DispatchQueue.main.async {[weak self] in
+			guard let _self = self else{return}
+
+			var pNode = photoNode()
+			if _self.photoList.checkIndex(displayIndex){
+				pNode = _self.photoList[displayIndex]
+			}
+			pNode.photoQuality = .large
+			pNode.photo = image
+			pNode.index = displayIndex
+			if isTryingNext , displayIndex == _self.photoList.count{
+				cachePhotoNode = pNode
+			}else if isTryingPrevious, displayIndex == (-_self.photoList.negativeCount) - 1{
+				cachePhotoNode = pNode
+			}else{
+				_self.photoList[displayIndex] = pNode
+			}
+			if !_isFromInternet , !(_self.didFinishPresentTransitionAnimation && displayIndex == _self.beginIndex) ,
+				let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex + _self.photoList.negativeCount, section: 0)) as? DisplayCell{
+				_self.needSwitchToLarge = false
+				_self.updateCell(cell, image: image, displayIndex: displayIndex, isThumbnail: false)
+			}
+
+		}
+		return cachePhotoNode
+	}
 	func updatePhotoCount(_ count:Int) {
 		var indexPaths:[IndexPath] = []
 		for idx in photoList.count ..< count {
@@ -758,7 +857,7 @@ extension MDKImageDisplayController{
 			})
 
 		let updateFrame = {
-			UIView.animate(withDuration: Transition.duration, animations: {
+			UIView.animate(withDuration: MDKImageTransition.duration, animations: {
 				let photoBottom = max(-10, cell.frame.height - cell.imageView.superview!.convert(cell.imageView.frame, to: cell).maxY)
 				if photoBottom<self.toolbar.frame.height{
 					self.collectionView.frame.origin.y = 0-(self.toolbar.frame.height - photoBottom)
@@ -806,7 +905,7 @@ extension MDKImageDisplayController{
 
 
 		collectionView.isScrollEnabled = true
-		UIView.animate(withDuration: Transition.duration, animations: {
+		UIView.animate(withDuration: MDKImageTransition.duration, animations: {
 			self.collectionView.frame.origin.y = 0
 			self.toolbar.frame.origin.y = self.view.frame.height
 		}) { (_) in
@@ -828,7 +927,7 @@ extension MDKImageDisplayController{
 		let translation = pan.translation(in: nil)
 
 		let progress = min(translation.y / collectionView.bounds.height,  0.5)  
-		Transition.global().process = progress
+		MDKImageTransition.global().process = progress
 		guard let cell = collectionView.visibleCells.first as? DisplayCell else{return}
 		switch pan.state {
 		case .began:
@@ -837,18 +936,18 @@ extension MDKImageDisplayController{
 			if #available(iOS 10.0, *) {
 				animator()?.pauseAnimation()
 			}
-			Transition.global().dismiss(viewController: self)
+			MDKImageTransition.global().dismiss(viewController: self)
 		case .changed:
-			Transition.global().process = progress
+			MDKImageTransition.global().process = progress
 			if #available(iOS 10.0, *) {
 				animator()?.fractionComplete = min(1, progress*1.5)
 			}
-			Transition.global().controlTransitionView(position: translation)
+			MDKImageTransition.global().controlTransitionView(position: translation)
 		default:
 			cell.contentScroll.panGestureRecognizer.isEnabled = true
 			
 			if progress + pan.velocity(in: nil).y / collectionView.bounds.height > 0.3 , translation.y > collectionView.bounds.height/4 {
-				Transition.global().commitDismiss()
+				MDKImageTransition.global().commitDismiss()
 				didDismiss?(displayIndex)
 				if #available(iOS 10.0, *) {
 					if let animator = animator(){
@@ -856,7 +955,7 @@ extension MDKImageDisplayController{
 					}
 				}
 			} else {
-				Transition.global().cancelDismiss()
+				MDKImageTransition.global().cancelDismiss()
 				didDismiss?(displayIndex)
 				if #available(iOS 10.0, *) {
 					animator()?.isReversed = true
@@ -958,7 +1057,7 @@ extension MDKImageDisplayController{
 
 //MARK:	UIGestureRecognizerDelegate
 extension MDKImageDisplayController:UIGestureRecognizerDelegate {
-	func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+	public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
 
 		if gestureRecognizer == collectionView.panGestureRecognizer || otherGestureRecognizer == collectionView.panGestureRecognizer {
 			return false
@@ -966,7 +1065,7 @@ extension MDKImageDisplayController:UIGestureRecognizerDelegate {
 
 		return true
 	}
-	func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+	public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 
 		if gestureRecognizer == dismissTap {
 			guard let cell = self.collectionView.visibleCells.first as? DisplayCell else {return true}
@@ -1036,7 +1135,7 @@ extension MDKImageDisplayController{
 			return
 		}
 		let displayIndex = self.displayIndex - photoList.negativeCount
-		let option = CloseOption()
+		let option = MDKImageCloseOption()
 		if displayIndex>0 {
 			option.lastIdentifier = photoList[displayIndex-1].identifier
 		}else if displayIndex<0{
@@ -1045,7 +1144,7 @@ extension MDKImageDisplayController{
 		option.index = displayIndex
 		option.needQuality = .large
 		option.displayCtr = self
-		let identifier = largeClose?(option){[weak self] photo in
+		let identifier = largeIdentiferClose?(option){[weak self] photo in
 			guard let photo = photo , let _self = self else {return}
 			_self.photoList[displayIndex].photoQuality = .original
 
@@ -1064,22 +1163,25 @@ extension MDKImageDisplayController{
 
 //系统功能
 extension MDKImageDisplayController{
-	override var supportedInterfaceOrientations: UIInterfaceOrientationMask{
+	override open var supportedInterfaceOrientations: UIInterfaceOrientationMask{
 		return .all
 	}
 
 	@available(iOS 9.0, *)
-	override var previewActionItems: [UIPreviewActionItem]{
+	override open var previewActionItems: [UIPreviewActionItem]{
 		var actionArr:[UIPreviewActionItem] = []
 		actionArr.append(UIPreviewAction(title: "保存图片", style: .default, handler: {[weak self] (action, previewCtr) in
 			self?.savePhoto()
 		}))
 
 		if self.photoList[0].photo == nil {
-			let option = CloseOption()
+			let option = MDKImageCloseOption()
 			option.index = 0
 			option.needQuality = .thumbnail
-			let _ = largeClose?(option){ photo in
+			largeClose?(option){ photo in
+				self.photoList[0].photo = photo
+			}
+			let _ = largeIdentiferClose?(option){ photo in
 				self.photoList[0].photo = photo
 			}
 		}

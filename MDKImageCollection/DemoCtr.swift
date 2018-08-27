@@ -38,11 +38,11 @@ class DemoCtr: UIViewController {
     }
 	
 
-	var imageCollection:MDKImageCollectionView?
+	var imageCollection:ImageCollectionView?
 	func InfiniteTest() -> () {
 		let flow = UICollectionViewFlowLayout()
 		flow.itemSize = CGSize(width: 100, height: 100)
-		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
+		imageCollection = ImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection!)
 		
 		imageCollection?.thumbnailForIndexUseCheck(close: { (option, handler) in
@@ -56,7 +56,7 @@ class DemoCtr: UIViewController {
 	func UpdateTest() -> () {
 		let flow = UICollectionViewFlowLayout()
 		flow.itemSize = CGSize(width: 100, height: 100)
-		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
+		imageCollection = ImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection!)
 		
 		imageCollection?.thumbnailForIndex(count: 40, close: { (option, handler) in
@@ -77,7 +77,7 @@ class DemoCtr: UIViewController {
 		
 		let flow = UICollectionViewFlowLayout()
 		flow.itemSize = CGSize(width: 100, height: 100)
-		imageCollection = MDKImageCollectionView(frame: CGRect(), flowLayout: flow)
+		imageCollection = ImageCollectionView(frame: CGRect(), flowLayout: flow)
 		view.addSubview(imageCollection!)
 		imageCollection?.registerFor3DTouchPreviewing(self)
 		imageCollection?.thumbnailForIndex(count: urlArr.count, close: { (option, handler) in
@@ -98,7 +98,7 @@ class DemoCtr: UIViewController {
 		imageCollection?.frame = CGRect(x: 0, y: 0, width: view.frame.size.width, height: view.frame.size.height)
 	}
 	func QRCodeTest() -> () {
-		imageCollection = MDKImageCollectionView()
+		imageCollection = ImageCollectionView()
 		let layout = imageCollection?.collectionViewLayout as! UICollectionViewFlowLayout
 		layout.itemSize = #imageLiteral(resourceName: "QRCode").size
 		view.addSubview(imageCollection!)

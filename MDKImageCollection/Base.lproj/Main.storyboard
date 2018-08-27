@@ -73,6 +73,13 @@
                                     <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="qgr-RP-jGx"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Cts-UF-Bm5">
+                                <rect key="frame" x="132" y="364" width="111" height="30"/>
+                                <state key="normal" title="ObjC跨视图切换"/>
+                                <connections>
+                                    <segue destination="0fk-F0-j8p" kind="show" id="Ron-Ih-Fly"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
@@ -84,6 +91,8 @@
                             <constraint firstItem="u9P-Oc-BIW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Jxx-11-qQP"/>
                             <constraint firstItem="lfR-by-9zO" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="50" id="RtX-QB-RCk"/>
                             <constraint firstItem="5mC-hw-cKT" firstAttribute="top" secondItem="u9P-Oc-BIW" secondAttribute="bottom" constant="20" id="XM1-5B-pg6"/>
+                            <constraint firstItem="Cts-UF-Bm5" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ani-rK-b1P"/>
+                            <constraint firstItem="Cts-UF-Bm5" firstAttribute="top" secondItem="N08-La-McT" secondAttribute="bottom" constant="20" id="gEO-1c-Ufh"/>
                             <constraint firstItem="u9P-Oc-BIW" firstAttribute="top" secondItem="lfR-by-9zO" secondAttribute="bottom" constant="20" id="pLQ-Ng-hu6"/>
                             <constraint firstItem="lfR-by-9zO" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="tVC-U7-J0z"/>
                         </constraints>
@@ -94,6 +103,14 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="423" y="-276"/>
+        </scene>
+        <!--ObjCTestViewCtr-->
+        <scene sceneID="80I-sh-JXp">
+            <objects>
+                <viewControllerPlaceholder storyboardName="ObjCTestViewCtr" id="0fk-F0-j8p" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="xh7-zY-NJw" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1188" y="-277"/>
         </scene>
     </scenes>
 </document>

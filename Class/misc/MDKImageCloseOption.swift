@@ -1,5 +1,5 @@
 //
-//  CloseOption.swift
+//  MDKImageCloseOption.swift
 //  MDKImageCollection
 //
 //  Created by mikun on 2018/8/8.
@@ -8,7 +8,7 @@
 
 
 
-@objc public class CloseOption :NSObject{
+@objc public class MDKImageCloseOption :NSObject{
 	@objc public var lastIdentifier:String?
 	@objc public var index:Int = 0
 	@objc public var needQuality:LoadingPhotoQuality = .thumbnail

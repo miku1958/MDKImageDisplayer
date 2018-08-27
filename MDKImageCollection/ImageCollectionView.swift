@@ -1,5 +1,5 @@
 //
-//  MDKImageCollectionView.swift
+//  ImageCollectionView.swift
 //  MDKImageCollection
 //
 //  Created by mikun on 2018/7/9.
@@ -14,16 +14,14 @@
 //FIXME:	handler改成传出去一个UIImageVIew,可以通过注册类型来改显示的UIIMageView以支持gif/视频
 
 
-open class MDKImageCollectionView: UICollectionView {
-	
+open class ImageCollectionView: UICollectionView {
+
 	
 	@objc public convenience init() {
 		let layout = UICollectionViewFlowLayout();
-		layout.itemSize = CGSize(width: MDKScreenWidth, height: MDKScreenHeight)
 		layout.minimumLineSpacing = 2
 		layout.minimumInteritemSpacing = 2
 		self.init(frame: CGRect(), flowLayout: layout)
-		
 	}
 	private convenience init(frame: CGRect) {
 		self.init()
@@ -44,21 +42,20 @@ open class MDKImageCollectionView: UICollectionView {
 	func initSelf() -> () {
 		delegate = self
 		dataSource = self
-		cusMiniteritemSpace = flowLayout.minimumInteritemSpacing
-		cusSectionInset = flowLayout.sectionInset
-		
+//		cusMiniteritemSpace = flowLayout.minimumInteritemSpacing
+//		cusSectionInset = flowLayout.sectionInset
+
 		MDKRegister(Cell: ThumbnailCell.self)
 		if #available(iOS 11.0, *) {
 			self.contentInsetAdjustmentBehavior = .never
 		}
 	}
 
-	
+	var cellSize:CGSize = CGSize(width: MDKScreenWidth, height: MDKScreenHeight)
 	
 
 	@objc public var imageTransitionCornerRadius:CGFloat = 0
 
-	@objc public var customTransitionID:String?
 
 
 
@@ -76,7 +73,7 @@ open class MDKImageCollectionView: UICollectionView {
 
 	func updateThumbnailClose() -> () {
 		hasThumbnailClose = !(thumbnailClose == nil && thumbnaiIdentifierClose == nil)
-		let option = CloseOption()
+		let option = MDKImageCloseOption()
 		option.index = 0;
 
 		let handler:imageClose = {image in
@@ -84,13 +81,14 @@ open class MDKImageCollectionView: UICollectionView {
 				if self.needAutoPreLoad , self.photoList.count == 0 {
 					self.photoList.count = 1
 				}
-				if  self.autoSizeWhenOnePhot , !self.needAutoPreLoad ,self.photoList.count == 1 {
-					if image != nil{
-						self.flowLayout.itemSize = image!.size
-					}
-					self.reloadData()
-					self.invalidateIntrinsicContentSize()
-				}
+//				if  self.autoSizeWhenOnePhot , !self.needAutoPreLoad ,self.photoList.count == 1 {
+//					if image != nil{
+//						self.flowLayout.itemSize = image!.size
+//						self.flowLayout.itemSize.width = min(self.flowLayout.itemSize.width, self.frame.width-self.contentInset.left - self.contentInset.right)
+//					}
+//					self.reloadData()
+//					self.invalidateIntrinsicContentSize()
+//				}
 				if let cell = self.cellForItem(at: IndexPath(item: 0, section: 0)) as? ThumbnailCell {
 					cell.imageView.image = image
 				}
@@ -110,6 +108,9 @@ open class MDKImageCollectionView: UICollectionView {
 		invalidateIntrinsicContentSize()
 	}
 
+	open override func reloadData() {
+		super.reloadData()
+	}
 
 	@objc public var hasLargeClose:Bool = false
 	private var largeClose:OptionImgClose? {
@@ -117,40 +118,41 @@ open class MDKImageCollectionView: UICollectionView {
 			hasLargeClose = largeClose != nil || hasLargeClose
 		}
 	}
+	
 	private var largeIdentifierClose:OptionImgRtStringClose? {
 		didSet{
 			hasLargeClose = largeClose != nil || hasLargeClose
 		}
 	}
-	@objc public var displayingOption:DisplayingOption?{
-		return MDKImageDisplayController.current()?.displayingOption
+	@objc public var displayingInfo:MDKImageDisplayingInfo?{
+		return MDKImageDisplayController.current()?.displayingInfo
 	}
 
 	@objc public var sourceScreenInset:UIEdgeInsets = UIEdgeInsets()
 
 
 	//FIXME:	废弃
-	private var _columnCount:Int = 0
-	@objc public var autoSizeWhenOnePhot:Bool = false {
-		didSet{
-			if autoSizeWhenOnePhot {
-				columnCount(1)
-			}
-		}
-	}
+//	private var _columnCount:Int = 0
+//	@objc public var autoSizeWhenOnePhot:Bool = false {
+//		didSet{
+//			if autoSizeWhenOnePhot {
+//				columnCount(1)
+//			}
+//		}
+//	}
 
 	private var needAutoPreLoad:Bool = false
 	private var maxVisibleCount:Int = 0
 	
-	//FIXME:	废弃
-	private var currentColumnCount:Int = 0
-	//FIXME:	废弃
-	private var currentCount:Int = 0
-
-	//FIXME:	废弃
-	private var cusMiniteritemSpace:CGFloat = 0
-	//FIXME:	废弃
-	private var cusSectionInset:UIEdgeInsets = UIEdgeInsets()
+//	//FIXME:	废弃
+//	private var currentColumnCount:Int = 0
+//	//FIXME:	废弃
+//	private var currentCount:Int = 0
+//
+//	//FIXME:	废弃
+//	private var cusMiniteritemSpace:CGFloat = 0
+//	//FIXME:	废弃
+//	private var cusSectionInset:UIEdgeInsets = UIEdgeInsets()
 
 	private var loadingIndex:Int = 1
 	private var preloadToIndex:Int = 1
@@ -165,77 +167,78 @@ open class MDKImageCollectionView: UICollectionView {
 	})
 
 
-	//FIXME:	废弃?
-	@objc public var flowLayout: UICollectionViewFlowLayout{
-		return collectionViewLayout as! UICollectionViewFlowLayout
+//	//FIXME:	废弃?
+	@objc public var flowLayout: UICollectionViewFlowLayout?{
+		return collectionViewLayout as?  UICollectionViewFlowLayout
 	}
-	//FIXME:	废弃
-	@objc public func setForceSectionInset(_ inset:UIEdgeInsets){
-		_forceSectionInset = inset
-	}
-	//FIXME:	废弃
-	private var _forceSectionInset:UIEdgeInsets? {
-		didSet{
-			if _forceSectionInset != nil{
-				flowLayout.sectionInset = _forceSectionInset!
-			}
-		}
-	}
+//	//FIXME:	废弃
+//	@objc public func setForceSectionInset(_ inset:UIEdgeInsets){
+//		_forceSectionInset = inset
+//	}
+//	//FIXME:	废弃
+//	private var _forceSectionInset:UIEdgeInsets? {
+//		didSet{
+//			if _forceSectionInset != nil{
+//				flowLayout.sectionInset = _forceSectionInset!
+//			}
+//		}
+//	}
 
 
 
 }
 //MARK:	view function
-extension MDKImageCollectionView{
+extension ImageCollectionView{
 	open override func layoutSubviews() {
 		
 		super.layoutSubviews()
-		if _columnCount == 0 {
-			flowLayout.minimumInteritemSpacing = cusMiniteritemSpace
-			flowLayout.sectionInset = _forceSectionInset != nil ? _forceSectionInset! : cusSectionInset
-			var contentWidth = frame.size.width - cusSectionInset.left - cusSectionInset.right - flowLayout.itemSize.width
-			currentColumnCount = 0
-			while contentWidth > 0 {
-				currentColumnCount += 1
-				contentWidth -= flowLayout.itemSize.width
-				contentWidth -= cusMiniteritemSpace
-			}
-			return;
-		}
-		currentColumnCount = _columnCount
-		var tempMaxCount = CGFloat(currentColumnCount)
-		if flowLayout.itemSize.height > 0 {
-			tempMaxCount = tempMaxCount * (frame.size.height / flowLayout.itemSize.height)
-		}
-		
-		maxVisibleCount = max(1, Int(tempMaxCount))
-		var itemWidths:CGFloat = 0
-		let itemWidth = min(frame.width, flowLayout.itemSize.width )
-		let itemHeight = min(frame.height, flowLayout.itemSize.height)
-		if itemWidth > 0 , itemHeight > 0{
-			flowLayout.itemSize = CGSize(width: itemWidth, height: itemHeight)
-			while itemWidths < frame.size.width {
-				itemWidths += itemWidth
-			}
-			let itemCount = max(1, Int(itemWidths / itemWidth))
-			if  itemCount <= _columnCount {
-				//尺寸满足条件,查看间距需不需要调整
-				let interSpace = (frame.size.width - itemWidths) / CGFloat(itemCount - 1)
-				if interSpace < flowLayout.minimumInteritemSpacing {
-					flowLayout.minimumInteritemSpacing = interSpace
-				}
-			}else {
-				//一行能放的比columnCount多
-				let interSpace = CGFloat(Int((frame.size.width - flowLayout.itemSize.width * CGFloat(_columnCount)) / CGFloat(_columnCount + 1)))
-				flowLayout.minimumInteritemSpacing = interSpace
-				if _forceSectionInset != nil{
-					flowLayout.sectionInset = _forceSectionInset!;
-				}else{
-					flowLayout.sectionInset = UIEdgeInsets(top: cusSectionInset.top, left: interSpace, bottom: cusSectionInset.bottom, right: interSpace)
-				}
-			}
-		}
-		
+//		if _columnCount == 0 {
+//			flowLayout.minimumInteritemSpacing = cusMiniteritemSpace
+//			flowLayout.sectionInset = _forceSectionInset != nil ? _forceSectionInset! : cusSectionInset
+//			var contentWidth = frame.size.width - cusSectionInset.left - cusSectionInset.right - flowLayout.itemSize.width
+//			currentColumnCount = 0
+//			while contentWidth > 0 {
+//				currentColumnCount += 1
+//				contentWidth -= flowLayout.itemSize.width
+//				contentWidth -= cusMiniteritemSpace
+//			}
+//			return;
+//		}
+//		currentColumnCount = _columnCount
+//		var tempMaxCount = CGFloat(currentColumnCount)
+//		if flowLayout.itemSize.height > 0 {
+//			tempMaxCount = tempMaxCount * (frame.size.height / flowLayout.itemSize.height)
+//		}
+
+//		maxVisibleCount = max(1, Int(tempMaxCount))
+//		var itemWidths:CGFloat = 0
+//		var itemWidth = min(frame.width, flowLayout.itemSize.width )
+//		let itemHeight = min(frame.height, flowLayout.itemSize.height)
+//		if itemWidth > 0 , itemHeight > 0{
+//			itemWidth = min(itemWidth, frame.width-contentInset.left - contentInset.right)
+//			flowLayout.itemSize = CGSize(width: itemWidth, height: itemHeight)
+//			while itemWidths < frame.size.width {
+//				itemWidths += itemWidth
+//			}
+//			let itemCount = max(1, Int(itemWidths / itemWidth))
+//			if  itemCount <= _columnCount {
+//				//尺寸满足条件,查看间距需不需要调整
+//				let interSpace = (frame.size.width - itemWidths) / CGFloat(itemCount - 1)
+//				if interSpace < flowLayout.minimumInteritemSpacing {
+//					flowLayout.minimumInteritemSpacing = interSpace
+//				}
+//			}else {
+//				//一行能放的比columnCount多
+//				let interSpace = CGFloat(Int((frame.size.width - flowLayout.itemSize.width * CGFloat(_columnCount)) / CGFloat(_columnCount + 1)))
+//				flowLayout.minimumInteritemSpacing = interSpace
+//				if _forceSectionInset != nil{
+//					flowLayout.sectionInset = _forceSectionInset!;
+//				}else{
+//					flowLayout.sectionInset = UIEdgeInsets(top: cusSectionInset.top, left: interSpace, bottom: cusSectionInset.bottom, right: interSpace)
+//				}
+//			}
+//		}
+
 		if !self.bounds.size.equalTo(intrinsicContentSize) {
 			
 			invalidateIntrinsicContentSize()
@@ -251,10 +254,10 @@ extension MDKImageCollectionView{
 }
 
 //MARK:	链式设置
-extension MDKImageCollectionView{
+extension ImageCollectionView{
 	//MARK:	thumbnail
 	@objc @discardableResult open
-	func thumbnailForIndex(count:Int , close:@escaping OptionImgClose) ->  MDKImageCollectionView {
+	func thumbnailForIndex(count:Int , close:@escaping OptionImgClose) ->  ImageCollectionView {
 		needAutoPreLoad = false
 		
 		photoList.count = count;
@@ -263,7 +266,7 @@ extension MDKImageCollectionView{
 	}
 	
 	@objc @discardableResult open
-	func thumbnailForIndexUseCheck(close:@escaping OptionImgRtBoolClose) ->  MDKImageCollectionView {
+	func thumbnailForIndexUseCheck(close:@escaping OptionImgRtBoolClose) ->  ImageCollectionView {
 		needAutoPreLoad = true
 		
 		photoList.count = 0;
@@ -274,32 +277,18 @@ extension MDKImageCollectionView{
 
 	//MARK:	large
 	@objc @discardableResult open
-	func largeForIndex(close:@escaping OptionImgClose) ->  MDKImageCollectionView {
+	func largeForIndex(close:@escaping OptionImgClose) ->  ImageCollectionView {
 		largeClose = close
 		return self;
 	}
 	@objc @discardableResult open
-	func largeForIndexUseIndetifier(close:@escaping OptionImgRtStringClose) ->  MDKImageCollectionView {
+	func largeForIndexUseIndetifier(close:@escaping OptionImgRtStringClose) ->  ImageCollectionView {
 		largeIdentifierClose = close
 		return self;
 	}
 
-
-	//MARK:	columnCount
-	@objc open var columnCount_:intRtSelfClose{
-		return {
-			
-			self._columnCount = $0
-			return self;
-		}
-	}
-
-	@discardableResult
-	func columnCount(_ count:Int) ->  MDKImageCollectionView {
-		_columnCount = count
-		return self;
-	}
-
+	public typealias OptionImgRtBoolClose =  (MDKImageCloseOption,@escaping imageClose)->(Bool)
+	public typealias intRtSelfClose = (Int) -> (ImageCollectionView)
 
 	//MARK:	updateCount
 	@objc open var updateCount_:intRtSelfClose{
@@ -310,7 +299,7 @@ extension MDKImageCollectionView{
 	}
 
 	@discardableResult
-	func updateCount(_ count:Int) ->  MDKImageCollectionView {
+	func updateCount(_ count:Int) ->  ImageCollectionView {
 		self.updateCollectionCount(count)
 		return self;
 	}
@@ -318,12 +307,10 @@ extension MDKImageCollectionView{
 	private func updateCollectionCount(_ count:Int) -> () {
 		guard photoList.count != count else { return }
 		if count == 0 {
-			for cell in visibleCells as! [ThumbnailCell]{
-				Transition.antiRegistr(view: cell.imageView)
-			}
 			photoList.count = 0;
-			reloadData()
+			isHidden = true
 		}else{
+			isHidden = false
 			var indexPs:[IndexPath] = []
 			if count>photoList.count {
 				for idx in photoList.count..<count {
@@ -349,7 +336,7 @@ extension MDKImageCollectionView{
 }
 
 //MARK:	UICollectionViewDelegate,UICollectionViewDataSource
-extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewDataSource {
+extension ImageCollectionView : UICollectionViewDelegateFlowLayout,UICollectionViewDataSource {
 	public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
 		return photoList.count
 	}
@@ -361,15 +348,11 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 	public func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath){
 		let item = indexPath.item
 		guard let cell = cell as? ThumbnailCell else  {return}
-		if let customTransitionID = customTransitionID {
-			Transition.register(view:cell.imageView, for: customTransitionID)
-		}else{
-			Transition.register(view:cell.imageView, for: "MDK\(Unmanaged.passUnretained(self).toOpaque())\(item)")
-		}
+
 
 
 		cell.imageView.image = nil
-		let option = CloseOption()
+		let option = MDKImageCloseOption()
 		option.index = item;
 		let handler:imageClose = {[weak self] image in
 			DispatchQueue.main.async {
@@ -387,13 +370,14 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 		guard needAutoPreLoad ,let thumbnailClose = thumbnaiIdentifierClose else {return}
 		
 		if maxVisibleCount == 0 {
-			layoutSubviews()
-			maxVisibleCount = Int(CGFloat(currentColumnCount) * (frame.size.height / flowLayout.itemSize.height))
+			if let items = collectionViewLayout.layoutAttributesForElements(in: collectionView.bounds){
+				maxVisibleCount = items.count
+			}
 		}
 		if maxVisibleCount>2 ,maxVisibleCount%2 != 0 {
 			maxVisibleCount -= 1
 		}
-		Transition.syncQueue.async {
+		MDKImageTransition.syncQueue.async {
 			var beginIndex = 0
 			var endIndex = 0
 			let pageCount = self.maxVisibleCount//如果比这个值高的话,有可能在滚太快的时候导致这个index的cell没有显示就跳过了
@@ -422,17 +406,17 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 				var photo = photoNode()
 				photo.index = nextIndex
 				
-				Transition.synchronized({
+				MDKImageTransition.synchronized({
 					self.preloadPhotos.append(photo)
 				})
-				let option = CloseOption()
+				let option = MDKImageCloseOption()
 				option.index = nextIndex;
 				let hasImage = thumbnailClose(option){[weak self] image in
 
 					if image != nil {
 						DispatchQueue.main.sync {
 
-							Transition.synchronized({
+							MDKImageTransition.synchronized({
 								guard self != nil else { return }
 								if let firstPhoto = self!.preloadPhotos.first ,
 									nextIndex >= firstPhoto.index ,
@@ -449,18 +433,18 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 					}
 				}
 				if(!hasImage){
-					Transition.synchronized({
+					MDKImageTransition.synchronized({
 						self.preloadPhotos.removeLast()
 					})
 
-					self.currentCount = nextIndex-1
+//					self.currentCount = nextIndex-1
 					break
 				}
 
 
 			}
 			DispatchQueue.main.sync {
-				Transition.synchronized({
+				MDKImageTransition.synchronized({
 
 					if self.preloadPhotos.count > 0{
 						var insertedIndexPaths:[IndexPath] = []
@@ -489,7 +473,6 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 
 	public func collectwillDisplayCellionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
 		if let cell = cell as? ThumbnailCell {
-			Transition.antiRegistr(view: cell.imageView)
 			cell.imageView.image = nil
 		}
 	}
@@ -501,42 +484,69 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 		})
 		
 	}
-	
+//	public func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+//		return CGSize(width: min(cellSize.width, frame.width), height: min(cellSize.height, frame.height))
+//	}
+//	
 	func getDisplayCtr(displayIndex:Int) -> (MDKImageDisplayController) {
-		let display = MDKImageDisplayController( photoCount: photoList.count){ [weak self] option,handler in
-			guard let _self = self else{return nil}
-			switch option.needQuality {
-			case .thumbnail:
-				if let thumbnailClose = _self.thumbnailClose{
-					thumbnailClose(option){ photo  in
-						handler(photo)
+		let display:MDKImageDisplayController!
+			
+		if let largeClose = largeClose {
+			display = MDKImageDisplayController( photoCount: photoList.count){ [weak self] option,handler in
+				guard let _self = self else{return}
+				switch option.needQuality {
+				case .thumbnail:
+					if let thumbnailClose = _self.thumbnailClose{
+						thumbnailClose(option){ photo  in
+							handler(photo)
+						}
+					}else if let thumbnailClose = _self.thumbnaiIdentifierClose {
+						let _ = thumbnailClose(option){ photo  in
+							handler(photo)
+						}
 					}
-				}else if let thumbnailClose = _self.thumbnaiIdentifierClose {
-					let _ = thumbnailClose(option){ photo  in
+					
+				case .large , .original:
+					largeClose(option){ photo  in
 						handler(photo)
 					}
 				}
-				
-			case .large , .original:
-				if _self.largeClose != nil{
-					_self.largeClose?(option){ photo  in
-						handler(photo)
-					}
-				}else{
-					return _self.largeIdentifierClose?(option){ photo  in
-						handler(photo)
-					}
-				}
-
 			}
-			return nil
+		}else{
+			let largeIdentifierClose = self.largeIdentifierClose!
+			display = MDKImageDisplayController(largeClose: { [weak self] (option, handler) -> (String?) in
+				guard let _self = self else{return nil}
+				switch option.needQuality {
+				case .thumbnail:
+					if let thumbnailClose = _self.thumbnailClose{
+						thumbnailClose(option){ photo  in
+							handler(photo)
+						}
+					}else if let thumbnailClose = _self.thumbnaiIdentifierClose {
+						let _ = thumbnailClose(option){ photo  in
+							handler(photo)
+						}
+					}
+					
+				case .large , .original:
+					return largeIdentifierClose(option){ photo  in
+						handler(photo)
+					}
+					
+				}
+				return nil
+			})
 		}
+			
+		
 		display.transition.ImageCornerRadius = imageTransitionCornerRadius
 		display.transition.sourceScreenInset = sourceScreenInset
-		if let customTransitionID = customTransitionID {
-			display.beginTransitionID = customTransitionID
-		}else{
-			display.sourceTransitionIDPrefix = "\(Unmanaged.passUnretained(self).toOpaque())"
+
+		display.registerAppearSourecView = { [weak self] in
+			return self?.cellForItem(at: IndexPath(item: displayIndex, section: 0))
+		}
+		display.registerDismissTargetView = { [weak self] (option) ->(UIView?) in
+			return self?.cellForItem(at: IndexPath(item: option.index, section: 0))
 		}
 
 		display.setDisplayIndex(displayIndex)
@@ -554,7 +564,7 @@ extension MDKImageCollectionView : UICollectionViewDelegate,UICollectionViewData
 	}
 }
 //MARK:	系统功能
-extension MDKImageCollectionView: UIViewControllerPreviewingDelegate{
+extension ImageCollectionView: UIViewControllerPreviewingDelegate{
 
 	@available(iOS 9.0, *)
 	public func previewingContext(_ previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {

@@ -9,12 +9,12 @@
 
 
 
-class Transition: NSObject{
-	static private weak var instance:Transition?
-	class func global() -> Transition {
+open class MDKImageTransition: NSObject{
+	static private weak var instance:MDKImageTransition?
+	class func global() -> MDKImageTransition {
 		var strongInstance = instance
 		if strongInstance == nil {
-			strongInstance = Transition()
+			strongInstance = MDKImageTransition()
 			instance = strongInstance
 		}
 		return strongInstance!
@@ -23,7 +23,7 @@ class Transition: NSObject{
 	var isInTransition:Bool = false
 	var  isPresenting:Bool? = true
 	static let duration:TimeInterval = 0.25
-	var ImageCornerRadius:CGFloat = 0
+	@objc public var ImageCornerRadius:CGFloat = 0
 	
 	weak var transitingView:UIView?
 	var transitingViewGravity:String?
@@ -32,14 +32,14 @@ class Transition: NSObject{
 	weak var sourceCtr:UIViewController?
 	weak var animatingCtr:MDKImageDisplayController?
 
-	var sourceScreenInset:UIEdgeInsets = UIEdgeInsets()
+	@objc public var sourceScreenInset:UIEdgeInsets = UIEdgeInsets()
 	
 	static let syncQueue = DispatchQueue(label: "MDKImageFlushQueue",attributes: [])
 
 	private static let lock:DispatchSemaphore = DispatchSemaphore(value: 1)
 	static func synchronized(_ close:(()->())) -> () {
-		Transition.lock.wait()
-		defer { Transition.lock.signal() }
+		MDKImageTransition.lock.wait()
+		defer { MDKImageTransition.lock.signal() }
 		close()
 	}
 
@@ -54,26 +54,9 @@ class Transition: NSObject{
 	}
 	
 
-	static var viewMap:[String:NSHashTable<UIView>] = [:]
-	static func register(view:UIView , for key:String) -> () {
-		if key.contains("Optional"){
-			
-		}
-		antiRegistr(view: view)
-		if Transition.viewMap[key] == nil {
-			Transition.viewMap[key] = NSHashTable.weakObjects()
-		}
-		Transition.viewMap[key]?.add(view)
-	}
+	var beginViewMap:NSHashTable<UIView> = NSHashTable()
+	var dismissViewMap:NSHashTable<UIView> = NSHashTable()
 
-	static func antiRegistr(view:UIView) -> () {
-		for (mapKey,views) in Transition.viewMap {
-			views.remove(view)
-			if views.count == 0{
-				Transition.viewMap.removeValue(forKey: mapKey)
-			}
-		}
-	}
 
 
 //MARK:	dismiss动画控制的属性
@@ -85,7 +68,7 @@ class Transition: NSObject{
 				process = max(0, min(1, process))
 				if let transitingView = transitingView {
 					transitingView.layer.speed = 0.0;
-					transitingView.layer.timeOffset = CFTimeInterval(process) * Transition.duration
+					transitingView.layer.timeOffset = CFTimeInterval(process) * MDKImageTransition.duration
 				}
 			}
 		}
@@ -106,7 +89,7 @@ class Transition: NSObject{
 	
 }
 //MARK:	dismiss动画控制的方法
-extension Transition{
+extension MDKImageTransition{
 	func dismiss(viewController : MDKImageDisplayController) {
 		
 		
@@ -128,7 +111,7 @@ extension Transition{
 		
 		let sourcePosition = transitingView.layer.position
 		
-		let ratio = CGFloat(transitingView.layer.timeOffset / Transition.duration)
+		let ratio = CGFloat(transitingView.layer.timeOffset / MDKImageTransition.duration)
 		let currentPosition = CGPoint(x: (sourcePosition.x - targetPosition.x) * ratio , y: (sourcePosition.y - targetPosition.y) * ratio)
 		transitingView.transform.tx = position.x + (currentPosition.x/max(transitingView.layer.transform.m11, 1))
 		transitingView.transform.ty = position.y + (currentPosition.y/max(transitingView.layer.transform.m22, 1))
@@ -143,7 +126,7 @@ extension Transition{
 		finishingDismiss = true
 		rollbackTransformT = CGPoint(x: view.transform.tx, y: view.transform.ty)
 		commitLayerBeginOffset = view.layer.timeOffset
-		dismissingTimeInterval = (commitLayerBeginOffset)/(Transition.duration*60)
+		dismissingTimeInterval = (commitLayerBeginOffset)/(MDKImageTransition.duration*60)
 		commitLayerAnimation(view ,rollback: true)
 	}
 	
@@ -165,7 +148,7 @@ extension Transition{
 		view.layer.masksToBounds = true
 		rollbackTransformT = CGPoint(x: view.transform.tx, y: view.transform.ty)
 		commitLayerBeginOffset = view.layer.timeOffset
-		dismissingTimeInterval = (Transition.duration-commitLayerBeginOffset)/(Transition.duration*60)
+		dismissingTimeInterval = (MDKImageTransition.duration-commitLayerBeginOffset)/(MDKImageTransition.duration*60)
 		commitLayerAnimation(view ,rollback: false)
 	}
 	func commitLayerAnimation(_ view:UIView , rollback:Bool){
@@ -177,7 +160,7 @@ extension Transition{
 			dismissingTimeInterval = 0.000000001
 		}
 		rollback ? (timeOffset -= dismissingTimeInterval) : (timeOffset += dismissingTimeInterval)
-		if rollback ? (timeOffset < 0) : (timeOffset > Transition.duration) {
+		if rollback ? (timeOffset < 0) : (timeOffset > MDKImageTransition.duration) {
 			if rollback{
 				layer.removeAllAnimations()
 				layer.timeOffset = 0
@@ -203,45 +186,45 @@ extension Transition{
 				reduce = CGFloat(timeOffset / commitLayerBeginOffset)
 			}
 		}else{
-			if Transition.duration == commitLayerBeginOffset{
+			if MDKImageTransition.duration == commitLayerBeginOffset{
 				reduce = 0
 			}else{
-				reduce = CGFloat((Transition.duration - timeOffset) / (Transition.duration - commitLayerBeginOffset))
+				reduce = CGFloat((MDKImageTransition.duration - timeOffset) / (MDKImageTransition.duration - commitLayerBeginOffset))
 			}
 		}
 		
 		view.transform.tx = rollbackTransformT.x * reduce
 		view.transform.ty = rollbackTransformT.y * reduce
 		
-		layer.timeOffset = min(max(timeOffset, 0), Transition.duration)
+		layer.timeOffset = min(max(timeOffset, 0), MDKImageTransition.duration)
 		
 		DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(1/60.0)) {
 			self.commitLayerAnimation(view, rollback: rollback)
 		}
 	}
 }
-extension Transition : UIViewControllerTransitioningDelegate{
-	func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+extension MDKImageTransition : UIViewControllerTransitioningDelegate{
+	public func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
 		return TransitionController(presentedViewController: presented, presenting: presenting)
 	}
-	func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+	public func animationController(forPresented presented: UIViewController, presenting: UIViewController, source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
 		self.isPresenting = true
 		return self
 	}
 
-	func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
+	public func animationController(forDismissed dismissed: UIViewController) -> UIViewControllerAnimatedTransitioning? {
 		self.isPresenting = false
 		return self
 	}
 }
 
-extension Transition :  UIViewControllerAnimatedTransitioning{
+extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 
-	func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
-		return Transition.duration
+	public func transitionDuration(using transitionContext: UIViewControllerContextTransitioning?) -> TimeInterval {
+		return MDKImageTransition.duration
 	}
 
-	func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
+	public func animateTransition(using transitionContext: UIViewControllerContextTransitioning) {
 		
 		
 		finishingDismiss = false
@@ -279,8 +262,10 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 			return
 		}
 
-		var allTargetViews:[UIView] = []
-		var beginTransitionViews:[UIView] = []
+		var targetView:UIView?
+		var sourceView:UIView?
+		var beginTransitionView:UIView? = beginViewMap.anyObject
+
 		var hasViewPair:Bool = false
 		var keyWinFrame = MDKKeywindow.frame
 		keyWinFrame.origin.x += sourceScreenInset.left
@@ -289,61 +274,57 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		keyWinFrame.size.height -= sourceScreenInset.top+sourceScreenInset.bottom
 		assert(keyWinFrame.size.width > 0, "sourceScreenInset.left or sourceScreenInset.right is wrong")
 		assert(keyWinFrame.size.height > 0, "sourceScreenInset.top or sourceScreenInset.bottom is wrong")
-		for (transitionID,views) in Transition.viewMap {
 
-			let enumerator = views.objectEnumerator()
-			var targetViews:[UIView] = []
-			var sourceViews:Set<UIView> = Set()
-			while let view = enumerator.nextObject() as? UIView {
-				if view.frame.width == 0{
-					
-				}
-				if let beginTransID = animatingCtr?.beginTransitionID ,beginTransID == transitionID{
-					beginTransitionViews.append(view)
-				}
-				if containVIew.contain(subview: view) {
-					targetViews.append(view)
-					if let index = beginTransitionViews.index(of: view){
-						beginTransitionViews.remove(at: index)
-					}
-				}else if let frame = view.superview?.convert(view.frame, to: MDKKeywindow) , keyWinFrame.intersects(frame){
-					sourceViews.update(with: view)
-				}
+		var enumerator = dismissViewMap.objectEnumerator()
+		if dismissViewMap.count == 0 {
+			enumerator = beginViewMap.objectEnumerator()
+		}
 
-				
-				if targetViews.count>0,sourceViews.count>0{
-					break
+		while let view = enumerator.nextObject() as? UIView {
+			if containVIew.contain(subview: view) {
+				targetView = view
+				if view == beginTransitionView{
+					beginTransitionView = nil
 				}
+			}else if let frame = view.superview?.convert(view.frame, to: MDKKeywindow) , keyWinFrame.intersects(frame){
+				sourceView = view
 			}
 
-			for view in targetViews{
-				if let sourceView = sourceViews.first ,
-					let sourceSuperView = sourceView.superview{
+			if targetView != nil,sourceView != nil{
+				break
+			}
+		}
 
-					hasViewPair = true
-					pairAnimationViews(targetView: view, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
-					targetViews.removeFirst()
-				}else{
-					allTargetViews.append(contentsOf: targetViews)
-					break
+		if let targetView = targetView, let sourceView = sourceView , let sourceSuperView = sourceView.superview{
+			hasViewPair = true
+			pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
+		}
+
+		if !hasViewPair , let targetView = targetView{
+			if let sourceView = beginTransitionView , let sourceSuperView = sourceView.superview{
+
+				hasViewPair = true
+				pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
+			}else{
+				self.forceTransitionContextCompleteTransition()
+				self.animatingCtr?.view.isUserInteractionEnabled = true
+				if !isPresent{
+					self.animatingCtr?.dismiss(animated: false, completion: nil)
 				}
 			}
 		}
 		if !hasViewPair {
-			for view in allTargetViews{
-				if let sourceView = beginTransitionViews.first ,
-					let sourceSuperView = sourceView.superview{
+			if isPresent {
+				targetView?.alpha = 0
+			}
 
-					hasViewPair = true
-					pairAnimationViews(targetView: view, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
-					allTargetViews.removeFirst()
-				}else{
-					self.forceTransitionContextCompleteTransition()
-					self.animatingCtr?.view.isUserInteractionEnabled = true
-					if !isPresent{
-						self.animatingCtr?.dismiss(animated: false, completion: nil)
-					}
-				}
+			animatingCtr?.view.isUserInteractionEnabled = false
+			UIView.animate(withDuration: MDKImageTransition.duration, animations: {
+				targetView?.alpha = isPresent ? 1 : 0
+			}) { (finish) in
+				self.forceTransitionContextCompleteTransition()
+
+				self.animatingCtr?.view.isUserInteractionEnabled = true
 			}
 		}
 	}
@@ -378,6 +359,7 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 
 		updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
 		animatingCtr?.view.isUserInteractionEnabled = false
+		
 	}
 
 
@@ -418,7 +400,7 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 			let maskGroup = CAAnimationGroup()
 			maskGroup.animations = [maskBoundsAnim,maskPositionAnim]
 
-			maskGroup.duration = Transition.duration
+			maskGroup.duration = MDKImageTransition.duration
 			maskGroup.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
 
 
@@ -458,7 +440,7 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 		for anim in group.animations!{
 			print(anim.debugDescription)
 		}
-		group.duration = Transition.duration
+		group.duration = MDKImageTransition.duration
 		group.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
 
 
@@ -491,15 +473,15 @@ extension Transition :  UIViewControllerAnimatedTransitioning{
 class AnimationProxy:NSObject,CAAnimationDelegate {
 	weak var delegate:CAAnimationDelegate?
 	func animationDidStart(_ anim: CAAnimation) {
-
+		
 	}
 	func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
 		delegate?.animationDidStop?(anim, finished: flag)
 	}
 }
-extension Transition : CAAnimationDelegate{
+extension MDKImageTransition : CAAnimationDelegate{
 
-	func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
+	public func animationDidStop(_ anim: CAAnimation, finished flag: Bool) {
 
 		
 		
