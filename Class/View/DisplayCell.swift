@@ -191,6 +191,10 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 
 extension DisplayCell:UIScrollViewDelegate{
 	func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+		imageView.layer.speed = 1
+		if imageView.layer.animationKeys() == nil ,let superLayer = imageView.layer.superlayer{
+			imageView.layer.beginTime = superLayer.convertTime(CACurrentMediaTime(), from: nil)
+		}
 		return imageView
 	}
 	
@@ -208,6 +212,7 @@ extension DisplayCell:UIScrollViewDelegate{
 				0,
 				0
 		)
+		imageView.frame.origin = CGPoint()
 		scrollViewDidEndDecelerating(contentScroll)
 	}
 

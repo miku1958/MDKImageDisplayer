@@ -389,7 +389,6 @@ extension MDKImageDisplayController{
 					self.blurView.effect = nil
 				}
 			}
-			anim.startAnimation()
 			anim.addCompletion { (position) in
 				switch position {
 				case .start , .end:
@@ -397,6 +396,7 @@ extension MDKImageDisplayController{
 				default:break
 				}
 			}
+			anim.startAnimation()
 			_animator = anim
 		} else {
 			UIView.animate(withDuration: 0.15) {
@@ -425,6 +425,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			cell.scrollDelegate = self
 			if let pinch = cell.contentScroll.pinchGestureRecognizer{
 				longPress.require(toFail:pinch)
+				toolbarPan.require(toFail: pinch)
 			}
 
 		}
@@ -875,6 +876,7 @@ extension MDKImageDisplayController{
 
 		guard
 			let cell = collectionView.visibleCells.first as? DisplayCell,
+			!cell.isScrolling,
 			let indexPath = collectionView.indexPath(for: cell)
 		else { return }
 
@@ -970,9 +972,15 @@ extension MDKImageDisplayController{
 		switch pan.state {
 		case .began:
 			cell.contentScroll.panGestureRecognizer.isEnabled = false
-			viewWillDisappear(true)
 			if #available(iOS 10.0, *) {
+				if animator() == nil {
+					viewWillDisappear(true)
+				}else{
+					animator()?.isReversed = false
+				}
 				animator()?.pauseAnimation()
+			}else{
+				viewWillDisappear(true)
 			}
 			MDKImageTransition.global().dismiss(viewController: self)
 		case .changed:
@@ -1007,15 +1015,17 @@ extension MDKImageDisplayController{
 	@objc func toolbarPanFunc(pan:UIPanGestureRecognizer) ->(){
 
 
+		let velocity = pan.velocity(in: nil)
 		switch pan.state {
 		case .began:
 			if toolbarIsOpening{
-				let velocity = pan.velocity(in: nil)
 				if velocity.y>fabs(velocity.x) {
 					dismissToolbar(finish: {})
 				}
 			}else{
-				displayToolbar()
+				if velocity.y<100{
+					displayToolbar()
+				}
 			}
 		default:break
 		}
@@ -1100,7 +1110,9 @@ extension MDKImageDisplayController:UIGestureRecognizerDelegate {
 		if gestureRecognizer == collectionView.panGestureRecognizer || otherGestureRecognizer == collectionView.panGestureRecognizer {
 			return false
 		}
-
+		if gestureRecognizer == toolbarPan , otherGestureRecognizer.isKind(of: UIPinchGestureRecognizer.self){//UIScrollViewPinchGestureRecognizer
+			return false
+		}
 		return true
 	}
 	public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
