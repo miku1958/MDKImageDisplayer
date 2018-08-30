@@ -10,7 +10,7 @@ import Foundation
 import WebKit
 
 extension WKWebView {
-	public var MDKImage:MDKImageWebHocker {
+	@objc public var MDKImage:MDKImageWebHocker {
 		let hocker = MDKImageWebHocker.share
 		hocker.webView = self;
 		return hocker

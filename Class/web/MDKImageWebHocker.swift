@@ -9,7 +9,7 @@
 import UIKit
 import WebKit
 
-@objc open class MDKImageWebHocker:NSObject {
+@objcMembers open class MDKImageWebHocker:NSObject {
 	static let share:MDKImageWebHocker = MDKImageWebHocker()
 	internal override init() {
 		super.init()
