@@ -55,8 +55,10 @@ open class MDKImageTransition: NSObject{
 	
 
 	var beginViewMap:NSHashTable<UIView> = NSHashTable()
-	var dismissViewMap:NSHashTable<UIView> = NSHashTable()
+	var beginSourceFrame:CGRect?
 
+	var dismissViewMap:NSHashTable<UIView> = NSHashTable()
+	var dismissTargetFrame:CGRect?
 
 
 //MARK:	dismiss动画控制的属性
@@ -264,6 +266,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 
 		var targetView:UIView?
 		var sourceView:UIView?
+		var sourceFrame:CGRect? = isPresent ? beginSourceFrame : dismissTargetFrame
 		var beginTransitionView:UIView? = beginViewMap.anyObject
 
 		var hasViewPair:Bool = false
@@ -295,22 +298,23 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 			}
 		}
 
-		if let targetView = targetView, let sourceView = sourceView , let sourceSuperView = sourceView.superview{
-			hasViewPair = true
-			pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
+		if let targetView = targetView{
+			if let sourceView = sourceView {
+				hasViewPair = true
+				pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceFrameToKeyWin: nil, isPresent: isPresent)
+			}else if let sourceFrame = sourceFrame{
+				hasViewPair = true
+				pairAnimationViews(targetView: targetView, sourceView: nil, sourceFrameToKeyWin: sourceFrame, isPresent: isPresent)
+			}
 		}
 
 		if !hasViewPair , let targetView = targetView{
-			if let sourceView = beginTransitionView , let sourceSuperView = sourceView.superview{
-
+			if let sourceView = beginTransitionView{
 				hasViewPair = true
-				pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceSuperView: sourceSuperView, isPresent: isPresent)
-			}else{
-				self.forceTransitionContextCompleteTransition()
-				self.animatingCtr?.view.isUserInteractionEnabled = true
-				if !isPresent{
-					self.animatingCtr?.dismiss(animated: false, completion: nil)
-				}
+				pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceFrameToKeyWin: nil, isPresent: isPresent)
+			}else if let sourceFrame = sourceFrame{
+				hasViewPair = true
+				pairAnimationViews(targetView: targetView, sourceView: nil, sourceFrameToKeyWin: sourceFrame, isPresent: isPresent)
 			}
 		}
 		if !hasViewPair {
@@ -323,45 +327,56 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 				targetView?.alpha = isPresent ? 1 : 0
 			}) { (finish) in
 				self.forceTransitionContextCompleteTransition()
-
 				self.animatingCtr?.view.isUserInteractionEnabled = true
-			}
-		}
-	}
-
-	func pairAnimationViews(targetView view:UIView , sourceView:UIView , sourceSuperView:UIView , isPresent:Bool) -> () {
-		let sourceFrameOri = sourceView.frame
-		var sourceFrameMask = sourceFrameOri
-		if var sourceCtr = sourceCtr{
-			if sourceCtr.isKind(of: UITabBarController.self) , let selected = (sourceCtr as! UITabBarController).selectedViewController{
-				sourceCtr = selected
-			}
-			var navCtr:UINavigationController?
-			if sourceCtr.isKind(of: UINavigationController.self){
-				navCtr = sourceCtr as? UINavigationController
-			}else{
-				navCtr = sourceCtr.navigationController
-			}
-			if let hidden = navCtr?.isNavigationBarHidden,!hidden,let navBar = navCtr?.navigationBar{
-				let sourceFrameToKeyWindow = sourceSuperView.convert(sourceFrameOri, to: MDKKeywindow)
-				if sourceFrameToKeyWindow.origin.y < navBar.frame.maxY{
-					let insert = navBar.frame.maxY-sourceFrameToKeyWindow.origin.y
-					sourceFrameMask.size.height -= insert
-					sourceFrameMask.origin.y += insert
+				if !isPresent{
+					self.animatingCtr?.dismiss(animated: false, completion: nil)
 				}
-
 			}
 		}
-		animatingCtr?.view.layoutIfNeeded()
-		let sourceFrameToTarget = sourceSuperView.convert(sourceFrameOri, to: view.superview)
-		let maskFrameToTarget = sourceSuperView.convert(sourceFrameMask, to: view.superview)
-
-
-		updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
-		animatingCtr?.view.isUserInteractionEnabled = false
-		
 	}
 
+	func pairAnimationViews(targetView view:UIView , sourceView:UIView?, sourceFrameToKeyWin:CGRect? , isPresent:Bool) -> () {
+		var frameToKeyWin = CGRect()
+		if let sourceFrameToKeyWin = sourceFrameToKeyWin{
+			frameToKeyWin = sourceFrameToKeyWin
+		}else if let sourceFrameOri = sourceView?.frame ,let soucreSuperView = sourceView?.superview{
+			frameToKeyWin = soucreSuperView.convert(sourceFrameOri, to: MDKKeywindow)
+		}
+
+
+		animatingCtr?.view.layoutIfNeeded()
+
+		var frameMaskToKeyWin = getMaskFrame(frameToKeyWin: frameToKeyWin)
+		let sourceFrameToTarget = MDKKeywindow.convert(frameToKeyWin, to: view.superview)
+		let maskFrameToTarget = MDKKeywindow.convert(frameMaskToKeyWin, to: view.superview)
+		updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
+	}
+
+	func getMaskFrame(frameToKeyWin:CGRect) -> (CGRect) {
+		var maskFrame = frameToKeyWin
+
+		if frameToKeyWin.origin.x < sourceScreenInset.left {
+			let insert = sourceScreenInset.left-frameToKeyWin.origin.x
+			maskFrame.size.width -= insert
+			maskFrame.origin.x += insert
+		}
+
+		if frameToKeyWin.origin.y < sourceScreenInset.top{
+			let insert = sourceScreenInset.top-frameToKeyWin.origin.y
+			maskFrame.size.height -= insert
+			maskFrame.origin.y += insert
+		}
+
+		if frameToKeyWin.maxX > MDKKeywindow.frame.width - sourceScreenInset.right{
+			let insert = MDKKeywindow.frame.width - sourceScreenInset.right-frameToKeyWin.maxX
+			maskFrame.size.width -= insert
+		}
+		if frameToKeyWin.maxY > MDKKeywindow.frame.height - sourceScreenInset.bottom{
+			let insert = MDKKeywindow.frame.height - sourceScreenInset.bottom-frameToKeyWin.maxY
+			maskFrame.size.height -= insert
+		}
+		return maskFrame;
+	}
 
 	func updateLayer(from view:UIView , sourceFrame:CGRect , maskFrame:CGRect , isPresent:Bool) -> () {
 		isInTransition = true
@@ -372,7 +387,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 			return
 		}
 
-		if sourceFrame != maskFrame && false{//等调试好再说
+		if sourceFrame != maskFrame{//等调试好再说
 
 			let mask = CALayer()
 			mask.backgroundColor = UIColor.white.cgColor

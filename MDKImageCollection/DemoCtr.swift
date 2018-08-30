@@ -112,7 +112,37 @@ class DemoCtr: UIViewController {
 		imageCollection?.center.x = view.center.x
 		imageCollection?.frame.origin.y = 100
 	}
-	
+	func webviewInside() -> () {
+		let webView = WKWebView(frame: view.bounds)
+		view.addSubview(webView)
+		if #available(iOS 11.0, *) {
+			webView.scrollView.contentInsetAdjustmentBehavior = .always
+		}
+		webView.MDKImage.enableWhenClickImage {[weak self] (frame,imageURLArray,clickIndex)  in
+			let display = MDKImageDisplayController(photoCount: imageURLArray.count, largeClose: {  (option, handler) in
+				self?.downloadImage(url: imageURLArray[option.index], finish: { (image) in
+					handler(image)
+				})
+			})
+			display.setDisplayIndex(clickIndex)
+			if let nav = self?.navigationController{
+				display.transition.sourceScreenInset = UIEdgeInsets(top: nav.navigationBar.frame.maxY, left: 0, bottom: 0, right: 0)
+			}
+
+			display.registerAppearSourecFrame({ () -> (CGRect) in
+				return frame
+			})
+			display.registerDismissTargetFrame({ (option) -> (CGRect) in
+				if option.index == clickIndex{
+					return frame
+				}
+				return CGRect()
+			})
+
+			self?.present(display, animated: true, completion: nil)
+		}
+		webView.load(URLRequest(url: URL(string: "https://mp.weixin.qq.com/s/bY7JeNZAJekvnqvxsfSGxQ")!))
+	}
 	var cache:NSCache<NSString,UIImage> = NSCache()
 	var downloaingList:[String:[(UIImage)->()]] = [:]
 	func downloadImage(url urlstr:String , finish:@escaping (UIImage)->()) {
@@ -144,11 +174,6 @@ class DemoCtr: UIViewController {
 			}.resume()
 	}
 	
-	func webviewInside() -> () {
-		//https://blog.csdn.net/u014544904/article/details/50479083
-		//https://my.oschina.net/linxiaoxi1993/blog/465905
-		let webView = WKWebView(frame: view.bounds)
-		view.addSubview(webView)
-	}
+
 
 }

@@ -282,17 +282,25 @@ open class MDKImageDisplayController: UIViewController {
 		}
 	}
 
-	@objc public var registerAppearSourecView:RegisterAppearClose?
-	func registerAppearSourecView(_ register:@escaping RegisterAppearClose) -> () {
+	@objc public var registerAppearSourecView:RegisterAppearViewClose?
+	func registerAppearSourecView(_ register:@escaping RegisterAppearViewClose) -> () {
 		registerAppearSourecView = register
 	}
 	
-	@objc public var registerDismissTargetView:RegisterDismissClose?
-	func registerDismissTargetView(_ register:@escaping RegisterDismissClose) -> () {
+	@objc public var registerDismissTargetView:RegisterDismissViewClose?
+	func registerDismissTargetView(_ register:@escaping RegisterDismissViewClose) -> () {
 		registerDismissTargetView = register
 	}
 
-	
+	@objc public var registerAppearSourecFrame:RegisterAppearKeyWinFrameClose?
+	func registerAppearSourecFrame(_ register:@escaping RegisterAppearKeyWinFrameClose) -> () {
+		registerAppearSourecFrame = register
+	}
+
+	@objc public var registerDismissTargetFrame:RegisterDismissKeyWinFrameClose?
+	func registerDismissTargetFrame(_ register:@escaping RegisterDismissKeyWinFrameClose) -> () {
+		registerDismissTargetFrame = register
+	}
 	
 	@objc public var disableBlurBackgroundWithBlack:Bool = false
 
@@ -337,6 +345,8 @@ extension MDKImageDisplayController{
 	override open func viewWillAppear(_ animated: Bool) {
 		if let sourceView = registerAppearSourecView?(){
 			MDKImageTransition.global().beginViewMap.add(sourceView)
+		}else if let sourceFrame = registerAppearSourecFrame?(){
+			MDKImageTransition.global().beginSourceFrame = sourceFrame
 		}
 
 		if let cell = collectionView.visibleCells.first as? DisplayCell{
@@ -377,6 +387,8 @@ extension MDKImageDisplayController{
 		option.lastIdentifier = photoList[displayIndex - photoList.negativeCount].identifier
 		if let sourceView = registerDismissTargetView?(option) {
 			MDKImageTransition.global().dismissViewMap.add(sourceView)
+		}else if let targetFrame = registerDismissTargetFrame?(option) , targetFrame != CGRect(){
+			MDKImageTransition.global().dismissTargetFrame = targetFrame
 		}
 		if let cell = collectionView.visibleCells.first as? DisplayCell{
 			MDKImageTransition.global().dismissViewMap.add(cell.imageView)
@@ -574,7 +586,8 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 					if translation.x > canPanTranslation{
 						pan.setTranslation(CGPoint(x: canPanTranslation, y: collectionPanBeginOffset.y), in: nil)
 					}else{
-						translation.x = collectionPanLastTranslation.x + (translation.x - collectionPanLastTranslation.x)*(1-min(translation.x/canPanTranslation, 1))*0.6
+						let transoffset = (translation.x - collectionPanLastTranslation.x) * (1-min(translation.x/canPanTranslation, 1))
+						translation.x = collectionPanLastTranslation.x + transoffset * 0.6
 
 						pan.setTranslation(translation, in: nil)
 					}

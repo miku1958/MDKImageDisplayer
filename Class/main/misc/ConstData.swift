@@ -44,5 +44,10 @@ public typealias OptionImgRtStringClose =  (MDKImageCloseOption,@escaping ImageC
 
 
 
-public typealias RegisterAppearClose = (()->(UIView?))
-public typealias RegisterDismissClose = ((MDKImageCloseOption)->(UIView?))
+public typealias RegisterAppearViewClose = (()->(UIView?))
+public typealias RegisterDismissViewClose = ((MDKImageCloseOption)->(UIView?))
+
+
+
+public typealias RegisterAppearKeyWinFrameClose = (()->(CGRect))
+public typealias RegisterDismissKeyWinFrameClose = ((MDKImageCloseOption)->(CGRect))

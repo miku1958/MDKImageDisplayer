@@ -20,6 +20,8 @@
 		FF769AA120F309CB00DB6DA1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA020F309CB00DB6DA1 /* Assets.xcassets */; };
 		FF769AA420F309CB00DB6DA1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FF769AA220F309CB00DB6DA1 /* LaunchScreen.storyboard */; };
 		FF79EE8720FD9F93006D318F /* toolbarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF79EE8620FD9F93006D318F /* toolbarView.swift */; };
+		FF9095632137BEF90084B7B2 /* MDKImageWebHocker.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9095622137BEF90084B7B2 /* MDKImageWebHocker.swift */; };
+		FF9095652137DA520084B7B2 /* WKWebView+MDKImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9095642137DA520084B7B2 /* WKWebView+MDKImage.swift */; };
 		FF9EE1E7211B17DE00A5F533 /* ConstData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E6211B17DE00A5F533 /* ConstData.swift */; };
 		FF9EE1E9211B1B5900A5F533 /* MDKImageCloseOption.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1E8211B1B5900A5F533 /* MDKImageCloseOption.swift */; };
 		FF9EE1EC211B1BC700A5F533 /* MDKImageDisplayingInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF9EE1EB211B1BC700A5F533 /* MDKImageDisplayingInfo.swift */; };
@@ -65,6 +67,9 @@
 		FF769AA320F309CB00DB6DA1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FF769AA520F309CB00DB6DA1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FF79EE8620FD9F93006D318F /* toolbarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = toolbarView.swift; sourceTree = "<group>"; };
+		FF9095622137BEF90084B7B2 /* MDKImageWebHocker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageWebHocker.swift; sourceTree = "<group>"; };
+		FF9095642137DA520084B7B2 /* WKWebView+MDKImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWebView+MDKImage.swift"; sourceTree = "<group>"; };
+		FF9095662137E2410084B7B2 /* MDKImageDisplayController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MDKImageDisplayController.h; path = Class/objc/MDKImageDisplayController.h; sourceTree = SOURCE_ROOT; };
 		FF9EE1E6211B17DE00A5F533 /* ConstData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConstData.swift; sourceTree = "<group>"; };
 		FF9EE1E8211B1B5900A5F533 /* MDKImageCloseOption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageCloseOption.swift; sourceTree = "<group>"; };
 		FF9EE1EB211B1BC700A5F533 /* MDKImageDisplayingInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MDKImageDisplayingInfo.swift; sourceTree = "<group>"; };
@@ -151,10 +156,9 @@
 		FF769AAB20F309D400DB6DA1 /* Class */ = {
 			isa = PBXGroup;
 			children = (
-				FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */,
-				FF79EE8520FD9F47006D318F /* View */,
-				FF9EE1EA211B1B6A00A5F533 /* misc */,
-				FFB9DF9F210872CE008381DC /* Transition */,
+				FF90955E2137BED50084B7B2 /* objc */,
+				FF90955D2137BECA0084B7B2 /* web */,
+				FF90955C2137BEB90084B7B2 /* main */,
 			);
 			path = Class;
 			sourceTree = "<group>";
@@ -166,6 +170,35 @@
 				FFDA853820F992280073AAA2 /* DisplayCell.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		FF90955C2137BEB90084B7B2 /* main */ = {
+			isa = PBXGroup;
+			children = (
+				FFDA853620F98EE40073AAA2 /* MDKImageDisplayController.swift */,
+				FF79EE8520FD9F47006D318F /* View */,
+				FF9EE1EA211B1B6A00A5F533 /* misc */,
+				FFB9DF9F210872CE008381DC /* Transition */,
+			);
+			path = main;
+			sourceTree = "<group>";
+		};
+		FF90955D2137BECA0084B7B2 /* web */ = {
+			isa = PBXGroup;
+			children = (
+				FF9095642137DA520084B7B2 /* WKWebView+MDKImage.swift */,
+				FF9095622137BEF90084B7B2 /* MDKImageWebHocker.swift */,
+			);
+			path = web;
+			sourceTree = "<group>";
+		};
+		FF90955E2137BED50084B7B2 /* objc */ = {
+			isa = PBXGroup;
+			children = (
+				FF9095662137E2410084B7B2 /* MDKImageDisplayController.h */,
+			);
+			name = objc;
+			path = "New Group";
 			sourceTree = "<group>";
 		};
 		FF9EE1EA211B1B6A00A5F533 /* misc */ = {
@@ -307,6 +340,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF9095652137DA520084B7B2 /* WKWebView+MDKImage.swift in Sources */,
 				FFB9DFA321087304008381DC /* MDKImageTransition.swift in Sources */,
 				FF2C1F6C20F4A6C40022D54F /* photoNode.swift in Sources */,
 				FFB9DFA521087327008381DC /* TransitionController.swift in Sources */,
@@ -314,6 +348,7 @@
 				FFDA853720F98EE40073AAA2 /* MDKImageDisplayController.swift in Sources */,
 				FF9EE1E9211B1B5900A5F533 /* MDKImageCloseOption.swift in Sources */,
 				FF6E9CF8210FF4C100CC7F3F /* lazyArray.swift in Sources */,
+				FF9095632137BEF90084B7B2 /* MDKImageWebHocker.swift in Sources */,
 				FF50B6D72102C5EF00911035 /* DoubleTapThanPanGesture.swift in Sources */,
 				FF9EE1EE211B242B00A5F533 /* UIView+containSubView.swift in Sources */,
 				FFDA853920F992280073AAA2 /* DisplayCell.swift in Sources */,

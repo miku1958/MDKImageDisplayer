@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
 
 
   s.name         = "MDKImageCollection"
-  s.version      = "1.1.3"
+  s.version      = "1.1.4"
   s.summary      = "a image collection"
 
   s.description  = <<-DESC
@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
   s.license      = "Mozilla"
 
 
-  s.author             = { "miku1958" => "v.v1958@qq.com" }
+  s.author        = { "miku1958" => "v.v1958@qq.com" }
 
   s.platform     = :ios, "8.0"
 
@@ -25,11 +25,23 @@ Pod::Spec.new do |s|
 
 
 
-  s.source_files  = "Class/**/*.{swift}"#,"Class/objc/*.h"
+  # s.source_files  = "Class/**/*.{swift}"#,
 
+  s.default_subspec = 'main'
 
+  s.subspec 'main' do |ss|
+    ss.source_files = "Class/main/**/*.{swift}"
+  end
 
+  # s.subspec 'objc' do |ss|
+  #   ss.source_files = "Class/objc/*.h"
+  #   ss.dependency 'MDKImageCollection/main'
+  # end
 
+  s.subspec 'web' do |ss|
+    ss.source_files = "Class/web/**/*.{swift}"
+    ss.dependency 'MDKImageCollection/main'
+  end
 
   s.requires_arc = true
   # s.static_framework = false

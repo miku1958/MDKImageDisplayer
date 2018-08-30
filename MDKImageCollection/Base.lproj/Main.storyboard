@@ -35,8 +35,13 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lfR-by-9zO">
-                                <rect key="frame" x="18" y="114" width="339" height="30"/>
+                                <rect key="frame" x="0.0" y="114" width="375" height="30"/>
                                 <state key="normal" title="本地图片延迟加载(无限加载),图片来源@王菊 的猫"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="titleLabel.numberOfLines">
+                                        <integer key="value" value="0"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
                                 <connections>
                                     <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="tls-Lk-igA"/>
                                 </connections>
@@ -80,21 +85,42 @@
                                     <segue destination="0fk-F0-j8p" kind="show" id="Ron-Ih-Fly"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3UW-qh-alN">
+                                <rect key="frame" x="0.0" y="414" width="375" height="48"/>
+                                <state key="normal" title="web嵌入 图片是通过img标签获取的,例子中的圆形图片是由于多放了一个小尺寸的img在顶部所以点开才会错位"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="titleLabel.numberOfLines">
+                                        <integer key="value" value="0"/>
+                                    </userDefinedRuntimeAttribute>
+                                    <userDefinedRuntimeAttribute type="number" keyPath="titleLabel.textAlignment">
+                                        <integer key="value" value="1"/>
+                                    </userDefinedRuntimeAttribute>
+                                </userDefinedRuntimeAttributes>
+                                <connections>
+                                    <action selector="openDemo:" destination="BYZ-38-t0r" eventType="touchUpInside" id="7Sh-N1-08a"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="N08-La-McT" firstAttribute="top" secondItem="toZ-GA-hGa" secondAttribute="bottom" constant="20" id="1HE-7l-pMh"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="lfR-by-9zO" secondAttribute="trailing" id="3dI-EW-xMF"/>
                             <constraint firstItem="toZ-GA-hGa" firstAttribute="top" secondItem="5mC-hw-cKT" secondAttribute="bottom" constant="20" id="4nD-Mi-rop"/>
+                            <constraint firstItem="3UW-qh-alN" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="G7A-j5-EtN"/>
                             <constraint firstItem="N08-La-McT" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="GBZ-b2-Jvn"/>
                             <constraint firstItem="toZ-GA-hGa" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Gdv-cL-Qfu"/>
                             <constraint firstItem="5mC-hw-cKT" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Jvl-Mi-fdG"/>
                             <constraint firstItem="u9P-Oc-BIW" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="Jxx-11-qQP"/>
                             <constraint firstItem="lfR-by-9zO" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="50" id="RtX-QB-RCk"/>
                             <constraint firstItem="5mC-hw-cKT" firstAttribute="top" secondItem="u9P-Oc-BIW" secondAttribute="bottom" constant="20" id="XM1-5B-pg6"/>
+                            <constraint firstItem="3UW-qh-alN" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="a15-xc-QxD"/>
                             <constraint firstItem="Cts-UF-Bm5" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="ani-rK-b1P"/>
+                            <constraint firstItem="3UW-qh-alN" firstAttribute="top" secondItem="Cts-UF-Bm5" secondAttribute="bottom" constant="20" id="dda-16-Ll0"/>
                             <constraint firstItem="Cts-UF-Bm5" firstAttribute="top" secondItem="N08-La-McT" secondAttribute="bottom" constant="20" id="gEO-1c-Ufh"/>
                             <constraint firstItem="u9P-Oc-BIW" firstAttribute="top" secondItem="lfR-by-9zO" secondAttribute="bottom" constant="20" id="pLQ-Ng-hu6"/>
+                            <constraint firstItem="lfR-by-9zO" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="rgf-YL-5fk"/>
                             <constraint firstItem="lfR-by-9zO" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="tVC-U7-J0z"/>
+                            <constraint firstAttribute="trailing" secondItem="3UW-qh-alN" secondAttribute="trailing" id="uwA-2U-1Ta"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>

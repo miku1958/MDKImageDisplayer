@@ -13,7 +13,7 @@ class ThumbnailCell: UICollectionViewCell,MDKImageProtocol {
 		let view = UIImageView()
 		view.contentMode = .scaleAspectFill
 		view.clipsToBounds = true
-		
+
 		return view
 	}()
 
