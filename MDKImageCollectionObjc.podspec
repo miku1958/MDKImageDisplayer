@@ -1,13 +1,12 @@
-
 Pod::Spec.new do |s|
 
 
-  s.name         = "MDKImageCollection"
-  s.version      = "1.1.4"
-  s.summary      = "a image collection"
+  s.name         = "MDKImageCollectionObjc"
+  s.version      = "1.1.5"
+  s.summary      = "a image collection objc version"
 
   s.description  = <<-DESC
-  a image  collection
+  a image collection objc version
                    DESC
 
   s.homepage     = "https://github.com/miku1958/MDKImageCollection"
@@ -25,26 +24,14 @@ Pod::Spec.new do |s|
 
 
 
-
-  s.default_subspec = 'main'
-
-  s.subspec 'main' do |ss|
-    ss.source_files = "Class/main/**/*.{swift}"
-  end
-
-
-  s.subspec 'web' do |ss|
-    ss.source_files = "Class/web/**/*.{swift}"
-    ss.dependency 'MDKImageCollection/main'
-  end
+  s.source_files = "Class/objc/*.h"
+  s.dependency 'MDKImageCollection/main'
 
   s.requires_arc = true
   # s.static_framework = false
   s.prefix_header_file = false
 
-  s.dependency "MDKTools/swift"
 
   s.swift_version = '4.0'
 
 end
-
