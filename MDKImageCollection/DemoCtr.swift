@@ -124,6 +124,7 @@ class DemoCtr: UIViewController {
 					handler(image)
 				})
 			})
+			display.disableBlurBackgroundWithBlack = true
 			display.setDisplayIndex(clickIndex)
 			if let nav = self?.navigationController{
 				display.transition.sourceScreenInset = UIEdgeInsets(top: nav.navigationBar.frame.maxY, left: 0, bottom: 0, right: 0)

@@ -32,6 +32,6 @@ Pod::Spec.new do |s|
   s.prefix_header_file = false
 
 
-  s.swift_version = '4.0'
+  # s.swift_version = '4.0'
 
 end

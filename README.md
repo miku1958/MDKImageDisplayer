@@ -33,9 +33,40 @@ MDKImageDisplayController *display = [[MDKImageDisplayController alloc]initWithL
 
 ![](https://github.com/miku1958/MDKImageCollection/raw/master/photo/4.gif)
 
+webview嵌入（只支持了WKWebView，以下用swift展示）
+
+![](https://github.com/miku1958/MDKImageCollection/raw/master/photo/5.gif)
+
+```
+webView.MDKImage.enableWhenClickImage {[weak self] (frame,imageURLArray,clickIndex)  in
+    let display = MDKImageDisplayController(photoCount: imageURLArray.count, largeClose: {  (option, handler) in
+        //下载图片image
+        handler(image)
+    })
+    display.setDisplayIndex(clickIndex)
+    if let nav = self?.navigationController{
+        display.transition.sourceScreenInset = UIEdgeInsets(top: nav.navigationBar.frame.maxY, left: 0, bottom: 0, right: 0)
+    }
+
+    display.registerAppearSourecFrame({ () -> (CGRect) in
+        return frame
+    })
+    display.registerDismissTargetFrame({ (option) -> (CGRect) in
+        if option.index == clickIndex{
+            return frame
+        }
+        return CGRect()//代表进行渐变过度
+    })
+
+    self?.present(display, animated: true, completion: nil)
+}
+```
+
+
+
 #### 计划中特性：
 
-1. webview嵌入
+1. ~~webview嵌入~~（完成）
 2. 读取时的占位提示（圆圈）
 3. gif支持
 4. ~~视频支持~~
