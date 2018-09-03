@@ -86,6 +86,7 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 
 
 	weak var scrollDelegate:UIScrollViewDelegate?
+	
 	let imageView:UIImageView = {
 		let view = UIImageView()
 		view.contentMode = .scaleAspectFill
@@ -113,13 +114,15 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 		super.init(coder: aDecoder)
 	}
 	
-	let contentScroll:UIScrollView = {
+	lazy var contentScroll:UIScrollView = {
 		let scroll = UIScrollView()
 		
 		if #available(iOS 11.0, *) {
 			scroll.contentInsetAdjustmentBehavior = .never
 		}
-		
+		scroll.panGestureRecognizer.removeTarget(scroll, action: nil)
+		scroll.panGestureRecognizer.addTarget(self, action: #selector(handlePan(_:)))
+		contentScrollPanSelector = NSSelectorFromString("handlePan:")
 		return scroll
 	}()
 	
@@ -186,10 +189,23 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 			stopScrollOffset = nil
 		}
 	}
+	
+	
+	var contentScrollPanSelector : Selector!
+	var contentScrollPanBeginOffset:CGPoint = CGPoint()
+	var contentScrollPanLastTranslation:CGPoint = CGPoint()
 }
 
 
 extension DisplayCell:UIScrollViewDelegate{
+	@objc func handlePan(_ pan:UIPanGestureRecognizer) -> () {
+		if pan.state == .began {
+			contentScrollPanBeginOffset = contentScroll.contentOffset
+		}
+		
+		
+		pan.view?.perform(contentScrollPanSelector, with: pan)
+	}
 	func viewForZooming(in scrollView: UIScrollView) -> UIView? {
 		imageView.layer.speed = 1
 		if imageView.layer.animationKeys() == nil ,let superLayer = imageView.layer.superlayer{

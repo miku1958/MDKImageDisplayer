@@ -597,7 +597,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			collectionPanLastTranslation = translation
 		}
 
-		collectionView.perform(collectionPanSelector, with: pan)
+		pan.view?.perform(collectionPanSelector, with: pan)
 	}
 	public func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		if scrollView.panGestureRecognizer.translation(in: nil).x > 1 || scrollView.panGestureRecognizer.translation(in: nil).y > 1 {
@@ -841,7 +841,6 @@ extension MDKImageDisplayController{
 	}
 	@discardableResult
 	func update(image:UIImage? , cachePhotoNode:photoNode? ,isFromInternet:Bool,displayIndex:Int,isTryingNext:Bool,isTryingPrevious:Bool) -> (photoNode?) {
-		let _isFromInternet = isFromInternet;
 		var cachePhotoNode = cachePhotoNode
 		DispatchQueue.main.async {[weak self] in
 			guard let _self = self else{return}
@@ -883,46 +882,24 @@ extension MDKImageDisplayController{
 			CATransaction.commit()
 		}
 	}
-	func displayToolbar(_ touchPoint:CGPoint? = nil) -> () {
-
-		resetTapCount()
-
-		guard
-			let cell = collectionView.visibleCells.first as? DisplayCell,
-			!cell.isScrolling,
-			let indexPath = collectionView.indexPath(for: cell)
-		else { return }
-
-		toolbarIsOpening = true
-
+	func resetToolbar(touchPoint:CGPoint? , cell:DisplayCell) -> () {
 		toolbar
-		.removeAllAction()
-		.addGroup()
+			.removeAllAction()
+			.addGroup()
 			.addAction(title: "保存图片", action: { [weak self] in
 				self?.savePhoto()
 			})
-		.addGroup()
+			.addGroup()
 			.addAction(title: "关闭图片", action: {[weak self] in
 				self?.dismissWithAnimation(all: true)
 			})
 			.addAction(title: "取消", action: { //[weak self] in
-
-			})
-
-		let updateFrame = {
-			UIView.animate(withDuration: MDKImageTransition.duration, animations: {
-				let photoBottom = max(-10, cell.frame.height - cell.imageView.superview!.convert(cell.imageView.frame, to: cell).maxY)
-				if photoBottom<self.toolbar.frame.height{
-					self.collectionView.frame.origin.y = 0-(self.toolbar.frame.height - photoBottom)
-				}
-				self.toolbar.frame.origin.y = self.view.frame.height - self.toolbar.frame.height
-			}) { (_) in
-				self.toolbarIsFinishOpen = true
-				self.resetTapCount()
 				
-			}
-		}
-
+			})
+		guard
+			let indexPath = collectionView.indexPath(for: cell)
+		else { return }
+		
 		DispatchQueue.global().async {
 			self.photoList[indexPath.item - self.photoList.negativeCount].checkHasQRCode {
 				DispatchQueue.main.async { [weak self] in
@@ -936,17 +913,29 @@ extension MDKImageDisplayController{
 								convertPoint!.y *= cell.imageView.image?.scale ?? 1
 							}
 							_self.QRCodeHandler((_self.photoList[indexPath.item - _self.photoList.negativeCount].QRCode)!,convertPoint)
-							}, atGroup: 0, at: 1)
-
-						updateFrame()
+						}, atGroup: 0, at: 1)
+						
+						_self.changeToolBarPosition(0,forceAnimation: true)
 					}
 				}
 			}
 		}
+		
+		toolbar.frame.origin.y = view.frame.height
+	}
+	func displayToolbar(_ touchPoint:CGPoint? = nil) -> () {
+		
+		guard
+			let cell = collectionView.visibleCells.first as? DisplayCell
+		else { return }
 
 
-		updateFrame()
 
+		resetToolbar(touchPoint: touchPoint, cell: cell)
+
+		
+		changeToolBarPosition(-view.frame.height,forceAnimation: true)
+		
 		view.addSubview(toolbar)
 
 		cell.makeScroll(stop: true)
@@ -954,23 +943,43 @@ extension MDKImageDisplayController{
 
 	}
 	func dismissToolbar(finish:@escaping ()->()) -> () {
-		resetTapCount()
 
 
 		collectionView.isScrollEnabled = true
-		UIView.animate(withDuration: MDKImageTransition.duration, animations: {
-			self.collectionView.frame.origin.y = 0
-			self.toolbar.frame.origin.y = self.view.frame.height
-		}) { (_) in
-			if let cell = self.collectionView.visibleCells.first as? DisplayCell {
-				cell.makeScroll(stop: false)
+		changeToolBarPosition(view.frame.height, forceAnimation: true, finish: finish)
+	}
+	func changeToolBarPosition(_ offset:CGFloat ,forceAnimation:Bool = false , finish:(()->())? = nil) -> () {
+		guard
+			toolbar.actionList.count > 0,
+			let cell = collectionView.visibleCells.first as? DisplayCell
+		else { return }
+		
+		
+		UIView.animate(withDuration: forceAnimation ? MDKImageTransition.duration : 0,animations:  {
+			self.toolbar.frame.origin.y = offset
+			if self.toolbar.frame.origin.y < self.view.frame.height - self.toolbar.frame.height {
+				self.resetTapCount()
+				self.toolbar.frame.origin.y = self.view.frame.height - self.toolbar.frame.height
+				self.toolbarIsOpening = true
+				self.toolbarIsFinishOpen = true
+			}else if self.toolbar.frame.origin.y > self.view.frame.height {
+				self.resetTapCount()
+				self.toolbar.frame.origin.y = self.view.frame.height
+				self.collectionView.frame.origin.y = 0
+				self.toolbarIsOpening = false
+				self.toolbarIsFinishOpen = false
+			}else{
+				self.toolbarIsOpening = true
 			}
-			self.resetTapCount()
-			self.toolbar.removeFromSuperview()
-			self.toolbarIsOpening = false
-			self.toolbarIsFinishOpen = false
-			finish()
+			
+			let photoBottom = max(-10, cell.frame.height - cell.imageView.superview!.convert(cell.imageView.frame, to: cell).maxY)
+			if photoBottom < (self.view.frame.height - self.toolbar.frame.origin.y){
+				self.collectionView.frame.origin.y = 0-(self.view.frame.height - self.toolbar.frame.origin.y - photoBottom)
+			}
+		}) { _ in
+			finish?()
 		}
+
 	}
 }
 
