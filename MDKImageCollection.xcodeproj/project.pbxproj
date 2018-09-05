@@ -156,9 +156,9 @@
 		FF769AAB20F309D400DB6DA1 /* Class */ = {
 			isa = PBXGroup;
 			children = (
+				FF90955C2137BEB90084B7B2 /* main */,
 				FF90955E2137BED50084B7B2 /* objc */,
 				FF90955D2137BECA0084B7B2 /* web */,
-				FF90955C2137BEB90084B7B2 /* main */,
 			);
 			path = Class;
 			sourceTree = "<group>";

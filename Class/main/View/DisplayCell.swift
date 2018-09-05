@@ -8,6 +8,9 @@
 
 import UIKit
 
+protocol DisplayCellDelegate : NSObjectProtocol {
+	func displayCell(_ cell:DisplayCell ,  scrollPanHandle pan:UIPanGestureRecognizer) -> ()
+}
 
 class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 
@@ -75,17 +78,12 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 		scrollViewDidZoom(self.contentScroll)
 	}
 
-	var isScrolling:Bool = false {
-		didSet{
-			if isScrolling {
-				
-			}
-		}
-	}
+	var isScrolling:Bool = false
+	var canScroll:Bool = true
 
 
 
-	weak var scrollDelegate:UIScrollViewDelegate?
+	weak var delegate:(UIScrollViewDelegate & DisplayCellDelegate)?
 	
 	let imageView:UIImageView = {
 		let view = UIImageView()
@@ -192,19 +190,16 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 	
 	
 	var contentScrollPanSelector : Selector!
-	var contentScrollPanBeginOffset:CGPoint = CGPoint()
-	var contentScrollPanLastTranslation:CGPoint = CGPoint()
 }
 
 
 extension DisplayCell:UIScrollViewDelegate{
 	@objc func handlePan(_ pan:UIPanGestureRecognizer) -> () {
-		if pan.state == .began {
-			contentScrollPanBeginOffset = contentScroll.contentOffset
+		delegate?.displayCell(self, scrollPanHandle: pan)
+		
+		if canScroll {
+			pan.view?.perform(contentScrollPanSelector, with: pan)
 		}
-		
-		
-		pan.view?.perform(contentScrollPanSelector, with: pan)
 	}
 	func viewForZooming(in scrollView: UIScrollView) -> UIView? {
 		imageView.layer.speed = 1
@@ -216,7 +211,7 @@ extension DisplayCell:UIScrollViewDelegate{
 	
 	func scrollViewDidZoom(_ scrollView: UIScrollView) {
 		if !updatingPhoto {
-			scrollDelegate?.scrollViewDidZoom?(scrollView)
+			delegate?.scrollViewDidZoom?(scrollView)
 		}
 		let showPicHeight = imageView.frame.size.height;
 		let showPicWidth = imageView.frame.size.width;
@@ -235,7 +230,7 @@ extension DisplayCell:UIScrollViewDelegate{
 
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		if !updatingPhoto {
-			scrollDelegate?.scrollViewDidScroll?(scrollView)
+			delegate?.scrollViewDidScroll?(scrollView)
 		}
 
 		if scrollView == contentScroll{

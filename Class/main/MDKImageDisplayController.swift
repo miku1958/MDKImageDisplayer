@@ -197,6 +197,7 @@ open class MDKImageDisplayController: UIViewController {
 	let dismissPan:UIPanGestureRecognizer = UIPanGestureRecognizer()
 
 	let toolbarPan:UIPanGestureRecognizer = UIPanGestureRecognizer()
+	var toolbarPanLastTranslation:CGPoint = CGPoint()
 
 	let longPress = UILongPressGestureRecognizer()
 
@@ -433,8 +434,8 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 
 	public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
 		let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NSStringFromClass(DisplayCell.self), for: indexPath) as! DisplayCell
-		if cell.scrollDelegate == nil {
-			cell.scrollDelegate = self
+		if cell.delegate == nil {
+			cell.delegate = self
 			if let pinch = cell.contentScroll.pinchGestureRecognizer{
 				longPress.require(toFail:pinch)
 				toolbarPan.require(toFail: pinch)
@@ -597,7 +598,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			collectionPanLastTranslation = translation
 		}
 
-		pan.view?.perform(collectionPanSelector, with: pan)
+		collectionView.perform(collectionPanSelector, with: pan)
 	}
 	public func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		if scrollView.panGestureRecognizer.translation(in: nil).x > 1 || scrollView.panGestureRecognizer.translation(in: nil).y > 1 {
@@ -884,17 +885,17 @@ extension MDKImageDisplayController{
 	}
 	func resetToolbar(touchPoint:CGPoint? , cell:DisplayCell) -> () {
 		toolbar
-			.removeAllAction()
-			.addGroup()
+		.removeAllAction()
+		.addGroup()
 			.addAction(title: "保存图片", action: { [weak self] in
 				self?.savePhoto()
 			})
-			.addGroup()
+		.addGroup()
 			.addAction(title: "关闭图片", action: {[weak self] in
 				self?.dismissWithAnimation(all: true)
 			})
 			.addAction(title: "取消", action: { //[weak self] in
-				
+
 			})
 		guard
 			let indexPath = collectionView.indexPath(for: cell)
@@ -913,15 +914,18 @@ extension MDKImageDisplayController{
 								convertPoint!.y *= cell.imageView.image?.scale ?? 1
 							}
 							_self.QRCodeHandler((_self.photoList[indexPath.item - _self.photoList.negativeCount].QRCode)!,convertPoint)
-						}, atGroup: 0, at: 1)
-						
-						_self.changeToolBarPosition(0,forceAnimation: true)
+							}, atGroup: 0, at: 1)
+
+						_self.changeToolBarPosition(offset: 0,forceAnimation: true)
 					}
 				}
 			}
 		}
-		
-		toolbar.frame.origin.y = view.frame.height
+
+		if toolbar.superview == nil {
+			toolbar.frame.origin.y = view.frame.height
+			view.addSubview(toolbar)
+		}
 	}
 	func displayToolbar(_ touchPoint:CGPoint? = nil) -> () {
 		
@@ -934,9 +938,8 @@ extension MDKImageDisplayController{
 		resetToolbar(touchPoint: touchPoint, cell: cell)
 
 		
-		changeToolBarPosition(-view.frame.height,forceAnimation: true)
-		
-		view.addSubview(toolbar)
+		changeToolBarPosition(offset: -view.frame.height,forceAnimation: true)
+
 
 		cell.makeScroll(stop: true)
 		collectionView.isScrollEnabled = false
@@ -946,40 +949,43 @@ extension MDKImageDisplayController{
 
 
 		collectionView.isScrollEnabled = true
-		changeToolBarPosition(view.frame.height, forceAnimation: true, finish: finish)
+		changeToolBarPosition(offset: view.frame.height, forceAnimation: true, finish: finish)
 	}
-	func changeToolBarPosition(_ offset:CGFloat ,forceAnimation:Bool = false , finish:(()->())? = nil) -> () {
+	func changeToolBarPosition(offset:CGFloat ,forceAnimation:Bool = false , finish:(()->())? = nil) -> () {
+
 		guard
 			toolbar.actionList.count > 0,
 			let cell = collectionView.visibleCells.first as? DisplayCell
 		else { return }
 		
-		
+		self.toolbarIsOpening = true
 		UIView.animate(withDuration: forceAnimation ? MDKImageTransition.duration : 0,animations:  {
-			self.toolbar.frame.origin.y = offset
-			if self.toolbar.frame.origin.y < self.view.frame.height - self.toolbar.frame.height {
-				self.resetTapCount()
+			self.toolbar.frame.origin.y += offset
+
+			if self.toolbar.frame.origin.y <= self.view.frame.height - self.toolbar.frame.height {
 				self.toolbar.frame.origin.y = self.view.frame.height - self.toolbar.frame.height
-				self.toolbarIsOpening = true
-				self.toolbarIsFinishOpen = true
-			}else if self.toolbar.frame.origin.y > self.view.frame.height {
-				self.resetTapCount()
+			}else if self.toolbar.frame.origin.y >= self.view.frame.height {
 				self.toolbar.frame.origin.y = self.view.frame.height
-				self.collectionView.frame.origin.y = 0
-				self.toolbarIsOpening = false
-				self.toolbarIsFinishOpen = false
-			}else{
-				self.toolbarIsOpening = true
 			}
-			
+
 			let photoBottom = max(-10, cell.frame.height - cell.imageView.superview!.convert(cell.imageView.frame, to: cell).maxY)
-			if photoBottom < (self.view.frame.height - self.toolbar.frame.origin.y){
+			if photoBottom <= (self.view.frame.height - self.toolbar.frame.origin.y){
 				self.collectionView.frame.origin.y = 0-(self.view.frame.height - self.toolbar.frame.origin.y - photoBottom)
+			}else{
+				self.collectionView.frame.origin.y = 0
 			}
 		}) { _ in
 			finish?()
+			self.resetTapCount()
+			if self.toolbar.frame.origin.y <= self.view.frame.height - self.toolbar.frame.height {
+				self.toolbarIsOpening = true
+				self.toolbarIsFinishOpen = true
+			}else if self.toolbar.frame.origin.y >= self.view.frame.height {
+				self.toolbarIsOpening = false
+				self.toolbarIsFinishOpen = false
+				cell.canScroll = true
+			}
 		}
-
 	}
 }
 
@@ -1036,20 +1042,34 @@ extension MDKImageDisplayController{
 	}
 	@objc func toolbarPanFunc(pan:UIPanGestureRecognizer) ->(){
 
-
 		let velocity = pan.velocity(in: nil)
 		switch pan.state {
 		case .began:
-			if toolbarIsOpening{
-				if velocity.y>fabs(velocity.x) {
-					dismissToolbar(finish: {})
+			if toolbarIsFinishOpen{
+				if velocity.y<0 {
+//					return;
 				}
 			}else{
-				if velocity.y<100{
-					displayToolbar()
+				if velocity.y<0{
+					if let cell = collectionView.visibleCells.first as? DisplayCell {
+						resetToolbar(touchPoint: nil, cell: cell)
+					}
 				}
 			}
-		default:break
+		case .ended:
+			toolbarPanLastTranslation = CGPoint()
+			if velocity.y<0{
+				changeToolBarPosition(offset: -view.frame.height,forceAnimation: true)
+			}else{
+				changeToolBarPosition(offset: view.frame.height,forceAnimation: true)
+			}
+		default:
+			let translation = pan.translation(in: nil)
+			var offset = translation.y - toolbarPanLastTranslation.y;
+			let maxOffset:CGFloat = 10
+			offset = max(min(offset, maxOffset), -maxOffset)
+			changeToolBarPosition(offset: offset)
+			toolbarPanLastTranslation = translation;
 		}
 	}
 
@@ -1267,5 +1287,21 @@ extension MDKImageDisplayController{
 		}
 
 		return actionArr
+	}
+}
+
+
+extension MDKImageDisplayController:DisplayCellDelegate{
+	func displayCell(_ cell: DisplayCell, scrollPanHandle pan: UIPanGestureRecognizer) {
+		let velocity = pan.velocity(in: nil)
+		if let imgSize =  cell.imageView.image?.size , cell.contentScroll.contentOffset.y >= cell.contentScroll.contentSize.height - imgSize.width/cell.frame.width*imgSize.height , velocity.y < 0 && !toolbarIsFinishOpen{
+
+			if toolbar.superview == nil{
+				resetToolbar(touchPoint: nil, cell: cell)
+			}
+			toolbarPanFunc(pan: pan)
+			cell.canScroll = false
+			cell.isScrolling = false
+		}
 	}
 }
