@@ -32,6 +32,7 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 			if fabs(ratio-lastRatio) > 0.01 {//防止两张图是因为缩小分辨率后比例稍微有些变化
 				UIView.animate(withDuration: MDKImageTransition.duration, animations: {
 					self.imageView.frame.size.height = self.imageView.frame.size.width / ratio
+					self.imageView.frame.origin = CGPoint()
 					self.scrollViewDidZoom(self.contentScroll)
 				}) { (finish) in
 					self.contentScroll.zoomScale = 1

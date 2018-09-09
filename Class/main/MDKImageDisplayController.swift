@@ -671,7 +671,6 @@ extension MDKImageDisplayController{
 		var hasLargePhoto:Bool = false
 		if let largeIdentiferClose = largeIdentiferClose{
 			guard let _hasLarge = load(largeIdentiferClose: largeIdentiferClose, option: option, displayIndex: displayIndex) else{
-//				print(identifer)
 				return
 			}
 			hasLargePhoto = _hasLarge
@@ -994,7 +993,8 @@ extension MDKImageDisplayController{
 	@objc func dismissPanFunc(pan:UIPanGestureRecognizer) ->(){
 		let translation = pan.translation(in: nil)
 
-		let progress = min(translation.y / collectionView.bounds.height,  0.5)  
+		let progress = min(fabs(translation.y / collectionView.bounds.height),  0.5)
+
 		MDKImageTransition.global().process = progress
 		guard let cell = collectionView.visibleCells.first as? DisplayCell else{return}
 		switch pan.state {
@@ -1042,6 +1042,9 @@ extension MDKImageDisplayController{
 	}
 	@objc func toolbarPanFunc(pan:UIPanGestureRecognizer) ->(){
 
+		if let cell = collectionView.visibleCells.first as? DisplayCell{
+			cell.canScroll = false
+		}
 		let velocity = pan.velocity(in: nil)
 		switch pan.state {
 		case .began:
@@ -1057,6 +1060,9 @@ extension MDKImageDisplayController{
 				}
 			}
 		case .ended:
+			if let cell = collectionView.visibleCells.first as? DisplayCell{
+				cell.canScroll = true
+			}
 			toolbarPanLastTranslation = CGPoint()
 			if velocity.y<0{
 				changeToolBarPosition(offset: -view.frame.height,forceAnimation: true)

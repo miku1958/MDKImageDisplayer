@@ -49,24 +49,31 @@ import WebKit
 		let imgJS = "document.elementFromPoint(\(touchPoint.x), \(touchPoint.y))"
 		let imgURLJS = "\(imgJS).src"
 		let imgRectJS = "\(imgJS).getBoundingClientRect()"
-
+		
 		webView?.evaluateJavaScript(imgURLJS, completionHandler: { (imgUrl, error) in
 			if let imgUrl = imgUrl as? String , mUrlArray.contains(imgUrl) {
 				let imgIndex: Int = (mUrlArray as NSArray).index(of: imgUrl)
-				self.webView?.evaluateJavaScript("\(imgRectJS).left", completionHandler: { (left, error) in self.webView?.evaluateJavaScript("\(imgRectJS).top", completionHandler: { (top, error) in self.webView?.evaluateJavaScript("\(imgRectJS).width", completionHandler: { (width, error) in self.webView?.evaluateJavaScript("\(imgRectJS).height", completionHandler: { (height, error) in
-
-					guard
-						let left = left as? CGFloat ,let top = top as? CGFloat ,
-						let width = width as? CGFloat , let height = height as? CGFloat
-					else {return}
-
-					let imgRect = CGRect(x: left, y: top, width: width, height: height)
-
+				self.getBoundingClientRect(imgRectJS, handler: { (imgRect) in
+					print(imgRect)
 					self.imageClickHandler?(imgRect,mUrlArray, imgIndex)
-
-				})})})})
+				})
+				
 			}
 		})
+	}
+	func getBoundingClientRect(_ imgRectJS:String , handler:@escaping (CGRect) -> ()) -> () {
+		self.webView?.evaluateJavaScript("\(imgRectJS).left", completionHandler: { (left, error) in
+			self.webView?.evaluateJavaScript("\(imgRectJS).top", completionHandler: { (top, error) in
+				self.webView?.evaluateJavaScript("\(imgRectJS).width", completionHandler: { (width, error) in
+					self.webView?.evaluateJavaScript("\(imgRectJS).height", completionHandler: { (height, error) in
+	
+			guard
+				let top = top as? CGFloat , let left = left as? CGFloat ,
+				let width = width as? CGFloat , let height = height as? CGFloat
+				else {return}
+			handler(CGRect(x: left, y: top, width: width, height: height))
+			
+		})})})})
 	}
 	private func convertUrlResult(urlResult:String,touchPoint:CGPoint) -> () {
 		var mUrlArray = urlResult.components(separatedBy: "+")
@@ -85,23 +92,28 @@ import WebKit
 		}
 	}
 	private let jsGetImages = """
-function MDKImageGetAllImages(){\
-	var objs = document.getElementsByTagName(\"img\");\
-	var imgScr = '';\
-	for(var i=0;i<objs.length;i++){\
-		var src = objs[i].src;\
-		var dataSrc = objs[i].data-src;\
-		if(src.length>0 && src.substr(0,4) == \"http\"){\
-			imgScr = imgScr + src + '+';\
-		}else if(dataSrc.length>0 && dataSrc.substr(0,4) == \"http\"){\
-			imgScr = imgScr + dataSrc + '+';\
-		}\
-	};\
-	return imgScr;\
+function MDKImageGetAllImages(){
+	var objs = document.getElementsByTagName(\"img\");
+	var imgScr = '';
+	for(var i=0;i<objs.length;i++){
+		var src = objs[i].src;
+		var dataSrc = objs[i].data-src;
+		if(src.length>0 && src.substr(0,4) == \"http\"){
+			imgScr = imgScr + src + '+';
+		}else if(dataSrc.length>0 && dataSrc.substr(0,4) == \"http\"){
+			imgScr = imgScr + dataSrc + '+';
+		}
+	};
+	return imgScr;
 };
 MDKImageGetAllImages();
 """
 	@objc private func resourceTap(_ tap:UITapGestureRecognizer) -> () {
+		
+		if let scroll = webView?.scrollView {
+			scroll.setContentOffset(scroll.contentOffset, animated: true)//force to stop
+		}
+		
 		let touchPoint: CGPoint = tap.location(in: webView)
 
 		webView?.evaluateJavaScript("MDKImageGetAllImages()", completionHandler: { (urlResult, error) in

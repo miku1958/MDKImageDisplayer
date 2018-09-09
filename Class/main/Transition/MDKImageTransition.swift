@@ -119,12 +119,17 @@ extension MDKImageTransition{
 		
 		//fix m11 和 m22过大时滑动太快
 		var positionXRatio = transitingView.layer.transform.m11
-		if positionXRatio>0 {
+		if positionXRatio>1 {
 			positionXRatio *= positionXRatio
+		}else{
+			positionXRatio = 1
 		}
+		
 		var positionYRatio = transitingView.layer.transform.m22
-		if positionYRatio>0 {
+		if positionYRatio>1 {
 			positionYRatio *= positionYRatio
+		}else{
+			positionYRatio = 1
 		}
 		
 		transitingView.transform.tx = position.x + (currentPosition.x/positionXRatio)
@@ -281,7 +286,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 
 		var targetView:UIView?
 		var sourceView:UIView?
-		var sourceFrame:CGRect? = isPresent ? beginSourceFrame : dismissTargetFrame
+		let sourceFrame:CGRect? = isPresent ? beginSourceFrame : dismissTargetFrame
 		var beginTransitionView:UIView? = beginViewMap.anyObject
 
 		var hasViewPair:Bool = false
@@ -315,21 +320,17 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 
 		if let targetView = targetView{
 			if let sourceView = sourceView {
-				hasViewPair = true
-				pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceFrameToKeyWin: nil, isPresent: isPresent)
+				hasViewPair = pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceFrameToKeyWin: nil, isPresent: isPresent)
 			}else if let sourceFrame = sourceFrame{
-				hasViewPair = true
-				pairAnimationViews(targetView: targetView, sourceView: nil, sourceFrameToKeyWin: sourceFrame, isPresent: isPresent)
+				hasViewPair = pairAnimationViews(targetView: targetView, sourceView: nil, sourceFrameToKeyWin: sourceFrame, isPresent: isPresent)
 			}
 		}
 
 		if !hasViewPair , let targetView = targetView{
 			if let sourceView = beginTransitionView{
-				hasViewPair = true
-				pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceFrameToKeyWin: nil, isPresent: isPresent)
+				hasViewPair = pairAnimationViews(targetView: targetView, sourceView: sourceView, sourceFrameToKeyWin: nil, isPresent: isPresent)
 			}else if let sourceFrame = sourceFrame{
-				hasViewPair = true
-				pairAnimationViews(targetView: targetView, sourceView: nil, sourceFrameToKeyWin: sourceFrame, isPresent: isPresent)
+				hasViewPair = pairAnimationViews(targetView: targetView, sourceView: nil, sourceFrameToKeyWin: sourceFrame, isPresent: isPresent)
 			}
 		}
 		if !hasViewPair {
@@ -350,7 +351,10 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 		}
 	}
 
-	func pairAnimationViews(targetView view:UIView , sourceView:UIView?, sourceFrameToKeyWin:CGRect? , isPresent:Bool) -> () {
+	func pairAnimationViews(targetView view:UIView , sourceView:UIView?, sourceFrameToKeyWin:CGRect? , isPresent:Bool) -> Bool {
+		if let imageView = view as? UIImageView , imageView.image == nil {
+			return false
+		}
 		var frameToKeyWin = CGRect()
 		if let sourceFrameToKeyWin = sourceFrameToKeyWin{
 			frameToKeyWin = sourceFrameToKeyWin
@@ -361,25 +365,30 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 
 		animatingCtr?.view.layoutIfNeeded()
 
-		var frameMaskToKeyWin = getMaskFrame(frameToKeyWin: frameToKeyWin)
+		let frameMaskToKeyWin = getMaskFrame(frameToKeyWin: frameToKeyWin, fromView: view)
 		let sourceFrameToTarget = MDKKeywindow.convert(frameToKeyWin, to: view.superview)
 		let maskFrameToTarget = MDKKeywindow.convert(frameMaskToKeyWin, to: view.superview)
 		updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
+		
+		return true
 	}
 
-	func getMaskFrame(frameToKeyWin:CGRect) -> (CGRect) {
+	func getMaskFrame(frameToKeyWin:CGRect ,fromView view:UIView) -> (CGRect) {
 		var maskFrame = frameToKeyWin
+
 
 		if frameToKeyWin.origin.x < sourceScreenInset.left {
 			let insert = sourceScreenInset.left-frameToKeyWin.origin.x
+			
 			maskFrame.size.width -= insert
-			maskFrame.origin.x += insert
+			maskFrame.origin.x += insert/view.layer.transform.m11
 		}
 
 		if frameToKeyWin.origin.y < sourceScreenInset.top{
 			let insert = sourceScreenInset.top-frameToKeyWin.origin.y
+			
 			maskFrame.size.height -= insert
-			maskFrame.origin.y += insert
+			maskFrame.origin.y += insert/view.layer.transform.m22
 		}
 
 		if frameToKeyWin.maxX > MDKKeywindow.frame.width - sourceScreenInset.right{
@@ -402,7 +411,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 			return
 		}
 
-		if sourceFrame != maskFrame{//等调试好再说
+		if sourceFrame != maskFrame || true{//等调试好再说
 
 			let mask = CALayer()
 			mask.backgroundColor = UIColor.white.cgColor
@@ -412,9 +421,9 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 			mask.bounds = sourcebounds;
 			mask.anchorPoint.x = 0
 			mask.anchorPoint.y = 0
-
+			
 			mask.position = maskFrame.origin
-			mask.position.y += sourceFrame.height - maskFrame.height
+
 
 			let maskBoundsAnim = CABasicAnimation()
 			maskBoundsAnim.keyPath = "bounds"
@@ -439,6 +448,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 
 			mask.add(maskGroup, forKey: "animateTransition")
 			view.layer.mask = mask
+//			view.layer.addSublayer(mask)
 
 		}
 
@@ -467,9 +477,8 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 		let group = CAAnimationGroup()
 		group.animations = [boundsAnim,positionAnim,cornerRadiusAnim]
 
-		for anim in group.animations!{
-			print(anim.debugDescription)
-		}
+
+
 		group.duration = MDKImageTransition.duration
 		group.timingFunction = CAMediaTimingFunction(name: kCAMediaTimingFunctionEaseInEaseOut)
 

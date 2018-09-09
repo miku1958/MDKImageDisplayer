@@ -151,6 +151,14 @@ class DemoCtr: UIViewController {
 			finish(image)
 			return
 		}
+		let path = "\(MDKFileTempWith("imageCache"))/\(urlstr.hash).png"
+		
+		if let image = UIImage(contentsOfFile: path) {
+			finish(image)
+			cache.setObject(image, forKey: urlstr as NSString)
+			return
+		}
+		
 		if (downloaingList[urlstr] == nil) {
 			downloaingList[urlstr] = [finish]
 		}else{
@@ -166,6 +174,8 @@ class DemoCtr: UIViewController {
 				let image = UIImage(data: data)
 				else {return}
 			self?.cache.setObject(image, forKey: urlstr as NSString)
+			try? FileManager.default.createDirectory(atPath: MDKFileTempWith("imageCache"), withIntermediateDirectories: true, attributes: nil)
+			try? UIImagePNGRepresentation(image)?.write(to: URL(fileURLWithPath: path))
 			if let arr = self?.downloaingList[urlstr]{
 				for finish in arr{
 					finish(image)
