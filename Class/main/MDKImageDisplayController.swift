@@ -1294,7 +1294,7 @@ extension MDKImageDisplayController{
 extension MDKImageDisplayController:DisplayCellDelegate{
 	func displayCell(_ cell: DisplayCell, scrollPanHandle pan: UIPanGestureRecognizer) {
 		let velocity = pan.velocity(in: nil)
-		if let imgSize =  cell.imageView.image?.size , cell.contentScroll.contentOffset.y >= cell.contentScroll.contentSize.height - imgSize.width/cell.frame.width*imgSize.height , velocity.y < 0 && !toolbarIsFinishOpen{
+		if let imgSize =  cell.imageView.image?.size , cell.contentScroll.contentOffset.y >= cell.contentScroll.contentSize.height - imgSize.width/cell.contentScroll.contentSize.width*imgSize.height , velocity.y < 0 && !toolbarIsFinishOpen{
 
 			if toolbar.superview == nil{
 				resetToolbar(touchPoint: nil, cell: cell)

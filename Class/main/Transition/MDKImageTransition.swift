@@ -185,7 +185,9 @@ extension MDKImageTransition{
 				animationDidStop(anim, finished: true)
 				
 			}
-			
+			view.layer.speed = 1
+			view.layer.beginTime = 0
+			view.layer.timeOffset = 0
 			view.transform.tx = 0
 			view.transform.ty = 0
 			finishingDismiss = false
