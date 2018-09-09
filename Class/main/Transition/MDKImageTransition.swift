@@ -115,8 +115,21 @@ extension MDKImageTransition{
 		
 		let ratio = CGFloat(transitingView.layer.timeOffset / MDKImageTransition.duration)
 		let currentPosition = CGPoint(x: (sourcePosition.x - targetPosition.x) * ratio , y: (sourcePosition.y - targetPosition.y) * ratio)
-		transitingView.transform.tx = position.x + (currentPosition.x/max(transitingView.layer.transform.m11, 1))
-		transitingView.transform.ty = position.y + (currentPosition.y/max(transitingView.layer.transform.m22, 1))
+
+		
+		//fix m11 和 m22过大时滑动太快
+		var positionXRatio = transitingView.layer.transform.m11
+		if positionXRatio>0 {
+			positionXRatio *= positionXRatio
+		}
+		var positionYRatio = transitingView.layer.transform.m22
+		if positionYRatio>0 {
+			positionYRatio *= positionYRatio
+		}
+		
+		transitingView.transform.tx = position.x + (currentPosition.x/positionXRatio)
+		transitingView.transform.ty = position.y + (currentPosition.y/positionYRatio)
+
 	}
 	
 	func cancelDismiss() {
