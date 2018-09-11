@@ -79,6 +79,7 @@ open class MDKImageDisplayController: UIViewController {
 		dismissTap.delegate = self
 		dismissTap.require(toFail: dismissPan)
 		dismissTap.require(toFail: zoomTap)
+		dismissTap.require(toFail: toolbarPan)
 		
 		zoomTap.addTarget(self, action: #selector(tapZoomFunc(tap:)))
 		collectionView.addGestureRecognizer(zoomTap)
@@ -951,7 +952,7 @@ extension MDKImageDisplayController{
 		collectionView.isScrollEnabled = true
 		changeToolBarPosition(offset: view.frame.height, forceAnimation: true, finish: finish)
 	}
-	func changeToolBarPosition(offset:CGFloat ,forceAnimation:Bool = false , finish:(()->())? = nil) -> () {
+	func changeToolBarPosition(offset:CGFloat ,forceAnimation:Bool = false , finish:(()->())? = nil , velocity _velocity:CGFloat? = nil) -> () {
 
 		guard
 			toolbar.actionList.count > 0,
@@ -959,7 +960,18 @@ extension MDKImageDisplayController{
 		else { return }
 		
 		self.toolbarIsOpening = true
-		UIView.animate(withDuration: forceAnimation ? MDKImageTransition.duration : 0,animations:  {
+		self.toolbarIsFinishOpen = false
+		var velocity:CGFloat = 0
+		if _velocity != nil {
+			velocity = _velocity!
+		}
+		UIView.animate(
+			withDuration: forceAnimation ? MDKImageTransition.duration : 0,
+			delay: 0,
+			usingSpringWithDamping: velocity >= 0 ? 1 : 0.5,
+			initialSpringVelocity: min(100, fabs(velocity)),
+			options: .curveEaseOut,
+			animations: {
 			self.toolbar.frame.origin.y += offset
 
 			if self.toolbar.frame.origin.y <= self.view.frame.height - self.toolbar.frame.height {
@@ -974,7 +986,7 @@ extension MDKImageDisplayController{
 			}else{
 				self.collectionView.frame.origin.y = 0
 			}
-		}) { _ in
+		}) { (_) in
 			finish?()
 			self.resetTapCount()
 			if self.toolbar.frame.origin.y <= self.view.frame.height - self.toolbar.frame.height {
@@ -986,6 +998,7 @@ extension MDKImageDisplayController{
 				cell.canScroll = true
 			}
 		}
+
 	}
 }
 
@@ -1064,11 +1077,12 @@ extension MDKImageDisplayController{
 			if let cell = collectionView.visibleCells.first as? DisplayCell{
 				cell.canScroll = true
 			}
+
 			toolbarPanLastTranslation = CGPoint()
 			if velocity.y<0{
-				changeToolBarPosition(offset: -view.frame.height,forceAnimation: true)
+				changeToolBarPosition(offset: -view.frame.height,forceAnimation: true , velocity:velocity.y/200)
 			}else{
-				changeToolBarPosition(offset: view.frame.height,forceAnimation: true)
+				changeToolBarPosition(offset: view.frame.height,forceAnimation: true , velocity:velocity.y/200)
 			}
 		default:
 			let translation = pan.translation(in: nil)
@@ -1097,7 +1111,7 @@ extension MDKImageDisplayController{
 	}
 
 	@objc fileprivate func tapDismissFunc(tap:UITapGestureRecognizer){
-		if zoomTap.state == .failed && !longPressIsActive{
+		if zoomTap.state == .failed && !longPressIsActive && toolbarIsFinishOpen{
 			tapCount = 1
 			self.dismissWithAnimation()
 		}
