@@ -1111,7 +1111,7 @@ extension MDKImageDisplayController{
 	}
 
 	@objc fileprivate func tapDismissFunc(tap:UITapGestureRecognizer){
-		if zoomTap.state == .failed && !longPressIsActive && toolbarIsFinishOpen{
+		if zoomTap.state == .failed && !longPressIsActive{
 			tapCount = 1
 			self.dismissWithAnimation()
 		}
