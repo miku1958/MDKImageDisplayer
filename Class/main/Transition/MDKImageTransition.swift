@@ -256,7 +256,9 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 				guard let toView = transitionContext.view(forKey: .to) else {return}
 				animatingCtr = transitionContext.viewController(forKey: .to) as? MDKImageDisplayController
 				sourceCtr = transitionContext.viewController(forKey: .from)
-				didViewAnimation(to: toView, from: nil)
+				DispatchQueue.main.async {//fix:首次加载图片是通过异步的话,没有图片会导致无法动态present的问题
+					self.didViewAnimation(to: toView, from: nil)
+				}
 			} else {
 				guard let fromView = transitionContext.view(forKey: .from) else {return}
 				animatingCtr = transitionContext.viewController(forKey: .from) as? MDKImageDisplayController

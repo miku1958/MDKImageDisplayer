@@ -105,7 +105,7 @@ open class MDKImageDisplayController: UIViewController {
 			case .fail(.denied):
 				fallthrough
 			case .fail(.restricted):
-				UIAlertController(title: "请允许系统访问图片", message: nil, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
+				UIAlertController(title: "请允许 APP 访问图片", message: nil, preferredStyle: .alert).MDKAdd(Cancel: { (_) in
 					
 				}, title: "返回").MDKQuickPresented()
 			case let .fail(.saveingFail(error)):
@@ -213,7 +213,8 @@ open class MDKImageDisplayController: UIViewController {
 	
 	
 
-	var savePhotoResult:SavePhotoClose?
+	var savePhotoResult : SavePhotoClose?
+	@objc var savePhotoResultObjc : SavePhotoBlock?
 
 	var collectionViewIsScrolling :Bool = false
 	
@@ -1072,7 +1073,7 @@ extension MDKImageDisplayController{
 		default:
 			let translation = pan.translation(in: nil)
 			var offset = translation.y - toolbarPanLastTranslation.y;
-			let maxOffset:CGFloat = 10
+			let maxOffset:CGFloat = 20
 			offset = max(min(offset, maxOffset), -maxOffset)
 			changeToolBarPosition(offset: offset)
 			toolbarPanLastTranslation = translation;
@@ -1220,18 +1221,33 @@ import Photos
 extension MDKImageDisplayController{
 
 	func savePhoto() -> () {
-		let author = PHPhotoLibrary.authorizationStatus();
-		if author == .restricted {
-			//没有权限
-			savePhotoResult?(.fail(.restricted))
-			return
-		}
+		var failType : SavePhotoFailType?
+		var failTypeObjc : MDKSavePhotoFailType?
 
-		if author == .denied {
+		switch PHPhotoLibrary.authorizationStatus() {
+		case .restricted , .notDetermined:
 			//没有权限
-			savePhotoResult?(.fail(.denied))
+			failType = .restricted
+			failTypeObjc = .restricted
+		case .denied:
+			failType = .denied
+			failTypeObjc = .denied
+		default:
+			break
+		}
+		if failType != nil {
+
+			if let savePhotoResultObjc = savePhotoResultObjc{
+				let result = MDKSavePhotoResult()
+				result.success = false
+				result.failType = failTypeObjc!
+				savePhotoResultObjc(result)
+			}else{
+				savePhotoResult?(.fail(failType!))
+			}
 			return
 		}
+		
 		let displayIndex = self.displayIndex - photoList.negativeCount
 		let option = MDKImageCloseOption()
 		if displayIndex>0 {
@@ -1255,7 +1271,19 @@ extension MDKImageDisplayController{
 	}
 
 	@objc func image(_ image: UIImage, didFinishSavingWithError error: NSError?, contextInfo: UnsafeRawPointer) {
-		savePhotoResult?(error == nil ? .success : .fail(.saveingFail(error!)))
+
+
+		if let savePhotoResultObjc = savePhotoResultObjc{
+			let result = MDKSavePhotoResult()
+			if let error = error {
+				result.success = false
+				result.failType = .saveingFail
+				result.error = error
+			}
+			savePhotoResultObjc(result)
+		}else{
+			savePhotoResult?(error == nil ? .success : .fail(.saveingFail(error!)))
+		}
 	}
 }
 

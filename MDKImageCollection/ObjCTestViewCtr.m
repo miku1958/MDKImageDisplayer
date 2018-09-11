@@ -18,6 +18,12 @@
 @property (weak, nonatomic) IBOutlet UIImageView *imageView3;
 @end
 
+@implementation UIViewController (test)
+
+
+
+@end
+
 @implementation ObjCTestViewCtr
 
 - (void)viewDidLoad {
@@ -56,6 +62,53 @@
 				}
 			}
 		}];
+		id savePhotoResultObjc = ^(MDKSavePhotoResult * result) {
+
+			NSString *title = nil;
+			NSString *message = nil;
+			UIAlertAction *confirmAction = nil;
+			if (result.success) {
+				title = @"保存成功";
+				confirmAction = [UIAlertAction actionWithTitle:@"返回" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+				}];
+			}else{
+				switch (result.failType) {
+					case MDKSavePhotoFailTypeDenied:
+					case MDKSavePhotoFailTypeRestricted:
+						title = @"没有权限保存图片";
+						message = @"是否跳转到设置?";
+						confirmAction = [UIAlertAction actionWithTitle:@"跳转到设置" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+							NSString *urlstr =@"prefs:root=Privacy&path=PHOTOS";
+							NSURL *url;
+							if (UIDevice.currentDevice.systemVersion.doubleValue <10.0) {
+								url = [NSURL URLWithString:urlstr];
+							}else{
+								url = [NSURL URLWithString:[urlstr stringByReplacingOccurrencesOfString:@"prefs" withString:@"App-Prefs"]];;
+							}
+
+							if ([UIApplication.sharedApplication canOpenURL:url]) {
+								[UIApplication.sharedApplication openURL:url];
+							}
+						}];
+						break;
+					case MDKSavePhotoFailTypeSaveingFail:
+						title = @"保存错误";
+						message = result.error.localizedDescription;
+						confirmAction = [UIAlertAction actionWithTitle:@"返回" style:UIAlertActionStyleDestructive handler:^(UIAlertAction * _Nonnull action) {
+						}];
+					default:
+						break;
+				}
+			}
+			UIAlertController *alertCtr = [UIAlertController
+										   alertControllerWithTitle:title
+										   message:message //tittle和msg会分行,msg字体会小点
+										   preferredStyle:UIAlertControllerStyleAlert];
+			[alertCtr addAction:confirmAction];
+			UIAlertAction *cancelAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) { }];
+			[alertCtr addAction:cancelAction];
+			[_self.presentedViewController presentViewController:alertCtr animated:YES completion:nil];
+		};
 		display.disableBlurBackgroundWithBlack = true;
 		display.registerAppearSourecView = ^UIView *{
 			return view;

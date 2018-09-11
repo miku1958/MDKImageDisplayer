@@ -23,6 +23,19 @@ public enum SavePhotoResult {
 	case fail(SavePhotoFailType)
 }
 
+@objc public enum MDKSavePhotoFailType : NSInteger{
+	case none
+	case restricted
+	case denied
+	case saveingFail
+}
+
+@objcMembers public class MDKSavePhotoResult : NSObject{
+	var success : Bool = true
+	var failType : MDKSavePhotoFailType = .none
+	var error : NSError?
+}
+
 @objc public enum LoadingPhotoQuality:Int{
 
 	case thumbnail = -1
@@ -33,6 +46,8 @@ public enum SavePhotoResult {
 
 
 public typealias SavePhotoClose = (SavePhotoResult)->()
+public typealias SavePhotoBlock = (MDKSavePhotoResult)->()
+
 public typealias QRCodeHandlerClose = ([String:CGRect],CGPoint?)->()
 
 public typealias IndexClose = (Int) -> ()
