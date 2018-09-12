@@ -10,6 +10,7 @@
 class TransitionController: UIPresentationController {
 	override func presentationTransitionWillBegin() {
 		if let presentedView = presentedView , let containerView = containerView{
+			presentedView.alpha = 0
 			presentedView.frame = containerView.bounds;
 			containerView.addSubview(presentedView)
 		}

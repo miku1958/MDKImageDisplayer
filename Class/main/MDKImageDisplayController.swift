@@ -307,6 +307,7 @@ open class MDKImageDisplayController: UIViewController {
 	
 	@objc public var disableBlurBackgroundWithBlack:Bool = false
 
+	var didLoadAnyImage:Bool = false
 }
 
 
@@ -738,6 +739,7 @@ extension MDKImageDisplayController{
 		var isFromInternet:Bool = false
 		let identifier = largeIdentiferClose(option){[weak self] image  in
 			hasLargePhoto = true
+			self?.didLoadAnyImage = true
 			cachePhotoNode = self?.update(image: image, cachePhotoNode: cachePhotoNode, isFromInternet: isFromInternet, displayIndex: displayIndex, isTryingNext: isTryingNext, isTryingPrevious: isTryingPrevious)
 		}
 		isFromInternet = true

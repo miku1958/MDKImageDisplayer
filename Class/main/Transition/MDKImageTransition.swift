@@ -176,27 +176,33 @@ extension MDKImageTransition{
 		
 		let layer = view.layer
 		var timeOffset = layer.timeOffset
+
 		if dismissingTimeInterval == 0 {
 			dismissingTimeInterval = 0.000000001
 		}
 		rollback ? (timeOffset -= dismissingTimeInterval) : (timeOffset += dismissingTimeInterval)
-		if rollback ? (timeOffset < 0) : (timeOffset > MDKImageTransition.duration) {
-			if rollback{
-				layer.removeAllAnimations()
+
+		if rollback ? (timeOffset <= MDKImageTransition.duration / 60) : (timeOffset >= MDKImageTransition.duration) {
+
+			UIView.performWithoutAnimation {
+				CATransaction.begin()
+				CATransaction.setDisableActions(true)
+				if rollback{
+					layer.removeAllAnimations()
+					forceTransitionContextCompleteTransition()
+				}else if let animKey = layer.animationKeys()?.first , let anim = layer.animation(forKey: animKey){
+					animationDidStop(anim, finished: true)
+				}
+				layer.speed = 1
+				layer.beginTime = 0
 				layer.timeOffset = 0
-				forceTransitionContextCompleteTransition()
-				
-			}else if let animKey = layer.animationKeys()?.first , let anim = layer.animation(forKey: animKey){
-				animationDidStop(anim, finished: true)
-				
+				view.transform.tx = 0
+				view.transform.ty = 0
+				finishingDismiss = false
+				animatingCtr?.view.isUserInteractionEnabled = true
+
+				CATransaction.commit()
 			}
-			view.layer.speed = 1
-			view.layer.beginTime = 0
-			view.layer.timeOffset = 0
-			view.transform.tx = 0
-			view.transform.ty = 0
-			finishingDismiss = false
-			animatingCtr?.view.isUserInteractionEnabled = true
 			return
 		}
 		
@@ -217,8 +223,10 @@ extension MDKImageTransition{
 		
 		view.transform.tx = rollbackTransformT.x * reduce
 		view.transform.ty = rollbackTransformT.y * reduce
-		
-		layer.timeOffset = min(max(timeOffset, 0), MDKImageTransition.duration)
+
+
+		layer.timeOffset = min(max(timeOffset, MDKImageTransition.duration / 60), MDKImageTransition.duration)
+
 		
 		DispatchQueue.main.asyncAfter(deadline: .now() + TimeInterval(1/60.0)) {
 			self.commitLayerAnimation(view, rollback: rollback)
@@ -256,9 +264,14 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 				guard let toView = transitionContext.view(forKey: .to) else {return}
 				animatingCtr = transitionContext.viewController(forKey: .to) as? MDKImageDisplayController
 				sourceCtr = transitionContext.viewController(forKey: .from)
-				DispatchQueue.main.async {//fix:首次加载图片是通过异步的话,没有图片会导致无法动态present的问题
+				if let inMainQueue = animatingCtr?.didLoadAnyImage ,inMainQueue{
 					self.didViewAnimation(to: toView, from: nil)
+				}else{
+					DispatchQueue.main.async {//fix:首次加载图片是通过异步的话,没有图片会导致无法动态present的问题
+						self.didViewAnimation(to: toView, from: nil)
+					}
 				}
+
 			} else {
 				guard let fromView = transitionContext.view(forKey: .from) else {return}
 				animatingCtr = transitionContext.viewController(forKey: .from) as? MDKImageDisplayController
@@ -371,7 +384,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 		let sourceFrameToTarget = MDKKeywindow.convert(frameToKeyWin, to: view.superview)
 		let maskFrameToTarget = MDKKeywindow.convert(frameMaskToKeyWin, to: view.superview)
 		updateLayer(from: view, sourceFrame: sourceFrameToTarget ,maskFrame:maskFrameToTarget, isPresent: isPresent)
-		
+		animatingCtr?.view.alpha = 1
 		return true
 	}
 
