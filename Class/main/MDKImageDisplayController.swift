@@ -967,10 +967,11 @@ extension MDKImageDisplayController{
 		if _velocity != nil {
 			velocity = _velocity!
 		}
+
 		UIView.animate(
 			withDuration: forceAnimation ? MDKImageTransition.duration : 0,
 			delay: 0,
-			usingSpringWithDamping: velocity >= 0 ? 1 : 0.5,
+			usingSpringWithDamping: velocity >= 0 ? 1 : 0.7,
 			initialSpringVelocity: min(100, fabs(velocity)),
 			options: .curveEaseOut,
 			animations: {
@@ -1081,7 +1082,11 @@ extension MDKImageDisplayController{
 			}
 
 			toolbarPanLastTranslation = CGPoint()
-			if velocity.y<0{
+			if toolbar.frame.origin.y < view.frame.height - toolbar.frame.height*2/3{
+				changeToolBarPosition(offset: -view.frame.height,forceAnimation: true , velocity:velocity.y/200)
+			}else if toolbar.frame.origin.y > view.frame.height - toolbar.frame.height*1/3{
+				changeToolBarPosition(offset: view.frame.height,forceAnimation: true , velocity:velocity.y/200)
+			}else if velocity.y<0{
 				changeToolBarPosition(offset: -view.frame.height,forceAnimation: true , velocity:velocity.y/200)
 			}else{
 				changeToolBarPosition(offset: view.frame.height,forceAnimation: true , velocity:velocity.y/200)
