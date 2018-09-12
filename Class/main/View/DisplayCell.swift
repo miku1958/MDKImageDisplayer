@@ -24,8 +24,8 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 			imageView.image = photo
 			contentScroll.zoomScale = 1
 			imageView.sizeToFit()
-			updateSize(size,resetOffset: true)
-		}else{
+			updateSize(size: size,resetOffset: true)
+		}else if let image = imageView.image , image != photo{
 			imageView.image = photo
 			let ratio = size.width / size.height
 			let lastRatio = self.imageView.frame.size.width / self.imageView.frame.size.height
@@ -33,18 +33,19 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 				UIView.animate(withDuration: MDKImageTransition.duration, animations: {
 					self.imageView.frame.size.height = self.imageView.frame.size.width / ratio
 					self.imageView.frame.origin = CGPoint()
+					self.scrollViewDidScroll(self.contentScroll)
 					self.scrollViewDidZoom(self.contentScroll)
-				}) { (finish) in
+				}) { (_) in
 					self.contentScroll.zoomScale = 1
 					self.imageView.frame.size = size
-					self.updateSize(size,resetOffset: isThumbnail)
+					self.updateSize(size: size,resetOffset: isThumbnail)
 					self.isScrolling = false
 					self.updatingPhoto = false
 				}
 			}else{
 				self.contentScroll.zoomScale = 1
 				imageView.sizeToFit()
-				updateSize(size,resetOffset: isThumbnail)
+				updateSize(size: size,resetOffset: isThumbnail)
 			}
 		}
 
@@ -52,13 +53,18 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 		updatingPhoto = false
 	}
 
-
-	func updateSize(_ size:CGSize , resetOffset:Bool) -> () {
-		contentScroll.contentSize = size
+	func updateWidthScale (size:CGSize , resetOffset:Bool) -> () {
 
 		fullWidthScale = MDKScreenWidth/size.width
 		miniZoomScale = min(0.5, fullWidthScale)
 		maxZoomScale = max(2, fullWidthScale)
+	}
+
+	func updateSize(size:CGSize , resetOffset:Bool) -> () {
+
+		updateWidthScale(size: size,resetOffset: resetOffset)
+
+		contentScroll.contentSize = size
 
 
 		contentScroll.minimumZoomScale = miniZoomScale
@@ -213,9 +219,9 @@ extension DisplayCell:UIScrollViewDelegate{
 		let showPicHeight = imageView.frame.size.height;
 		let showPicWidth = imageView.frame.size.width;
 		contentScroll.contentInset = UIEdgeInsetsMake(
-				showPicHeight>MDKScreenHeight ? 0 :
+				showPicHeight>=MDKScreenHeight ? 0 :
 					(MDKScreenHeight-showPicHeight)/2,
-				showPicWidth>MDKScreenWidth ? 0 :
+				showPicWidth>=MDKScreenWidth ? 0 :
 					(MDKScreenWidth-showPicWidth)/2,
 				0,
 				0
