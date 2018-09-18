@@ -1252,7 +1252,7 @@ extension MDKImageDisplayController{
 		var failTypeObjc : MDKSavePhotoFailType?
 
 		switch PHPhotoLibrary.authorizationStatus() {
-		case .restricted , .notDetermined:
+		case .restricted:
 			//没有权限
 			failType = .restricted
 			failTypeObjc = .restricted
