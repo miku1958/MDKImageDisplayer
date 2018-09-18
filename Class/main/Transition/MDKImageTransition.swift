@@ -49,6 +49,7 @@ open class MDKImageTransition: NSObject{
 		_transitionContext?.completeTransition(true)
 		transitingView?.layer.mask = nil
 		animatingCtr?.view.isUserInteractionEnabled = true
+		animatingCtr?.view.alpha = 1;
 		isPresenting = nil
 		isInTransition = false
 	}
@@ -368,6 +369,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 
 	func pairAnimationViews(targetView view:UIView , sourceView:UIView?, sourceFrameToKeyWin:CGRect? , isPresent:Bool) -> Bool {
 		if let imageView = view as? UIImageView , imageView.image == nil {
+			animatingCtr?.view.alpha = 1
 			return false
 		}
 		var frameToKeyWin = CGRect()
@@ -426,7 +428,7 @@ extension MDKImageTransition :  UIViewControllerAnimatedTransitioning{
 			return
 		}
 
-		if sourceFrame != maskFrame || true{//等调试好再说
+		if sourceFrame != maskFrame{//等调试好再说
 
 			let mask = CALayer()
 			mask.backgroundColor = UIColor.white.cgColor

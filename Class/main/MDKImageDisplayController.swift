@@ -454,12 +454,17 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 
 		displayIndexWillChange?(displayIndex)
 		guard let cell = cell as? DisplayCell else { return }
-		if shouldResetCellImage{
-			cell.imageView.image = nil
-		}
 		cell.imageView.alpha = 1
 		cell.imageView.layer.mask = nil
 		cell.isScrolling = false
+		if let image = photoList[displayIndex].photo {
+			cell.imageView.image = image
+			return
+		}
+		if shouldResetCellImage{
+			cell.imageView.image = nil
+		}
+
 
 
 
@@ -739,7 +744,6 @@ extension MDKImageDisplayController{
 		var isFromInternet:Bool = false
 		let identifier = largeIdentiferClose(option){[weak self] image  in
 			hasLargePhoto = true
-			self?.didLoadAnyImage = true
 			cachePhotoNode = self?.update(image: image, cachePhotoNode: cachePhotoNode, isFromInternet: isFromInternet, displayIndex: displayIndex, isTryingNext: isTryingNext, isTryingPrevious: isTryingPrevious)
 		}
 		isFromInternet = true
@@ -800,6 +804,7 @@ extension MDKImageDisplayController{
 
 					CATransaction.commit()
 				}
+//				self.collectionView.setNeedsLayout()
 				self.collectionView.layoutIfNeeded()
 
 
@@ -866,6 +871,7 @@ extension MDKImageDisplayController{
 			if let cell = _self.collectionView.cellForItem(at: IndexPath(item: displayIndex + _self.photoList.negativeCount, section: 0)) as? DisplayCell{
 
 				_self.updateCell(cell, image: image, displayIndex: displayIndex, isThumbnail: false)
+				self?.didLoadAnyImage = true
 			}
 
 		}
