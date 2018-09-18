@@ -9,6 +9,7 @@
 import UIKit
 
 //TODO:	做读取时占位提示圈
+//TODO:	dismiss的时候,如果不是同一张图片就做渐变
 
 
 open class MDKImageDisplayController: UIViewController {
@@ -457,13 +458,13 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		cell.imageView.alpha = 1
 		cell.imageView.layer.mask = nil
 		cell.isScrolling = false
-		if let image = photoList[displayIndex].photo {
-			cell.imageView.image = image
-			return
-		}
 		if shouldResetCellImage{
 			cell.imageView.image = nil
 		}
+		if let photo = photoList[displayIndex].photo {
+			cell.setPhoto(photo, isThumbnail: photoList[displayIndex].photoQuality == .thumbnail)
+		}
+
 
 
 
@@ -804,7 +805,6 @@ extension MDKImageDisplayController{
 
 					CATransaction.commit()
 				}
-//				self.collectionView.setNeedsLayout()
 				self.collectionView.layoutIfNeeded()
 
 
