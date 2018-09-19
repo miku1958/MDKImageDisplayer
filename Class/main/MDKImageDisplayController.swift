@@ -1285,15 +1285,20 @@ extension MDKImageDisplayController{
 		option.index = displayIndex
 		option.needQuality = .large
 		option.displayCtr = self
-		let identifier = largeIdentiferClose?(option){[weak self] photo in
+		let handlePhotoClose:ImageClose = {[weak self] photo in
 			guard let photo = photo , let _self = self else {return}
 			_self.photoList[displayIndex].photoQuality = .original
 
 			_self.photoList[displayIndex].photo = photo
 			UIImageWriteToSavedPhotosAlbum(photo, _self, #selector(_self.image(_:didFinishSavingWithError:contextInfo:)), nil)
 		}
-		if identifier != nil {
-			photoList[displayIndex].identifier = identifier
+		if let largeIdentiferClose = largeIdentiferClose{
+			let identifier = largeIdentiferClose(option,handlePhotoClose)
+			if identifier != nil {
+				photoList[displayIndex].identifier = identifier
+			}
+		}else{
+			largeClose?(option,handlePhotoClose)
 		}
 	}
 
