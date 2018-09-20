@@ -29,7 +29,7 @@ open class MDKImageDisplayController: UIViewController {
 		photoList.count = photoCount
 		self.largeClose = largeClose
 
-		setDisplayIndex(0)
+//		setDisplayIndex(0)
 	}
 
 	private var largeIdentiferClose:OptionImgRtStringClose?
@@ -41,7 +41,7 @@ open class MDKImageDisplayController: UIViewController {
 		photoList.count = 1
 		largeIdentiferClose = largeClose
 
-		setDisplayIndex(0)
+//		setDisplayIndex(0)
 	}
 	
 	required public init?(coder aDecoder: NSCoder) {
@@ -162,7 +162,9 @@ open class MDKImageDisplayController: UIViewController {
 		collectionView.scrollToItem(at: displayIndexPath, at: .left, animated: false)
 		collectionViewIsScrolling = false
 
-		loadPhoto(displayIndex)
+		if largeIdentiferClose != nil {
+			loadPhoto(displayIndex)
+		}
 		collectionView.layoutIfNeeded()
 
 
@@ -348,6 +350,9 @@ extension MDKImageDisplayController{
 	}
 	
 	override open func viewWillAppear(_ animated: Bool) {
+		if largeIdentiferClose != nil ,photoList[0].identifier == nil{
+			setDisplayIndex(0)
+		}
 		if let sourceView = registerAppearSourecView?(){
 			MDKImageTransition.global().beginViewMap.add(sourceView)
 		}else if let sourceFrame = registerAppearSourecFrame?(){
