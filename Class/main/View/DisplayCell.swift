@@ -209,6 +209,7 @@ extension DisplayCell:UIScrollViewDelegate{
 		}
 	}
 	func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+		imageView.frame.origin = CGPoint()//修正极小概率下imageVIew的位置在连续pinch下会出错的问题
 		return imageView
 	}
 	

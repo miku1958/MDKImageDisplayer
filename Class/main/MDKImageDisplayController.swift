@@ -1202,9 +1202,10 @@ extension MDKImageDisplayController:UIGestureRecognizerDelegate {
 		if gestureRecognizer == collectionView.panGestureRecognizer || otherGestureRecognizer == collectionView.panGestureRecognizer {
 			return false
 		}
-		if gestureRecognizer == toolbarPan , otherGestureRecognizer.isKind(of: UIPinchGestureRecognizer.self){//UIScrollViewPinchGestureRecognizer
+		if otherGestureRecognizer.isKind(of: UIPinchGestureRecognizer.self){//UIScrollViewPinchGestureRecognizer
 			return false
 		}
+
 		return true
 	}
 	public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
