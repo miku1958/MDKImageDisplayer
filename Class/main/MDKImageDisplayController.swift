@@ -387,9 +387,15 @@ extension MDKImageDisplayController{
 	}
 	
 	override open func viewWillDisappear(_ animated: Bool) {
+		super.viewWillDisappear(animated)
+		updateDismissView()
+		updateDismissAnimator()
+	}
+	func updateDismissView() -> () {
 		let option = MDKImageCloseOption()
 		option.index = displayIndex
 		option.lastIdentifier = photoList[displayIndex - photoList.negativeCount].identifier
+		MDKImageTransition.global().dismissViewMap.removeAllObjects()
 		if let sourceView = registerDismissTargetView?(option) {
 			MDKImageTransition.global().dismissViewMap.add(sourceView)
 		}else if let targetFrame = registerDismissTargetFrame?(option) , targetFrame != CGRect(){
@@ -398,6 +404,9 @@ extension MDKImageDisplayController{
 		if let cell = collectionView.visibleCells.first as? DisplayCell{
 			MDKImageTransition.global().dismissViewMap.add(cell.imageView)
 		}
+	}
+
+	func updateDismissAnimator() -> () {
 		if #available(iOS 10.0, *) {
 			let anim = UIViewPropertyAnimator(duration: MDKImageTransition.duration, curve: .easeInOut) {
 				if self.disableBlurBackgroundWithBlack{
@@ -424,10 +433,7 @@ extension MDKImageDisplayController{
 				}
 			}
 		}
-		
 	}
-	
-	
 }
 
 //MARK:	UICollectionViewDelegate,UICollectionViewDataSource
@@ -1024,8 +1030,9 @@ extension MDKImageDisplayController{
 		case .began:
 			cell.contentScroll.panGestureRecognizer.isEnabled = false
 			if #available(iOS 10.0, *) {
+				updateDismissView()
 				if animator() == nil {
-					viewWillDisappear(true)
+					updateDismissAnimator()
 				}else{
 					animator()?.isReversed = false
 				}
@@ -1046,20 +1053,29 @@ extension MDKImageDisplayController{
 			if progress + pan.velocity(in: nil).y / collectionView.bounds.height > 0.3 , translation.y > collectionView.bounds.height/4 {
 				MDKImageTransition.global().commitDismiss()
 				didDismiss?(displayIndex)
-				if #available(iOS 10.0, *) {
-					if let animator = animator(){
-						animator.continueAnimation(withTimingParameters: UICubicTimingParameters(animationCurve: .easeIn), durationFactor: 1/(1-animator.fractionComplete))
-					}
-				}
+				forceFinishBlurViewDismissAnimation(isReversed: false)
 			} else {
 				MDKImageTransition.global().cancelDismiss()
 				didDismiss?(displayIndex)
-				if #available(iOS 10.0, *) {
-					animator()?.isReversed = true
-					if let animator = animator(){
-						animator.continueAnimation(withTimingParameters: UICubicTimingParameters(animationCurve: .easeIn), durationFactor: 1/animator.fractionComplete)
-					}
+				forceFinishBlurViewDismissAnimation(isReversed: true)
+			}
+		}
+	}
+	func forceFinishBlurViewDismissAnimation(isReversed:Bool) -> () {
+		if #available(iOS 10.0, *) {
+			if let animator = animator(){
+				var durationFactor : CGFloat = 1
+				animator.isReversed = isReversed
+				if isReversed {
+					durationFactor = 1/animator.fractionComplete
+				}else{
+					durationFactor = 1/(1-animator.fractionComplete)
 				}
+
+				if durationFactor == .infinity {
+					durationFactor = 1
+				}
+				animator.continueAnimation(withTimingParameters: UICubicTimingParameters(animationCurve: .easeIn), durationFactor:durationFactor)
 			}
 		}
 	}
@@ -1196,7 +1212,7 @@ extension MDKImageDisplayController:UIGestureRecognizerDelegate {
 		if gestureRecognizer == dismissTap || gestureRecognizer == zoomTap{
 			guard let cell = self.collectionView.visibleCells.first as? DisplayCell else {return true}
 
-			return (!collectionViewIsScrolling && !cell.isScrolling) || toolbarIsFinishOpen
+			return ((!collectionViewIsScrolling && !cell.isScrolling) || toolbarIsFinishOpen) && _animator == nil
 		}
 		if gestureRecognizer.isKind(of: UILongPressGestureRecognizer.self) {
 			if toolbarIsOpening {
