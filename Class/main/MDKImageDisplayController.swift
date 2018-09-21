@@ -10,7 +10,7 @@ import UIKit
 
 //TODO:	做读取时占位提示圈
 //TODO:	dismiss的时候,如果不是同一张图片就做渐变
-
+//FIXME:	图片比例不一样的时候,iphoneX会跳一下
 
 open class MDKImageDisplayController: UIViewController {
 

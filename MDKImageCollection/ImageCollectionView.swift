@@ -538,7 +538,7 @@ extension ImageCollectionView : UICollectionViewDelegateFlowLayout,UICollectionV
 			})
 		}
 			
-		
+		display.disableBlurBackgroundWithBlack = true
 		display.transition.ImageCornerRadius = imageTransitionCornerRadius
 		display.transition.sourceScreenInset = sourceScreenInset
 

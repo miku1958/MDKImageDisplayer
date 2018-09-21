@@ -153,11 +153,11 @@ class DemoCtr: UIViewController {
 		}
 		let path = "\(MDKFileTempWith("imageCache"))/\(urlstr.hash).png"
 		
-		if let image = UIImage(contentsOfFile: path) {
-			finish(image)
-			cache.setObject(image, forKey: urlstr as NSString)
-			return
-		}
+//		if let image = UIImage(contentsOfFile: path) {
+//			finish(image)
+//			cache.setObject(image, forKey: urlstr as NSString)
+//			return
+//		}
 		
 		if (downloaingList[urlstr] == nil) {
 			downloaingList[urlstr] = [finish]
