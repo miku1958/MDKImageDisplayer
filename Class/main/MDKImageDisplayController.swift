@@ -473,11 +473,8 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 			cell.imageView.image = nil
 		}
 		if let photo = photoList[displayIndex].photo {
-			cell.setPhoto(photo, isThumbnail: photoList[displayIndex].photoQuality == .thumbnail)
+			updateCell(cell, image: photo, displayIndex: displayIndex, isThumbnail: photoList[displayIndex].photoQuality == .thumbnail)
 		}
-
-
-
 
 
 		if let leftmostIndex = leftmostIndex, indexPath.item == leftmostIndex{
@@ -589,7 +586,7 @@ extension MDKImageDisplayController: UICollectionViewDelegateFlowLayout,UICollec
 		if pan.state == .began {
 			collectionPanBeginOffset = collectionView.contentOffset
 		}
-		if let leftmostIndex = leftmostIndex,Int(collectionView.contentOffset.x / collectionView.frame.width) == leftmostIndex {
+		if let leftmostIndex = leftmostIndex,Int(collectionView.contentOffset.x / collectionView.frame.width) <= leftmostIndex {
 			var translation = pan.translation(in: nil)
 
 			let canPanWidth = collectionView.frame.width * 0.5
@@ -831,7 +828,8 @@ extension MDKImageDisplayController{
 		}else if isTryingPrevious{
 			isFailToTryPrevious = true
 			return nil
-		}else if displayIndex<0 && leftmostIndex==nil{
+		}
+		if (identifier == nil  || option.lastIdentifier == nil) , displayIndex<0 , leftmostIndex==nil {
 			leftmostIndex = displayIndex + photoList.negativeCount
 		}
 

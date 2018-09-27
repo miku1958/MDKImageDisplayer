@@ -34,6 +34,7 @@ class DisplayCell: UICollectionViewCell,MDKImageProtocol {
 					self.imageView.frame.size.height = self.imageView.frame.size.width / ratio
 					self.imageView.frame.origin = CGPoint()
 					self.scrollViewDidScroll(self.contentScroll)
+					//FIXME:	iphoneX在UIView.animation中修改contentInset会导致offset错位,(scrollViewDidZoom中)
 					self.scrollViewDidZoom(self.contentScroll)
 				}) { (_) in
 					self.contentScroll.zoomScale = 1
@@ -221,19 +222,24 @@ extension DisplayCell:UIScrollViewDelegate{
 		if !updatingPhoto {
 			delegate?.scrollViewDidZoom?(scrollView)
 		}
-		let showPicHeight = imageView.frame.size.height;
-		let showPicWidth = imageView.frame.size.width;
-		contentScroll.contentInset = UIEdgeInsetsMake(
-				showPicHeight>=MDKScreenHeight ? 0 :
-					(MDKScreenHeight-showPicHeight)/2,
-				showPicWidth>=MDKScreenWidth ? 0 :
-					(MDKScreenWidth-showPicWidth)/2,
-				0,
-				0
-		)
+
+		contentScroll.contentInset = contentScrollInset
+
 		scrollViewDidEndDecelerating(contentScroll)
 	}
 
+	var contentScrollInset : UIEdgeInsets{
+		let showPicHeight = imageView.frame.size.height;
+		let showPicWidth = imageView.frame.size.width;
+		return UIEdgeInsetsMake(
+			showPicHeight>=MDKScreenHeight ? 0 :
+				(MDKScreenHeight-showPicHeight)/2,
+			showPicWidth>=MDKScreenWidth ? 0 :
+				(MDKScreenWidth-showPicWidth)/2,
+			0,
+			0
+		)
+	}
 
 	func scrollViewDidScroll(_ scrollView: UIScrollView) {
 		if !updatingPhoto {
